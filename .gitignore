@@ -1,0 +1,51 @@
+# 1. THƯ MỤC BUILD & COMPILED CODE (Java)
+*.class
+*.war
+*.ear
+/build/
+/dist/
+/nbbuild/
+/nbdist/
+
+# 2. CẤU HÌNH CỦA NETBEANS (IDE Chính)
+nbproject/private/
+nbactions.xml
+nb-configuration.xml
+
+# 3. CẤU HÌNH CỦA CÁC IDE KHÁC (VS Code, IntelliJ, Eclipse)
+# --- VS Code ---
+.vscode/
+*.code-workspace
+
+# --- IntelliJ IDEA ---
+.idea/
+*.iml
+*.iws
+*.ipr
+/out/
+
+# --- Eclipse ---
+.metadata/
+/bin/
+.recommenders/
+.settings/
+.classpath
+.project
+
+# 4. FILE HỆ ĐIỀU HÀNH & FILE TẠM (Logs)
+# --- Windows ---
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- macOS ---
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# --- Temp & Logs ---
+*.log
+*.tmp
+*.bak
