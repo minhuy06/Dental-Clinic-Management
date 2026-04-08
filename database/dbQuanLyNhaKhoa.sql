@@ -1,0 +1,505 @@
+CREATE DATABASE DbQuanLyNhaKhoa;
+GO
+USE DbQuanLyNhaKhoa;
+GO
+
+-- Bảng TaiKhoan
+CREATE TABLE TaiKhoan (
+    TaiKhoan_ID INT IDENTITY(1,1),
+    SoDienThoai VARCHAR(15) NOT NULL,
+    MatKhau VARCHAR(100) NOT NULL,
+    VaiTro NVARCHAR(30) NOT NULL, 
+    TrangThai NVARCHAR(50) DEFAULT N'Hoạt động',
+    CONSTRAINT PK_TaiKhoan PRIMARY KEY (TaiKhoan_ID),
+    CONSTRAINT UQ_TaiKhoan_SoDienThoai UNIQUE (SoDienThoai)
+);
+GO
+
+-- Bảng BenhNhan
+CREATE TABLE BenhNhan (
+    BenhNhan_ID INT IDENTITY(1,1),
+    TaiKhoan_ID INT, 
+    HoTen NVARCHAR(100) NOT NULL,
+    NgaySinh DATE,
+    GioiTinh BIT, 
+    TienSuBenh NVARCHAR(500),
+    NhomMau VARCHAR(10),
+    CONSTRAINT PK_BenhNhan PRIMARY KEY (BenhNhan_ID)
+);
+GO
+
+-- TẠO FILTERED INDEX CHO BỆNH NHÂN (Ép UNIQUE nhưng bỏ qua NULL)
+CREATE UNIQUE NONCLUSTERED INDEX UQ_BenhNhan_TaiKhoanID 
+ON BenhNhan(TaiKhoan_ID) WHERE TaiKhoan_ID IS NOT NULL;
+GO
+
+-- Bảng Bác Sĩ
+CREATE TABLE BacSi (
+    BacSi_ID INT IDENTITY(1,1),
+    TaiKhoan_ID INT NOT NULL,
+    HoTen NVARCHAR(100) NOT NULL,
+    NgaySinh DATE,
+    GioiTinh BIT,
+    ChuyenKhoa NVARCHAR(100) NOT NULL,
+    AnhDaiDien VARCHAR(255),
+    TrinhDo NVARCHAR(50),
+    CONSTRAINT PK_BacSi PRIMARY KEY (BacSi_ID),
+    CONSTRAINT UQ_BacSi_TaiKhoanID UNIQUE (TaiKhoan_ID)
+);
+GO
+
+-- Bảng Lễ Tân
+CREATE TABLE LeTan (
+    LeTan_ID INT IDENTITY(1,1),
+    TaiKhoan_ID INT NOT NULL,
+    HoTen NVARCHAR(100) NOT NULL,
+    NgaySinh DATE,
+    GioiTinh BIT,
+    CaLamViec NVARCHAR(50),
+    CONSTRAINT PK_LeTan PRIMARY KEY (LeTan_ID),
+    CONSTRAINT UQ_LeTan_TaiKhoanID UNIQUE (TaiKhoan_ID)
+);
+GO
+
+-- Bảng Dịch Vụ
+CREATE TABLE DichVu (
+    DichVu_ID INT IDENTITY(1,1),
+    TenDichVu NVARCHAR(100) NOT NULL,
+    GiaTien MONEY NOT NULL,
+    CONSTRAINT PK_DichVu PRIMARY KEY (DichVu_ID)
+);
+GO
+
+-- Bảng Thuốc
+CREATE TABLE Thuoc (
+    Thuoc_ID INT IDENTITY(1,1),
+    TenThuoc NVARCHAR(100) NOT NULL,
+    DonViTinh NVARCHAR(20) NOT NULL,
+    GiaTien MONEY NOT NULL,
+    CONSTRAINT PK_Thuoc PRIMARY KEY (Thuoc_ID)
+);
+GO
+
+-- Bảng Lịch Hẹn
+CREATE TABLE LichHen (
+    LichHen_ID INT IDENTITY(1,1),
+    BenhNhan_ID INT NOT NULL,
+    BacSi_ID INT NOT NULL,
+    NgayKham DATE NOT NULL,
+    GioKham TIME NOT NULL,
+    GhiChu NVARCHAR(255),
+    TrangThai NVARCHAR(50) DEFAULT N'Chờ duyệt',
+    CONSTRAINT PK_LichHen PRIMARY KEY (LichHen_ID)
+);
+GO
+
+-- Bảng Phiếu Khám
+CREATE TABLE PhieuKham (
+    PhieuKham_ID INT IDENTITY(1,1),
+    LichHen_ID INT NULL, 
+    ChanDoan NVARCHAR(200),
+    NgayTao DATETIME DEFAULT GETDATE(), 
+    TrangThai NVARCHAR(100) DEFAULT N'Chờ thanh toán',
+    CONSTRAINT PK_PhieuKham PRIMARY KEY (PhieuKham_ID)
+);
+GO
+
+CREATE UNIQUE NONCLUSTERED INDEX UQ_PhieuKham_LichHenID 
+ON PhieuKham(LichHen_ID) WHERE LichHen_ID IS NOT NULL;
+GO
+
+-- Bảng Chi Tiết Dịch Vụ
+CREATE TABLE ChiTietDichVu (
+    ChiTietDichVu_ID INT IDENTITY(1,1),
+    PhieuKham_ID INT NOT NULL,
+    DichVu_ID INT NOT NULL,
+    DonGia MONEY NOT NULL,
+    ViTriRang NVARCHAR(50),
+    CONSTRAINT PK_ChiTietDichVu PRIMARY KEY (ChiTietDichVu_ID)
+);
+GO
+
+-- Bảng Chi Tiết Đơn Thuốc
+CREATE TABLE ChiTietDonThuoc (
+    ChiTietThuoc_ID INT IDENTITY(1,1),
+    PhieuKham_ID INT NOT NULL,
+    Thuoc_ID INT NOT NULL,
+    SoLuong INT NOT NULL,
+    CachSuDung NVARCHAR(255),
+    CONSTRAINT PK_ChiTietDonThuoc PRIMARY KEY (ChiTietThuoc_ID)
+);
+GO
+
+-- Bảng Hóa Đơn
+CREATE TABLE HoaDon (
+    HoaDon_ID INT IDENTITY(1,1),
+    PhieuKham_ID INT NOT NULL,
+    LeTan_ID INT NOT NULL,
+    TongTien MONEY NOT NULL,
+    NgayThanhToan DATETIME,
+    TrangThai NVARCHAR(50) DEFAULT N'Chưa thanh toán',
+    CONSTRAINT PK_HoaDon PRIMARY KEY (HoaDon_ID),
+    CONSTRAINT UQ_HoaDon_PhieuKham UNIQUE (PhieuKham_ID) -- Đảm bảo quan hệ 1-1
+);
+GO
+
+
+-- Ràng buộc khóa ngoại cho Bệnh Nhân, Bác Sĩ, Lễ Tân
+ALTER TABLE BenhNhan
+ADD CONSTRAINT FK_BenhNhan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+
+ALTER TABLE BacSi
+ADD CONSTRAINT FK_BacSi_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+
+ALTER TABLE LeTan
+ADD CONSTRAINT FK_LeTan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+GO
+
+-- Ràng buộc khóa ngoại cho Lịch Hẹn
+ALTER TABLE LichHen
+ADD CONSTRAINT FK_LichHen_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID);
+
+ALTER TABLE LichHen
+ADD CONSTRAINT FK_LichHen_BacSi FOREIGN KEY (BacSi_ID) REFERENCES BacSi(BacSi_ID);
+GO
+
+-- Ràng buộc khóa ngoại cho Phiếu Khám
+ALTER TABLE PhieuKham
+ADD CONSTRAINT FK_PhieuKham_LichHen FOREIGN KEY (LichHen_ID) REFERENCES LichHen(LichHen_ID);
+GO
+
+-- Ràng buộc khóa ngoại cho Chi Tiết Dịch Vụ
+ALTER TABLE ChiTietDichVu
+ADD CONSTRAINT FK_ChiTietDichVu_PhieuKham FOREIGN KEY (PhieuKham_ID) REFERENCES PhieuKham(PhieuKham_ID);
+
+ALTER TABLE ChiTietDichVu
+ADD CONSTRAINT FK_ChiTietDichVu_DichVu FOREIGN KEY (DichVu_ID) REFERENCES DichVu(DichVu_ID);
+GO
+
+-- Ràng buộc khóa ngoại cho Chi Tiết Đơn Thuốc
+ALTER TABLE ChiTietDonThuoc
+ADD CONSTRAINT FK_ChiTietDonThuoc_PhieuKham FOREIGN KEY (PhieuKham_ID) REFERENCES PhieuKham(PhieuKham_ID);
+
+ALTER TABLE ChiTietDonThuoc
+ADD CONSTRAINT FK_ChiTietDonThuoc_Thuoc FOREIGN KEY (Thuoc_ID) REFERENCES Thuoc(Thuoc_ID);
+GO
+
+-- Ràng buộc khóa ngoại cho Hóa Đơn
+ALTER TABLE HoaDon
+ADD CONSTRAINT FK_HoaDon_PhieuKham FOREIGN KEY (PhieuKham_ID) REFERENCES PhieuKham(PhieuKham_ID);
+
+ALTER TABLE HoaDon
+ADD CONSTRAINT FK_HoaDon_LeTan FOREIGN KEY (LeTan_ID) REFERENCES LeTan(LeTan_ID);
+GO
+
+-- INSERT dữ liệu mồi
+-- 1. INSERT TÀI KHOẢN
+INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
+-- 20 Bệnh nhân
+('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000003', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000005', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000006', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000007', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000008', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000009', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000010', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000011', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000012', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000013', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000014', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000015', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000016', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000017', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000018', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000019', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000020', '123456', N'Bệnh nhân', N'Hoạt động'),
+
+-- 20 Bác sĩ
+('0902000001', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000002', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000003', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000004', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000005', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000006', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000007', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000008', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000009', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000010', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000011', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000012', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000013', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000014', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000015', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000016', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000017', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000018', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000019', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000020', '123456', N'Bác sĩ', N'Hoạt động'),
+
+-- 20 Lễ tân
+('0903000001', '123456', N'Lễ tân', N'Hoạt động'), ('0903000002', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000003', '123456', N'Lễ tân', N'Hoạt động'), ('0903000004', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000005', '123456', N'Lễ tân', N'Hoạt động'), ('0903000006', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000007', '123456', N'Lễ tân', N'Hoạt động'), ('0903000008', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000009', '123456', N'Lễ tân', N'Hoạt động'), ('0903000010', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000011', '123456', N'Lễ tân', N'Hoạt động'), ('0903000012', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000015', '123456', N'Lễ tân', N'Hoạt động'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động');
+GO
+
+-- 2. INSERT BỆNH NHÂN
+INSERT INTO BenhNhan (TaiKhoan_ID, HoTen, NgaySinh, GioiTinh, TienSuBenh, NhomMau) VALUES
+(1, N'Nguyễn Văn An', '1990-05-15', 1, N'Không', 'A'), (2, N'Trần Thị Bích', '1985-08-20', 0, N'Dị ứng thuốc tê', 'B'),
+(3, N'Lê Hoàng Nam', '2000-11-10', 1, N'Tiểu đường', 'O'), (4, N'Phạm Thu Hà', '1995-02-28', 0, N'Không', 'AB'),
+(5, N'Hoàng Vĩnh Khang', '1982-07-07', 1, N'Cao huyết áp', 'A'), (6, N'Đặng Phương Hoa', '1998-12-12', 0, N'Không', 'B'),
+(7, N'Bùi Tấn Tài', '1975-03-30', 1, N'Hen suyễn', 'O'), (8, N'Ngô Mai Phương', '2002-09-05', 0, N'Không', 'A'),
+(9, N'Đoàn Văn Thịnh', '1988-06-18', 1, N'Bệnh tim mạch', 'AB'), (10, N'Lý Thảo Ly', '1993-01-22', 0, N'Không', 'B'),
+(11, N'Vũ Gia Huy', '1999-04-14', 1, N'Không', 'O'), (12, N'Đinh Bảo Ngọc', '1980-10-31', 0, N'Viêm gan B', 'A'),
+(13, N'Trương Công Phát', '1970-05-05', 1, N'Không', 'O'), (14, N'Lâm Bích Ngọc', '1996-08-08', 0, N'Không', 'B'),
+(15, N'Hồ Quốc Toàn', '1987-12-01', 1, N'Không', 'AB'), (16, N'Châu Tú Anh', '1991-03-15', 0, N'Dị ứng Penicillin', 'A'),
+(17, N'Phan Đình Phùng', '1984-07-25', 1, N'Không', 'O'), (18, N'Tạ Thanh Nhàn', '1979-11-19', 0, N'Không', 'B'),
+(19, N'Vương Thái Bảo', '2005-02-14', 1, N'Không', 'A'), (20, N'Dương Tuyết Mai', '1994-06-21', 0, N'Tiểu đường', 'AB');
+GO
+
+-- 3. INSERT BÁC SĨ
+INSERT INTO BacSi (TaiKhoan_ID, HoTen, NgaySinh, GioiTinh, ChuyenKhoa, AnhDaiDien, TrinhDo) VALUES
+(21, N'BS. Nguyễn Hải', '1975-01-10', 1, N'Tổng quát', '/img/bs1.jpg', N'CKI'),
+(22, N'BS. Trần Tâm', '1980-05-20', 0, N'Chỉnh nha', '/img/bs2.jpg', N'Thạc sĩ'),
+(23, N'BS. Lê Quang', '1978-08-15', 1, N'Phục hình răng', '/img/bs3.jpg', N'Tiến sĩ'),
+(24, N'BS. Phạm Hương', '1985-02-28', 0, N'Thẩm mỹ', '/img/bs4.jpg', N'CKI'),
+(25, N'BS. Hoàng Quân', '1972-11-05', 1, N'Phẫu thuật miệng', '/img/bs5.jpg', N'CKII'),
+(26, N'BS. Đặng Ngân', '1982-09-12', 0, N'Nhổ răng', '/img/bs6.jpg', N'Cử nhân'),
+(27, N'BS. Bùi Long', '1979-04-18', 1, N'Tổng quát', '/img/bs7.jpg', N'Thạc sĩ'),
+(28, N'BS. Ngô Yến', '1988-07-22', 0, N'Chỉnh nha', '/img/bs8.jpg', N'CKI'),
+(29, N'BS. Đoàn Phong', '1976-12-30', 1, N'Phục hình răng', '/img/bs9.jpg', N'Tiến sĩ'),
+(30, N'BS. Lý Trang', '1983-03-14', 0, N'Thẩm mỹ', '/img/bs10.jpg', N'Thạc sĩ'),
+(31, N'BS. Vũ Hoàng', '1974-06-05', 1, N'Phẫu thuật miệng', '/img/bs11.jpg', N'CKII'),
+(32, N'BS. Đinh Cẩm', '1986-10-10', 0, N'Nhổ răng', '/img/bs12.jpg', N'CKI'),
+(33, N'BS. Trương Toàn', '1981-01-25', 1, N'Tổng quát', '/img/bs13.jpg', N'Thạc sĩ'),
+(34, N'BS. Lâm Thu', '1989-05-19', 0, N'Chỉnh nha', '/img/bs14.jpg', N'Cử nhân'),
+(35, N'BS. Hồ Vĩ', '1977-08-08', 1, N'Phục hình răng', '/img/bs15.jpg', N'CKI'),
+(36, N'BS. Châu Loan', '1984-12-01', 0, N'Thẩm mỹ', '/img/bs16.jpg', N'Thạc sĩ'),
+(37, N'BS. Phan Trung', '1973-02-14', 1, N'Phẫu thuật miệng', '/img/bs17.jpg', N'Tiến sĩ'),
+(38, N'BS. Tạ My', '1987-07-07', 0, N'Nhổ răng', '/img/bs18.jpg', N'CKI'),
+(39, N'BS. Vương Đạt', '1980-09-09', 1, N'Tổng quát', '/img/bs19.jpg', N'Thạc sĩ'),
+(40, N'BS. Dương Quyên', '1985-11-11', 0, N'Chỉnh nha', '/img/bs20.jpg', N'Cử nhân');
+GO
+
+-- 4. INSERT LỄ TÂN
+INSERT INTO LeTan (TaiKhoan_ID, HoTen, NgaySinh, GioiTinh, CaLamViec) VALUES
+(41, N'Lê Ái', '1995-01-01', 0, N'Sáng'), (42, N'Vũ Bình', '1996-02-02', 1, N'Chiều'),
+(43, N'Ngô Cẩm', '1997-03-03', 0, N'Tối'), (44, N'Đỗ Dung', '1994-04-04', 0, N'Hành chính'),
+(45, N'Lý Ân', '1998-05-05', 1, N'Sáng'), (46, N'Đinh Giang', '1999-06-06', 0, N'Chiều'),
+(47, N'Phan Hiếu', '1993-07-07', 1, N'Tối'), (48, N'Bùi Kim', '1995-08-08', 0, N'Hành chính'),
+(49, N'Trần Liên', '1996-09-09', 0, N'Sáng'), (50, N'Lâm Mạnh', '1997-10-10', 1, N'Chiều'),
+(51, N'Hồ Nga', '1998-11-11', 0, N'Tối'), (52, N'Châu Oanh', '1994-12-12', 0, N'Hành chính'),
+(53, N'Vương Phương', '1999-01-15', 0, N'Sáng'), (54, N'Đoàn Quân', '1995-02-18', 1, N'Chiều'),
+(55, N'Tạ Quyên', '1996-03-20', 0, N'Tối'), (56, N'Phạm Sang', '1997-04-22', 1, N'Hành chính'),
+(57, N'Hoàng Thư', '1998-05-25', 0, N'Sáng'), (58, N'Trương Tín', '1994-06-28', 1, N'Chiều'),
+(59, N'Dương Uyên', '1999-07-30', 0, N'Tối'), (60, N'Nguyễn Vy', '1995-08-14', 0, N'Hành chính');
+GO
+
+-- 5. INSERT DỊCH VỤ
+INSERT INTO DichVu (TenDichVu, GiaTien) VALUES
+(N'Khám tổng quát', 100000), (N'Cạo vôi răng', 200000), (N'Trám răng Composite', 300000),
+(N'Nhổ răng sữa', 100000), (N'Nhổ răng khôn mọc thẳng', 1000000), (N'Nhổ răng khôn mọc ngầm', 3000000),
+(N'Tẩy trắng răng Laser', 2500000), (N'Tẩy trắng răng tại nhà', 1500000), (N'Lấy tủy răng cửa', 800000),
+(N'Lấy tủy răng hàm', 1500000), (N'Bọc răng sứ Titan', 2000000), (N'Bọc răng sứ Cercon', 5000000),
+(N'Bọc răng sứ Zirconia', 6000000), (N'Mặt dán sứ Veneer', 7000000), (N'Cấy ghép Implant', 15000000),
+(N'Cấy ghép Implant Cao cấp', 30000000), (N'Niềng răng mắc cài kim loại', 25000000), (N'Niềng răng mắc cài sứ', 35000000),
+(N'Niềng răng Invisalign', 80000000), (N'Điều trị viêm nha chu', 500000);
+GO
+
+-- 6. INSERT THUỐC
+INSERT INTO Thuoc (TenThuoc, DonViTinh, GiaTien) VALUES
+(N'Paracetamol 500mg', N'Viên', 5000), (N'Ibuprofen 400mg', N'Viên', 8000),
+(N'Amoxicillin 500mg', N'Viên', 10000), (N'Augmentin 1g', N'Viên', 25000),
+(N'Alphachoay', N'Viên', 6000), (N'Efferalgan 500mg sủi', N'Viên', 7000),
+(N'Rodogyl', N'Viên', 12000), (N'Metronidazole 250mg', N'Viên', 5000),
+(N'Spiramycin 1.5 MIU', N'Viên', 15000), (N'Cefuroxim 500mg', N'Viên', 20000),
+(N'Medrol 16mg', N'Viên', 15000), (N'Prednisolone 5mg', N'Viên', 3000),
+(N'Panadol Extra', N'Viên', 6000), (N'Betadine súc miệng', N'Chai', 80000),
+(N'Kin Gingival súc miệng', N'Chai', 120000), (N'Sensodyne kem y tế', N'Tuýp', 90000),
+(N'Clindamycin 300mg', N'Viên', 18000), (N'Vitamin C 500mg', N'Viên', 4000),
+(N'Calcium D3', N'Viên', 5000), (N'Nước muối sinh lý 0.9%', N'Chai', 10000);
+GO
+
+-- 7. INSERT LỊCH HẸN
+INSERT INTO LichHen (BenhNhan_ID, BacSi_ID, NgayKham, GioKham, GhiChu, TrangThai) VALUES
+(1, 1, '2024-03-01', '08:00', N'Khám định kỳ', N'Đã thanh toán'), (2, 2, '2024-03-02', '09:00', N'Tư vấn niềng răng', N'Đã thanh toán'),
+(3, 3, '2024-03-03', '10:00', N'Làm lại răng sứ', N'Đã thanh toán'), (4, 4, '2024-03-04', '14:00', N'Muốn tẩy trắng', N'Đã thanh toán'),
+(5, 5, '2024-03-05', '15:00', N'Đau răng khôn', N'Đã thanh toán'), (6, 6, '2024-03-06', '16:00', N'Nhổ răng sữa cho bé', N'Đã thanh toán'),
+(7, 7, '2024-03-07', '08:30', N'Cạo vôi răng', N'Đã thanh toán'), (8, 8, '2024-03-08', '09:30', N'Tái khám chỉnh nha', N'Đã thanh toán'),
+(9, 9, '2024-03-09', '10:30', N'Rớt răng tạm', N'Đã thanh toán'), (10, 10, '2024-03-10', '14:30', N'Khám thẩm mỹ', N'Đã thanh toán'),
+(11, 11, '2024-03-11', '15:30', N'Đau nhức dữ dội', N'Đã thanh toán'), (12, 12, '2024-03-12', '16:30', N'Nhổ răng lung lay', N'Đã thanh toán'),
+(13, 13, '2024-03-13', '08:00', N'Trám răng mẻ', N'Đã thanh toán'), (14, 14, '2024-03-14', '09:00', N'Tái khám niềng', N'Đã thanh toán'),
+(15, 15, '2024-03-15', '10:00', N'Cắm Implant', N'Đã thanh toán'), (16, 16, '2024-03-16', '14:00', N'Bọc sứ Veneer', N'Đã thanh toán'),
+(17, 17, '2024-03-17', '15:00', N'Cắt lợi', N'Đã thanh toán'), (18, 18, '2024-03-18', '16:00', N'Nhổ răng sâu', N'Đã thanh toán'),
+(19, 19, '2024-03-19', '08:30', N'Khám tổng quát', N'Đã thanh toán'), (20, 20, '2024-03-20', '09:30', N'Tái khám', N'Đã thanh toán');
+GO
+
+-- 8. INSERT PHIẾU KHÁM (20 Dòng, chỉ chèn LichHen_ID, ChanDoan)
+INSERT INTO PhieuKham (LichHen_ID, ChanDoan, NgayTao, TrangThai) VALUES
+(1, N'Vôi răng nhiều, cần cạo vôi', '2024-03-01 08:30:00', N'Đã thanh toán'), (2, N'Răng mọc lệch lạc', '2024-03-02 09:30:00', N'Đã thanh toán'),
+(3, N'Răng sứ cũ bị vỡ mẻ', '2024-03-03 10:30:00', N'Đã thanh toán'), (4, N'Màu răng xỉn vàng', '2024-03-04 14:30:00', N'Đã thanh toán'),
+(5, N'Răng 48 mọc ngầm đâm ngang', '2024-03-05 15:30:00', N'Đã thanh toán'), (6, N'Răng 51 lung lay nhiều', '2024-03-06 16:30:00', N'Đã thanh toán'),
+(7, N'Viêm nướu nhẹ', '2024-03-07 09:00:00', N'Đã thanh toán'), (8, N'Thay thun niềng răng', '2024-03-08 10:00:00', N'Đã thanh toán'),
+(9, N'Gắn lại răng tạm', '2024-03-09 11:00:00', N'Đã thanh toán'), (10, N'Tư vấn làm 16 răng sứ', '2024-03-10 15:00:00', N'Đã thanh toán'),
+(11, N'Viêm tủy cấp răng 46', '2024-03-11 16:00:00', N'Đã thanh toán'), (12, N'Nha chu viêm nặng', '2024-03-12 17:00:00', N'Đã thanh toán'),
+(13, N'Sâu ngà răng 24', '2024-03-13 08:30:00', N'Đã thanh toán'), (14, N'Thay dây cung thép', '2024-03-14 09:30:00', N'Đã thanh toán'),
+(15, N'Cắm 1 trụ Implant', '2024-03-15 10:30:00', N'Đã thanh toán'), (16, N'Dán 6 mặt sứ Veneer', '2024-03-16 14:30:00', N'Đã thanh toán'),
+(17, N'Cười hở lợi', '2024-03-17 15:30:00', N'Đã thanh toán'), (18, N'Răng 27 vỡ lớn', '2024-03-18 16:30:00', N'Đã thanh toán'),
+(19, N'Sâu men răng 15, 16', '2024-03-19 09:00:00', N'Đã thanh toán'), (20, N'Kiểm tra lại sau nhổ', '2024-03-20 10:00:00', N'Đã thanh toán');
+GO
+
+-- 9. INSERT CHI TIẾT DỊCH VỤ
+INSERT INTO ChiTietDichVu (PhieuKham_ID, DichVu_ID, DonGia, ViTriRang) VALUES
+(1, 2, 200000, N'Toàn hàm'), (2, 1, 100000, N'Không'), 
+(3, 12, 5000000, N'Răng 21'), (4, 7, 2500000, N'Toàn hàm'),
+(5, 6, 3000000, N'Răng 48'), (6, 4, 100000, N'Răng 51'),
+(7, 2, 200000, N'Toàn hàm'), (8, 17, 25000000, N'Hai hàm'),
+(9, 1, 100000, N'Răng 36'), (10, 1, 100000, N'Toàn hàm'),
+(11, 10, 1500000, N'Răng 46'), (12, 5, 1000000, N'Răng 36'),
+(13, 3, 300000, N'Răng 24'), (14, 17, 25000000, N'Hai hàm'),
+(15, 16, 30000000, N'Răng 46'), (16, 14, 7000000, N'Răng 13-23'),
+(17, 20, 500000, N'Hàm trên'), (18, 5, 1000000, N'Răng 27'),
+(19, 3, 300000, N'Răng 15'), (20, 1, 100000, N'Vết thương');
+GO
+
+-- 10. INSERT CHI TIẾT ĐƠN THUỐC
+INSERT INTO ChiTietDonThuoc (PhieuKham_ID, Thuoc_ID, SoLuong, CachSuDung) VALUES
+(1, 14, 1, N'Súc miệng sáng tối'), (2, 1, 10, N'Uống khi đau'),
+(3, 4, 14, N'Sáng 1 viên, tối 1 viên sau ăn'), (4, 16, 1, N'Chải răng hàng ngày'),
+(5, 4, 14, N'Sáng 1 viên, tối 1 viên sau ăn'), (6, 1, 5, N'Uống nửa viên khi đau'),
+(7, 14, 1, N'Súc miệng sáng tối'), (8, 1, 10, N'Uống khi đau'),
+(9, 1, 10, N'Uống khi đau'), (10, 18, 20, N'Ngày uống 1 viên'),
+(11, 4, 14, N'Sáng 1 viên, tối 1 viên'), (12, 4, 14, N'Sáng 1 viên, tối 1 viên'),
+(13, 1, 10, N'Uống khi đau'), (14, 1, 10, N'Uống khi đau'),
+(15, 4, 20, N'Sáng 1 viên, tối 1 viên'), (16, 1, 10, N'Uống khi đau'),
+(17, 4, 14, N'Sáng 1 viên, tối 1 viên'), (18, 4, 14, N'Sáng 1 viên, tối 1 viên'),
+(19, 1, 10, N'Uống khi đau'), (20, 14, 1, N'Súc miệng sau ăn');
+GO
+
+-- 11. INSERT HÓA ĐƠN
+INSERT INTO HoaDon (PhieuKham_ID, LeTan_ID, TongTien, NgayThanhToan, TrangThai) VALUES
+(1, 1, 280000, '2024-03-01 09:00:00', N'Đã thanh toán'), (2, 2, 150000, '2024-03-02 10:00:00', N'Đã thanh toán'),
+(3, 3, 5350000, '2024-03-03 11:00:00', N'Đã thanh toán'), (4, 4, 2590000, '2024-03-04 15:00:00', N'Đã thanh toán'),
+(5, 5, 3350000, '2024-03-05 16:00:00', N'Đã thanh toán'), (6, 6, 125000, '2024-03-06 17:00:00', N'Đã thanh toán'),
+(7, 7, 280000, '2024-03-07 09:30:00', N'Đã thanh toán'), (8, 8, 25050000, '2024-03-08 10:30:00', N'Đã thanh toán'),
+(9, 9, 150000, '2024-03-09 11:30:00', N'Đã thanh toán'), (10, 10, 180000, '2024-03-10 15:30:00', N'Đã thanh toán'),
+(11, 11, 1850000, '2024-03-11 16:30:00', N'Đã thanh toán'), (12, 12, 1350000, '2024-03-12 17:30:00', N'Đã thanh toán'),
+(13, 13, 350000, '2024-03-13 09:00:00', N'Đã thanh toán'), (14, 14, 25050000, '2024-03-14 10:00:00', N'Đã thanh toán'),
+(15, 15, 30500000, '2024-03-15 11:00:00', N'Đã thanh toán'), (16, 16, 7050000, '2024-03-16 15:00:00', N'Đã thanh toán'),
+(17, 17, 850000, '2024-03-17 16:00:00', N'Đã thanh toán'), (18, 18, 1350000, '2024-03-18 17:00:00', N'Đã thanh toán'),
+(19, 19, 350000, '2024-03-19 09:30:00', N'Đã thanh toán'), (20, 20, 180000, '2024-03-20 10:30:00', N'Đã thanh toán');
+GO
+
+
+-- RÀNG BUỘC KIỂM TRA
+-- Bảng Tài Khoản
+ALTER TABLE TaiKhoan
+ADD CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN (N'Bệnh nhân', N'Bác sĩ', N'Lễ tân', N'Quản trị viên'));
+GO
+
+ALTER TABLE TaiKhoan
+ADD CONSTRAINT CK_TaiKhoan_TrangThai CHECK (TrangThai IN (N'Hoạt động', N'Bị khóa', N'Chờ xác thực'));
+GO
+
+-- Bảng Bệnh Nhân
+ALTER TABLE BenhNhan
+ADD CONSTRAINT CK_BenhNhan_NgaySinh CHECK (NgaySinh <= GETDATE() AND NgaySinh >= '1900-01-01');
+
+ALTER TABLE BenhNhan
+ADD CONSTRAINT CK_BenhNhan_NhomMau CHECK (NhomMau IN ('A', 'B', 'AB', 'O', 'A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'));
+GO
+
+-- Bảng Bác Sĩ
+ALTER TABLE BacSi
+ADD CONSTRAINT CK_BacSi_NgaySinh CHECK (NgaySinh <= GETDATE() AND NgaySinh >= '1900-01-01');
+
+ALTER TABLE BacSi
+ADD CONSTRAINT CK_BacSi_ChuyenKhoa CHECK (ChuyenKhoa IN (N'Tổng quát', N'Chỉnh nha', N'Phục hình răng', N'Thẩm mỹ', N'Phẫu thuật miệng', N'Nhổ răng'));
+
+ALTER TABLE BacSi
+ADD CONSTRAINT CK_BacSi_TrinhDo CHECK (TrinhDo IN (N'Cử nhân', N'Thạc sĩ', N'Tiến sĩ', N'CKI', N'CKII'));
+GO
+
+-- Bảng Lễ Tân
+ALTER TABLE LeTan
+ADD CONSTRAINT CK_LeTan_NgaySinh CHECK (NgaySinh <= GETDATE() AND NgaySinh >= '1900-01-01');
+
+ALTER TABLE LeTan
+ADD CONSTRAINT CK_LeTan_CaLamViec CHECK (CaLamViec IN (N'Sáng', N'Chiều', N'Tối', N'Hành chính'));
+GO
+
+-- Bảng Lịch Hẹn
+ALTER TABLE LichHen
+ADD CONSTRAINT CK_LichHen_NgayKham CHECK (NgayKham >= '2024-01-01');
+
+ALTER TABLE LichHen
+ADD CONSTRAINT CK_LichHen_TrangThai CHECK (TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đã đến', N'Đã thanh toán', N'Đã hủy'));
+GO
+
+-- Bảng Phiếu Khám
+ALTER TABLE PhieuKham
+ADD CONSTRAINT CK_PhieuKham_NgayTao CHECK (NgayTao <= GETDATE() AND NgayTao >= '2020-01-01');
+
+ALTER TABLE PhieuKham
+ADD CONSTRAINT CK_PhieuKham_TrangThai CHECK (TrangThai IN (N'Chờ thanh toán', N'Đã thanh toán', N'Đã hủy'));
+GO
+
+-- Bảng Hóa Đơn
+ALTER TABLE HoaDon
+ADD CONSTRAINT CK_HoaDon_NgayThanhToan CHECK (NgayThanhToan <= GETDATE() AND NgayThanhToan >= '2024-01-01');
+
+ALTER TABLE HoaDon
+ADD CONSTRAINT CK_HoaDon_TrangThai CHECK (TrangThai IN (N'Chưa thanh toán', N'Đã thanh toán', N'Đã hủy'));
+GO
+
+-- Ràng buộc các thuộc tính Tiền tệ & Số lượng phải > 0
+ALTER TABLE DichVu ADD CONSTRAINT CK_DichVu_GiaTien CHECK (GiaTien > 0);
+ALTER TABLE Thuoc ADD CONSTRAINT CK_Thuoc_GiaTien CHECK (GiaTien > 0);
+ALTER TABLE ChiTietDichVu ADD CONSTRAINT CK_ChiTietDichVu_DonGia CHECK (DonGia > 0);
+ALTER TABLE ChiTietDonThuoc ADD CONSTRAINT CK_ChiTietDonThuoc_SoLuong CHECK (SoLuong > 0);
+ALTER TABLE HoaDon ADD CONSTRAINT CK_HoaDon_TongTien CHECK (TongTien > 0);
+GO
+
+-- TRIGGER cập nhập trạng thái
+CREATE TRIGGER tg_CapNhatTrangThai_ThanhToan
+ON HoaDon
+AFTER UPDATE
+AS
+BEGIN
+    -- Chỉ chạy Trigger nếu cột TrangThai thực sự có sự thay đổi
+    IF UPDATE(TrangThai)
+    BEGIN
+        BEGIN TRY
+            -- Mở khóa giao dịch an toàn
+            BEGIN TRANSACTION;
+
+            -- Khai báo biến hứng dữ liệu từ dòng vừa được Update
+            DECLARE @HoaDon_ID INT;
+            DECLARE @PhieuKham_ID INT;
+            DECLARE @TrangThaiMoi NVARCHAR(50);
+
+            -- Bảng 'inserted' là bảng tạm của SQL chứa dữ liệu mới nhất sau khi Update
+            SELECT @HoaDon_ID = inserted.HoaDon_ID, 
+                   @PhieuKham_ID = inserted.PhieuKham_ID, 
+                   @TrangThaiMoi = inserted.TrangThai
+            FROM inserted;
+
+            -- Nếu trạng thái mới là Đã thanh toán thì kích hoạt chuỗi hành động
+            IF @TrangThaiMoi = N'Đã thanh toán'
+            BEGIN
+                -- 1. Cập nhật Phiếu Khám
+                UPDATE PhieuKham
+                SET TrangThai = N'Đã thanh toán'
+                WHERE PhieuKham_ID = @PhieuKham_ID;
+
+                -- 2. Cập nhật Lịch Hẹn (Thông qua ID của Phiếu Khám)
+                UPDATE LichHen
+                SET TrangThai = N'Đã thanh toán'
+                WHERE LichHen_ID = (SELECT LichHen_ID FROM PhieuKham WHERE PhieuKham_ID = @PhieuKham_ID);
+            END
+
+            -- Ghi nhận toàn bộ thay đổi vào CSDL
+            COMMIT TRANSACTION;
+        END TRY
+        BEGIN CATCH
+            -- Nếu có bất kỳ lỗi nào, quay ngược thời gian phục hồi lại trạng thái cũ
+            IF @@TRANCOUNT > 0
+            BEGIN
+                ROLLBACK TRANSACTION;
+            END;
+            
+            -- Ném mã lỗi lên màn hình/văng lỗi về cho Java bắt Exception
+            THROW;
+        END CATCH
+    END
+END;
+GO
