@@ -195,6 +195,9 @@ GO
 -- INSERT dữ liệu mồi
 -- 1. INSERT TÀI KHOẢN
 INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
+-- 1 Admin
+('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động'),
+
 -- 20 Bệnh nhân
 ('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'),
 ('0901000003', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động'),
