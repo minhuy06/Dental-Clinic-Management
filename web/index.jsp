@@ -131,7 +131,7 @@
                     </div>
                     <div class="about-content fade-in">
                         <div class="subtitle">Về chúng tôi</div>
-                        <h2>Hệ Thống Nha Khoa Đạt Chuẩn Quốc Tế</h2>
+                        <h2>Hệ thống nha khoa đạt chuẩn quốc tế</h2>
                         <p>
                             Nha Khoa Kvone tự hào là hệ thống nha khoa tiêu chuẩn quốc tế
                             tại Đà Nẵng. Với hơn 15 năm hoạt động, phục vụ hơn 10,000 khách
@@ -156,31 +156,31 @@
         <section class="services-section" id="services">
             <div class="container">
                 <div class="section-title fade-in">
-                    <h2>Dịch Vụ Nổi Bật</h2>
+                    <h2>Dịch vụ nổi bật</h2>
                     <p>Đa dạng dịch vụ nha khoa chất lượng cao với công nghệ tiên tiến</p>
                 </div>
                 <div class="services-grid">
                     <div class="service-card fade-in">
                         <div class="service-icon">💎</div>
-                        <h3>Bọc Răng Sứ</h3>
+                        <h3>Bọc răng sứ</h3>
                         <p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo tự nhiên.</p>
                         <a href="${pageContext.request.contextPath}/dat-lich.jsp" class="link-more">Xem thêm →</a>
                     </div>
                     <div class="service-card fade-in">
                         <div class="service-icon">😁</div>
-                        <h3>Niềng Răng</h3>
+                        <h3>Niềng răng</h3>
                         <p>Chỉnh nha mắc cài kim loại, sứ hoặc khay trong suốt Invisalign.</p>
                         <a href="${pageContext.request.contextPath}/dat-lich.jsp" class="link-more">Xem thêm →</a>
                     </div>
                     <div class="service-card fade-in">
                         <div class="service-icon">🦷</div>
-                        <h3>Trồng Răng Implant</h3>
+                        <h3>Trồng răng implant</h3>
                         <p>Phục hồi răng mất bằng trụ Implant Titanium bền vững trọn đời.</p>
                         <a href="${pageContext.request.contextPath}/dat-lich.jsp" class="link-more">Xem thêm →</a>
                     </div>
                     <div class="service-card fade-in">
                         <div class="service-icon">✨</div>
-                        <h3>Tẩy Trắng Răng</h3>
+                        <h3>Tẩy trắng răng</h3>
                         <p>Công nghệ Laser an toàn, răng trắng sáng tự nhiên chỉ sau 1 buổi.</p>
                         <a href="${pageContext.request.contextPath}/dat-lich.jsp" class="link-more">Xem thêm →</a>
                     </div>
