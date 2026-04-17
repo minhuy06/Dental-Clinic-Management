@@ -1,4 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    String activeTab = request.getParameter("tab");
+    if (activeTab == null) activeTab = "info";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -24,13 +28,13 @@
                         <p>0901000001</p>
                     </div>
                     <div class="sidebar-menu">
-                        <div class="sidebar-menu-item active" onclick="switchTab('info', this)">
+                        <div class="sidebar-menu-item <%= "info".equals(activeTab) ? "active" : "" %>" onclick="switchTab('info', this)">
                             <span class="menu-icon">📋</span> Thông tin cá nhân
                         </div>
-                        <div class="sidebar-menu-item" onclick="switchTab('history', this)">
+                        <div class="sidebar-menu-item <%= "history".equals(activeTab) ? "active" : "" %>" onclick="switchTab('history', this)">
                             <span class="menu-icon">📅</span> Quản lý lịch hẹn
                         </div>
-                        <div class="sidebar-menu-item" onclick="switchTab('password', this)">
+                        <div class="sidebar-menu-item <%= "password".equals(activeTab) ? "active" : "" %>" onclick="switchTab('password', this)">
                             <span class="menu-icon">🔒</span> Đổi mật khẩu
                         </div>
                         <div class="sidebar-menu-item logout" onclick="confirmLogout()">
@@ -43,7 +47,7 @@
                 <div class="profile-content">
 
                     <!-- TAB 1: THONG TIN CA NHAN -->
-                    <div class="tab-content active" id="tab-info">
+                    <div class="tab-content <%= "info".equals(activeTab) ? "active" : "" %>" id="tab-info">
                         <div class="profile-content-header">
                             <h2>Thông tin cá nhân</h2>
                             <p>Xem và cập nhật thông tin của bạn</p>
@@ -106,7 +110,7 @@
                     </div>
 
                     <!-- TAB 2: QUAN LY LICH HEN -->
-                    <div class="tab-content" id="tab-history">
+                    <div class="tab-content <%= "history".equals(activeTab) ? "active" : "" %>" id="tab-history">
                         <div class="profile-content-header">
                             <h2>Quản lý lịch hẹn</h2>
                             <p>Xem, thanh toán và quản lý các lịch hẹn của bạn</p>
@@ -179,7 +183,7 @@
                     </div>
 
                     <!-- TAB 3: DOI MAT KHAU -->
-                    <div class="tab-content" id="tab-password">
+                    <div class="tab-content <%= "password".equals(activeTab) ? "active" : "" %>" id="tab-password">
                         <div class="profile-content-header">
                             <h2>Đổi mật khẩu</h2>
                             <p>Cập nhật mật khẩu để bảo mật tài khoản</p>
@@ -390,7 +394,6 @@
             // Hero
             html += '<div class="receipt-hero">';
             html += '<span class="receipt-status-pill ' + statusClass + '">' + statusText + '</span>';
-            html += '<span class="receipt-code">Mã phiếu: ' + d.code + '</span>';
             html += '<h3>Chi tiết phiếu khám</h3>';
             html += '<div class="receipt-subtitle">Nha Khoa Kvone - 48 Cao Thắng, Đà Nẵng</div>';
             html += '</div>';
