@@ -41,10 +41,20 @@
 
         <div class="header-actions">
             <% if (loggedInUser != null) { %>
-                <a href="${pageContext.request.contextPath}/patient/hoso.jsp" class="user-avatar-btn">
-                    <div class="user-avatar-circle">👤</div>
-                    <span class="user-avatar-name"><%= loggedInUser %></span>
-                </a>
+                <div class="user-dropdown-wrapper">
+                    <div class="user-avatar-btn" onclick="toggleUserDropdown()">
+                        <div class="user-avatar-circle">👤</div>
+                        <span class="user-avatar-name"><%= loggedInUser %></span>
+                        <span class="user-arrow">▼</span>
+                    </div>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=info" class="user-dropdown-item">📋 Hồ sơ cá nhân</a>
+                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=history" class="user-dropdown-item">📅 Quản lý lịch hẹn</a>
+                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=password" class="user-dropdown-item">🔒 Bảo mật</a>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="${pageContext.request.contextPath}/account/logout.jsp" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
+                    </div>
+                </div>
             <% } else { %>
                 <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="padding:8px 20px;font-size:0.82rem;">Đăng nhập</a>
             <% } %>
@@ -53,27 +63,34 @@
     </div>
 </header>
 
+            
 <script>
-window.addEventListener('scroll',function(){
-    var h=document.getElementById('header');
-    if(window.scrollY>50)h.classList.add('scrolled');else h.classList.remove('scrolled');
+    window.addEventListener('scroll', function() {
+        var h = document.getElementById('header');
+        if (window.scrollY > 50) h.classList.add('scrolled');
+        else h.classList.remove('scrolled');
+    });
 
-    // Auto highlight menu theo section dang xem (chi khi o trang dat-lich)
-    if(window.location.pathname.indexOf('dat-lich')>-1){
-        var sections=['datlich','dichvu','bacsi'];
-        var current='';
-        sections.forEach(function(id){
-            var sec=document.getElementById(id);
-            if(sec){
-                var rect=sec.getBoundingClientRect();
-                if(rect.top<=120 && rect.bottom>=120){current=id;}
-            }
-        });
-        document.querySelectorAll('.nav-menu a[data-section]').forEach(function(a){
-            a.classList.toggle('active',a.getAttribute('data-section')===current);
-        });
+    function toggleMenu() {
+        document.getElementById('navMenu').classList.toggle('open');
     }
-});
-function toggleMenu(){document.getElementById('navMenu').classList.toggle('open');}
-document.querySelectorAll('.nav-menu a').forEach(function(l){l.addEventListener('click',function(){document.getElementById('navMenu').classList.remove('open');});});
+
+    document.querySelectorAll('.nav-menu a').forEach(function(l) {
+        l.addEventListener('click', function() {
+            document.getElementById('navMenu').classList.remove('open');
+        });
+    });
+
+    function toggleUserDropdown() {
+        var dd = document.getElementById('userDropdown');
+        if (dd) dd.classList.toggle('show');
+    }
+
+    document.addEventListener('click', function(e) {
+        var w = document.querySelector('.user-dropdown-wrapper');
+        var dd = document.getElementById('userDropdown');
+        if (w && dd && !w.contains(e.target)) {
+            dd.classList.remove('show');
+        }
+    });
 </script>
