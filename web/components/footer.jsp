@@ -17,11 +17,11 @@
             <div class="footer-col">
                 <h4>Dịch vụ</h4>
                 <ul>
-                    <li><a href="#">Bọc răng sứ thẩm mỹ</a></li>
-                    <li><a href="#">Niềng răng chỉnh nha</a></li>
-                    <li><a href="#">Trồng răng Implant</a></li>
-                    <li><a href="#">Tẩy trắng răng</a></li>
-                    <li><a href="#">Khám tổng quát</a></li>
+                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Bọc răng sứ thẩm mỹ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Niềng răng chỉnh nha</a></li>
+                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Trồng răng Implant</a></li>
+                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Tẩy trắng răng</a></li>
+                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Khám tổng quát</a></li>
                 </ul>
             </div>
             <div class="footer-col">
