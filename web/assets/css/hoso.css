@@ -1,0 +1,918 @@
+.profile-page {
+    padding: 40px 0 80px;
+    background: var(--bg-section);
+    min-height: calc(100vh - var(--header-height));
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+/* === SIDEBAR === */
+.profile-sidebar {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+    position: sticky;
+    top: 90px;
+}
+
+.sidebar-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    padding: 28px 20px;
+    text-align: center;
+    color: white;
+}
+
+.sidebar-avatar {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    margin: 0 auto 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    border: 3px solid rgba(255,255,255,0.3);
+}
+
+.sidebar-header h3 {
+    color: white; font-family: var(--font-body);
+    font-size: 1rem; font-weight: 700; margin-bottom: 4px;
+}
+
+.sidebar-header p {
+    font-size: 0.78rem; color: rgba(255,255,255,0.7);
+}
+
+.sidebar-menu {
+    padding: 12px 0;
+}
+
+.sidebar-menu-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 13px 20px;
+    font-size: 0.88rem; font-weight: 500;
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border-left: 3px solid transparent;
+    text-decoration: none;
+}
+
+.sidebar-menu-item:hover {
+    background: var(--bg-light);
+    color: var(--primary);
+}
+
+.sidebar-menu-item.active {
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 600;
+    border-left-color: var(--primary);
+}
+
+.sidebar-menu-item .menu-icon {
+    font-size: 1.1rem; width: 24px; text-align: center;
+}
+
+.sidebar-menu-item.logout {
+    color: #e74c3c;
+    border-top: 1px solid var(--border-light);
+    margin-top: 8px;
+}
+
+.sidebar-menu-item.logout:hover {
+    background: #fde8e8;
+    color: #c0392b;
+}
+
+/* === MAIN CONTENT === */
+.profile-content {
+    background: var(--bg-white);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    padding: 32px;
+}
+
+.profile-content-header {
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1.5px solid var(--border-light);
+}
+
+.profile-content-header h2 {
+    font-size: 1.4rem; margin-bottom: 4px;
+}
+
+.profile-content-header p {
+    font-size: 0.85rem; color: var(--text-muted);
+}
+
+/* Tab content */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* === TAB THONG TIN === */
+.info-form .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.info-form .form-actions {
+    margin-top: 24px;
+    display: flex; gap: 12px;
+}
+
+.form-control:disabled,
+.form-control[disabled] {
+    background: var(--bg-light) !important;
+    color: var(--text-muted);
+    cursor: not-allowed;
+}
+
+/* === TAB DOI MAT KHAU === */
+.password-form {
+    max-width: 480px;
+}
+
+.password-strength {
+    height: 4px;
+    background: var(--border-light);
+    border-radius: 2px;
+    margin-top: 8px;
+    overflow: hidden;
+}
+
+.password-strength-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+    width: 0;
+}
+
+.password-strength-bar.weak { width: 33%; background: #e74c3c; }
+.password-strength-bar.medium { width: 66%; background: #f39c12; }
+.password-strength-bar.strong { width: 100%; background: #27ae60; }
+
+.password-hint {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+    line-height: 1.5;
+}
+
+/* === TAB QUAN LY LICH HEN === */
+.history-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.history-filter {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.filter-chip {
+    padding: 6px 16px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-body);
+    background: var(--bg-light);
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filter-chip:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-chip.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.history-table-wrapper {
+    overflow-x: auto;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-light);
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.history-table thead {
+    background: var(--bg-section);
+}
+
+.history-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.history-table td {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-body);
+    vertical-align: middle;
+}
+
+.history-table tbody tr:hover {
+    background: var(--primary-light);
+}
+
+.history-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.stt-cell {
+    font-weight: 700;
+    color: var(--text-muted);
+    text-align: center;
+    width: 50px;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-badge.pending { background: #fff3cd; color: #856404; }
+.status-badge.confirmed { background: #d1ecf1; color: #0c5460; }
+.status-badge.paid { background: #d4edda; color: #155724; }
+.status-badge.cancelled { background: #f8d7da; color: #721c24; }
+
+/* Nut thao tac */
+.action-buttons {
+    display: flex;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-action {
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: 1.5px solid var(--border-light);
+    background: var(--bg-white);
+    color: var(--text-body);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+}
+
+.btn-action.btn-view {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.btn-action.btn-view:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-action.btn-cancel {
+    border-color: #e74c3c;
+    color: #e74c3c;
+}
+
+.btn-action.btn-cancel:hover {
+    background: #e74c3c;
+    color: white;
+}
+
+.btn-action:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+/* ============================================
+   MODAL CHI TIET PHIEU KHAM
+   ============================================ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,20,40,0.6);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(4px);
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-box {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    max-width: 680px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.3);
+    transform: translateY(20px) scale(0.95);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.show .modal-box {
+    transform: translateY(0) scale(1);
+}
+
+.modal-header {
+    padding: 24px 28px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.modal-header h3 {
+    color: white;
+    font-family: var(--font-body);
+    font-size: 1.15rem;
+    margin: 0;
+}
+
+.modal-header .modal-close {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-header .modal-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+
+.modal-body {
+    padding: 28px;
+}
+
+.modal-section {
+    margin-bottom: 24px;
+}
+
+.modal-section:last-child {
+    margin-bottom: 0;
+}
+
+.modal-section-title {
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 20px;
+}
+
+.info-item {
+    font-size: 0.88rem;
+}
+
+.info-item .label {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.info-item .value {
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+
+.detail-table th {
+    padding: 10px 12px;
+    background: var(--bg-section);
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.78rem;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.detail-table th:last-child { text-align: right; }
+
+.detail-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-body);
+}
+
+.detail-table td:last-child {
+    text-align: right;
+    font-weight: 600;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
+.modal-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--accent-light);
+    border-radius: var(--radius-sm);
+    margin-top: 16px;
+}
+
+.modal-total .label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.modal-total .total-amount {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+    font-family: var(--font-heading);
+}
+
+.modal-footer {
+    padding: 20px 28px;
+    border-top: 1px solid var(--border-light);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+/* ============================================
+   CHI TIET PHIEU KHAM - DESIGN MOI
+   ============================================ */
+.modal-box.receipt-modal {
+    max-width: 720px;
+}
+
+.receipt-modal .modal-body {
+    padding: 0;
+    background: var(--bg-section);
+}
+
+.receipt-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 24px 28px 28px;
+    position: relative;
+}
+
+.receipt-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -14px;
+    left: 0; right: 0;
+    height: 14px;
+    background-image: radial-gradient(circle at 10px 0, transparent 10px, var(--primary-dark) 10px);
+    background-size: 20px 14px;
+    background-position: -10px 0;
+}
+
+.receipt-code {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+}
+
+.receipt-hero h3 {
+    color: white;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+}
+
+.receipt-hero .receipt-subtitle {
+    color: rgba(255,255,255,0.8);
+    font-size: 0.85rem;
+}
+
+.receipt-status-pill {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.receipt-status-pill.paid {
+    background: #d4edda;
+    color: #155724;
+}
+.receipt-status-pill.unpaid {
+    background: #fff3cd;
+    color: #856404;
+}
+.receipt-status-pill.pending {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+.receipt-content {
+    padding: 28px;
+}
+
+.receipt-card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.receipt-card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.receipt-card-title .title-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--primary-light);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+
+/* Doctor info card */
+.doctor-card-mini {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.doctor-avatar-mini {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--primary-light);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.doctor-avatar-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.doctor-details h4 {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 3px;
+}
+
+.doctor-details p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.doctor-details .specialty-tag {
+    display: inline-block;
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+/* Info row (ngay gio) */
+.info-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.info-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.info-cell .cell-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--bg-section);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.info-cell .cell-text small {
+    display: block;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
+}
+
+.info-cell .cell-text strong {
+    font-size: 0.92rem;
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+/* Kham benh - ly do, trieu chung, chan doan, ghi chu */
+.medical-item {
+    margin-bottom: 12px;
+}
+
+.medical-item:last-child {
+    margin-bottom: 0;
+}
+
+.medical-item .medical-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.medical-item .medical-text {
+    font-size: 0.9rem;
+    color: var(--text-dark);
+    line-height: 1.6;
+    padding: 10px 14px;
+    background: var(--bg-section);
+    border-radius: var(--radius-sm);
+    border-left: 3px solid var(--primary);
+}
+
+.medical-item .medical-text.diagnosis {
+    border-left-color: var(--accent);
+    background: var(--accent-light);
+    color: var(--accent-dark);
+    font-weight: 500;
+}
+
+/* Services table - new design */
+.services-list {
+    background: white;
+}
+
+.service-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px dashed var(--border-light);
+    gap: 16px;
+}
+
+.service-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.service-row:first-child {
+    padding-top: 0;
+}
+
+.service-info {
+    flex: 1;
+}
+
+.service-name {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 2px;
+}
+
+.service-position {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.service-price {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--primary);
+    white-space: nowrap;
+}
+
+/* Tong tien - new */
+.receipt-total-box {
+    background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+    border-radius: var(--radius-md);
+    padding: 18px 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    margin-top: 4px;
+}
+
+.receipt-total-box .total-label {
+    font-size: 0.88rem;
+    opacity: 0.9;
+}
+
+.receipt-total-box .total-value {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+/* Empty state */
+.medical-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+}
+
+/* Modal xac nhan huy */
+.confirm-box {
+    max-width: 400px;
+    text-align: center;
+}
+
+.confirm-box .modal-body {
+    padding: 32px 28px 24px;
+}
+
+.confirm-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.confirm-title {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.confirm-message {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    .info-row { grid-template-columns: 1fr; }
+    .receipt-hero { padding: 20px; }
+    .receipt-hero h3 { font-size: 1.2rem; }
+    .receipt-status-pill { position: static; display: inline-block; margin-top: 8px; }
+    .receipt-content { padding: 20px; }
+    .receipt-card { padding: 16px; }
+    }
+
+    .profile-sidebar {
+        position: relative;
+        top: 0;
+    }
+
+    .sidebar-menu {
+        display: flex;
+        overflow-x: auto;
+        padding: 0;
+        border-top: 1px solid var(--border-light);
+    }
+
+    .sidebar-menu-item {
+        flex-shrink: 0;
+        padding: 12px 16px;
+        border-left: none;
+        border-bottom: 3px solid transparent;
+        font-size: 0.82rem;
+    }
+
+    .sidebar-menu-item.active {
+        border-bottom-color: var(--primary);
+        border-left-color: transparent;
+    }
+
+    .sidebar-menu-item.logout {
+        border-top: none;
+        margin-top: 0;
+        border-left: 1px solid var(--border-light);
+    }
+
+    .info-form .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-content {
+        padding: 24px 20px;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+}

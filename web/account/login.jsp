@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Nha Khoa Kvone</title>
+    <title>Đăng nhập - Nha Khoa Smile</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
@@ -43,11 +43,11 @@
                     <div class="form-group" id="phoneGroup">
                         <label>Số điện thoại <span class="required">*</span></label>
                         <div class="input-wrapper">
-                            <span class="input-icon">📞</span>
+                            <span class="input-icon">📱</span>
                             <input type="tel" 
                                    class="form-control-icon" 
                                    id="phone" 
-                                   placeholder="Nhập số điện thoại"
+                                   placeholder="Nhập số điện thoại (VD: 0901234567)"
                                    maxlength="10"
                                    autocomplete="tel">
                         </div>
@@ -145,8 +145,8 @@
             if (isValid) {
                 // Gui form den backend (Servlet)
                 // Hien tai chua co backend nen chi thong bao
-                alert('Đăng nhập thành công!');
-                window.location.href = '${pageContext.request.contextPath}/index.jsp';
+                // Demo: luu ten vao session thong qua URL (backend se xu ly thuc te)
+                window.location.href = '${pageContext.request.contextPath}/index.jsp?loginSuccess=true&phone=' + encodeURIComponent(phone);
                 // Khi co backend, dung: document.getElementById('loginForm').submit();
             }
 

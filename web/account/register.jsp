@@ -50,7 +50,7 @@
                                    placeholder="Nhập họ và tên"
                                    autocomplete="off">
                         </div>
-                        <div class="form-error-msg" id="nameError">Vui lòng nhập họ và tên</div>
+                        <div class="form-error-msg" id="passwordError">Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (!@#$%^&*)</div>
                     </div>
 
                     <!-- So dien thoai -->
@@ -89,7 +89,7 @@
                             <input type="password" 
                                    class="form-control-icon" 
                                    id="password" 
-                                   placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                                   placeholder="Nhập mật khẩu (Abc@1234)"
                                    autocomplete="new-password">
                             <button type="button" class="toggle-password" onclick="togglePass('password', this)">👁</button>
                         </div>
@@ -216,8 +216,9 @@
                 document.getElementById('dobGroup').classList.remove('error');
             }
 
-            // Kiem tra mat khau (toi thieu 6 ky tu)
-            if (password.length < 6) {
+            // Kiem tra mat khau manh (toi thieu 8 ky tu, co chu hoa, chu thuong, so, ky tu dac biet)
+            var strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
+            if (!strongRegex.test(password)) {
                 document.getElementById('passwordGroup').classList.add('error');
                 isValid = false;
             } else {
