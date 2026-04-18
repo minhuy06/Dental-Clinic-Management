@@ -11,22 +11,21 @@
 <body>
     <jsp:include page="components/header.jsp" />
     <main>
-        <!-- HERO -->
         <section class="page-hero">
             <div class="page-hero-bg"><img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=1400&h=400&fit=crop" alt="Nha khoa"></div>
             <div class="page-hero-overlay"></div>
             <div class="page-hero-content">
                 <div class="hero-breadcrumb"><a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a><span class="separator">›</span><span>Đặt lịch, Dịch vụ & Bác sĩ</span></div>
-                <h1>Chăm Sóc Răng Miệng Toàn Diện</h1>
+                <h1>Chăm sóc răng miệng toàn diện</h1>
                 <p>Đặt lịch khám nhanh chóng, dịch vụ đa dạng, bác sĩ chuyên khoa hàng đầu</p>
             </div>
         </section>
 
-        <!-- ==================== DAT LICH ==================== -->
+        <!-- DAT LICH -->
         <section class="booking-section" id="datlich">
             <div class="container">
-                <div class="section-title"><h2>Đặt Lịch Khám</h2></div>
-                <p class="section-intro">Điền thông tin để đặt lịch hẹn. Phòng khám sẽ liên hệ xác nhận trong 30 phút.</p>
+                <div class="section-title"><h2>Đặt lịch khám</h2></div>
+                <p class="section-intro">Chọn dịch vụ, ngày giờ phù hợp. Phòng khám sẽ phân bác sĩ và liên hệ xác nhận trong 30 phút.</p>
                 <div class="booking-wrapper">
                     <div class="booking-info">
                         <h3>📍 Thông tin phòng khám</h3>
@@ -36,26 +35,14 @@
                             <li>🕐 T2 - T7: 8:00 - 17:00</li>
                             <li>🕐 Chủ nhật: 8:00 - 12:00</li>
                         </ul>
-                        <div class="booking-note"><strong>Lưu ý:</strong> Vui lòng đến trước giờ hẹn 15 phút. Hủy lịch xin thông báo trước 2 giờ.</div>
+                        <div class="booking-note"><strong>Quy trình:</strong><br>1. Bạn chọn dịch vụ & ngày giờ<br>2. Phòng khám xác nhận & phân bác sĩ<br>3. Bạn đến khám theo lịch hẹn</div>
                     </div>
                     <form class="booking-form" id="bookingForm" onsubmit="return handleBooking(event)">
-                        <div class="form-group" id="doctorGroup">
-                            <label>Chọn bác sĩ <span style="color:#e74c3c">*</span></label>
-                            <select class="form-control" id="doctorSelect">
-                                <option value="">-- Chọn bác sĩ --</option>
-                                <option value="1">BS. Nguyễn Hải - Tổng quát</option>
-                                <option value="2">BS. Trần Tâm - Chỉnh nha</option>
-                                <option value="3">BS. Lê Quang - Phục hình răng</option>
-                                <option value="4">BS. Phạm Hương - Thẩm mỹ</option>
-                                <option value="5">BS. Hoàng Quân - Phẫu thuật miệng</option>
-                                <option value="6">BS. Đặng Ngân - Nhổ răng</option>
-                            </select>
-                            <div class="form-error">Vui lòng chọn bác sĩ</div>
-                        </div>
+                        <!-- Chon dich vu (nhieu) -->
                         <div class="form-group" id="serviceGroup">
                             <label>Chọn dịch vụ <span style="color:#e74c3c">*</span></label>
-                            <select class="form-control" id="serviceSelect" onchange="updatePrice()">
-                                <option value="" data-price="0" data-time="">-- Chọn dịch vụ --</option>
+                            <select class="form-control" id="serviceAdd">
+                                <option value="">-- Chọn dịch vụ để thêm --</option>
                                 <option value="1" data-price="100000" data-time="20 phút">Khám tổng quát</option>
                                 <option value="2" data-price="200000" data-time="30 phút">Cạo vôi răng</option>
                                 <option value="3" data-price="300000" data-time="30 phút">Trám răng Composite</option>
@@ -77,9 +64,11 @@
                                 <option value="19" data-price="80000000" data-time="45 phút/lần">Niềng răng Invisalign</option>
                                 <option value="20" data-price="500000" data-time="30 phút">Điều trị viêm nha chu</option>
                             </select>
-                            <div class="form-error">Vui lòng chọn dịch vụ</div>
-                            <div class="price-display" id="priceDisplay" style="display:none;">
-                                Giá dịch vụ: <strong id="priceValue"></strong> VNĐ &nbsp;|&nbsp; ⏱ Thời gian dự kiến: <strong id="timeValue"></strong>
+                            <button type="button" onclick="addService()" style="margin-top:10px;padding:9px 22px;font-size:0.85rem;font-weight:600;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--font-body);">+ Thêm dịch vụ</button>
+                            <div class="form-error">Vui lòng chọn ít nhất 1 dịch vụ</div>
+                            <div id="selectedServices" style="margin-top:14px;"></div>
+                            <div id="priceDisplay" style="display:none;margin-top:10px;padding:12px 16px;background:#fff4e6;border-radius:6px;font-size:0.9rem;color:#d35400;">
+                                Tổng chi phí dự kiến: <strong id="priceValue" style="color:#e67e22;font-size:1.1rem;"></strong> VNĐ
                             </div>
                         </div>
                         <div class="form-group" id="dateGroup">
@@ -95,7 +84,7 @@
                         </div>
                         <div class="form-group">
                             <label>Ghi chú</label>
-                            <textarea class="form-control" id="bookingNote" placeholder="Mô tả triệu chứng hoặc yêu cầu..." rows="3"></textarea>
+                            <textarea class="form-control" id="bookingNote" placeholder="Mô tả triệu chứng hoặc yêu cầu của bạn..." rows="3"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Đặt lịch hẹn</button>
                     </form>
@@ -105,10 +94,10 @@
 
         <div class="section-divider"><span class="divider-icon">💎</span></div>
 
-        <!-- ==================== DICH VU ==================== -->
+        <!-- DICH VU -->
         <section class="services-price-section" id="dichvu">
             <div class="container">
-                <div class="section-title"><h2>Dịch Vụ</h2></div>
+                <div class="section-title"><h2>Dịch vụ</h2></div>
                 <p class="section-intro">Giá niêm yết công khai, minh bạch. Không phát sinh chi phí ẩn.</p>
                 <div class="price-table-wrapper">
                     <table class="price-table" id="priceTable">
@@ -165,10 +154,10 @@
 
         <div class="section-divider on-gray"><span class="divider-icon">✨</span></div>
 
-        <!-- ==================== BAC SI ==================== -->
+        <!-- BAC SI -->
         <section class="doctors-section" id="bacsi">
             <div class="container">
-                <div class="section-title"><h2>Đội Ngũ Bác Sĩ</h2></div>
+                <div class="section-title"><h2>Đội ngũ bác sĩ</h2></div>
                 <p class="section-intro">Các bác sĩ được đào tạo chuyên sâu, nhiều năm kinh nghiệm.</p>
                 <div class="doctors-grid">
                     <div class="doctor-card"><div class="doctor-img"><img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop" alt="BS"></div><div class="doctor-info"><h3>BS. Nguyễn Hải</h3><span class="doctor-specialty">Tổng quát</span><span class="doctor-degree">CKI</span></div></div>
@@ -184,81 +173,70 @@
     <jsp:include page="components/footer.jsp" />
 
     <script>
-    // Chan ngay qua khu
     (function(){var t=new Date().toISOString().split('T')[0];document.getElementById('bookingDate').setAttribute('min',t);})();
 
-    // Tao luoi gio - thay doi theo ngay
     var weekdayTimes=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'];
     var sundayTimes=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30'];
 
     function buildTimeGrid(times){
-        var grid=document.getElementById('timeGrid');
-        grid.innerHTML='';
-        document.getElementById('bookingTime').value='';
-        times.forEach(function(t){
-            var btn=document.createElement('div');
-            btn.className='time-slot';
-            btn.textContent=t;
-            btn.onclick=function(){
-                document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});
-                this.classList.add('selected');
-                document.getElementById('bookingTime').value=t;
-                document.getElementById('timeGroup').classList.remove('error');
-            };
-            grid.appendChild(btn);
-        });
+        var grid=document.getElementById('timeGrid');grid.innerHTML='';document.getElementById('bookingTime').value='';
+        times.forEach(function(t){var btn=document.createElement('div');btn.className='time-slot';btn.textContent=t;
+        btn.onclick=function(){document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});this.classList.add('selected');document.getElementById('bookingTime').value=t;document.getElementById('timeGroup').classList.remove('error');};grid.appendChild(btn);});
     }
-
     buildTimeGrid(weekdayTimes);
 
     document.getElementById('bookingDate').addEventListener('change',function(){
-        var selected=new Date(this.value);
-        var day=selected.getDay();
-        if(day===0){buildTimeGrid(sundayTimes);}
-        else{buildTimeGrid(weekdayTimes);}
-        document.getElementById('dateGroup').classList.remove('error');
+        var d=new Date(this.value).getDay();buildTimeGrid(d===0?sundayTimes:weekdayTimes);document.getElementById('dateGroup').classList.remove('error');
     });
 
-    // Hien thi gia + thoi gian dich vu
-    function updatePrice(){
-        var sel=document.getElementById('serviceSelect');
-        var opt=sel.options[sel.selectedIndex];
-        var price=opt.getAttribute('data-price');
-        var time=opt.getAttribute('data-time');
-        var display=document.getElementById('priceDisplay');
-        if(price&&price!=='0'){
-            document.getElementById('priceValue').textContent=parseInt(price).toLocaleString('vi-VN');
-            document.getElementById('timeValue').textContent=time;
-            display.style.display='block';
-        }else{display.style.display='none';}
-        document.getElementById('serviceGroup').classList.remove('error');
+    // === CHON NHIEU DICH VU ===
+    var selectedList=[];
+
+    function addService(){
+        var sel=document.getElementById('serviceAdd');var opt=sel.options[sel.selectedIndex];if(!opt.value)return;
+        if(selectedList.find(function(s){return s.id===opt.value;})){alert('Dịch vụ này đã được chọn!');return;}
+        selectedList.push({id:opt.value,name:opt.text,price:parseInt(opt.getAttribute('data-price')),time:opt.getAttribute('data-time')});
+        sel.selectedIndex=0;renderServices();document.getElementById('serviceGroup').classList.remove('error');
     }
 
-    // Toggle dich vu
+    function removeService(id){selectedList=selectedList.filter(function(s){return s.id!==id;});renderServices();}
+
+    function renderServices(){
+        var c=document.getElementById('selectedServices');
+        var d=document.getElementById('priceDisplay');
+        if(selectedList.length===0){c.innerHTML='';d.style.display='none';return;}
+
+        var html='<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">';
+        html+='<thead><tr style="background:#f0f4f8;"><th style="text-align:left;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Dịch vụ</th><th style="text-align:left;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Thời gian</th><th style="text-align:right;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Giá</th><th style="width:40px;"></th></tr></thead>';
+        html+='<tbody>';
+        var total=0;
+        selectedList.forEach(function(s){
+            total+=s.price;
+            html+='<tr style="border-bottom:1px solid #dee2e6;">';
+            html+='<td style="padding:10px 12px;font-weight:600;color:#1a1a2e;">'+s.name+'</td>';
+            html+='<td style="padding:10px 12px;color:#e67e22;font-weight:500;font-size:0.82rem;">⏱ '+s.time+'</td>';
+            html+='<td style="padding:10px 12px;text-align:right;font-weight:700;color:#0056b3;white-space:nowrap;">'+s.price.toLocaleString('vi-VN')+' đ</td>';
+            html+='<td style="padding:10px 6px;text-align:center;"><button type="button" onclick="removeService(\''+s.id+'\')" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #f8d7da;background:white;color:#e74c3c;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background=\'#e74c3c\';this.style.color=\'white\';this.style.borderColor=\'#e74c3c\'" onmouseout="this.style.background=\'white\';this.style.color=\'#e74c3c\';this.style.borderColor=\'#f8d7da\'">✕</button></td>';
+            html+='</tr>';
+        });
+        html+='</tbody></table>';
+
+        c.innerHTML=html;
+        document.getElementById('priceValue').textContent=total.toLocaleString('vi-VN');
+        d.style.display='block';
+    }
+
     var servicesExpanded=false;
-    function toggleServices(){
-        servicesExpanded=!servicesExpanded;
-        document.querySelectorAll('.hidden-row').forEach(function(r){r.style.display=servicesExpanded?'table-row':'none';});
-        document.getElementById('showMoreBtn').textContent=servicesExpanded?'Thu gọn ↑':'Xem thêm dịch vụ ↓';
-    }
+    function toggleServices(){servicesExpanded=!servicesExpanded;document.querySelectorAll('.hidden-row').forEach(function(r){r.style.display=servicesExpanded?'table-row':'none';});document.getElementById('showMoreBtn').textContent=servicesExpanded?'Thu gọn ↑':'Xem thêm dịch vụ ↓';}
 
-    // Booking validation
     function handleBooking(e){
         e.preventDefault();var ok=true;
-        if(!document.getElementById('doctorSelect').value){document.getElementById('doctorGroup').classList.add('error');ok=false;}else{document.getElementById('doctorGroup').classList.remove('error');}
-        if(!document.getElementById('serviceSelect').value){document.getElementById('serviceGroup').classList.add('error');ok=false;}else{document.getElementById('serviceGroup').classList.remove('error');}
+        if(selectedList.length===0){document.getElementById('serviceGroup').classList.add('error');ok=false;}else{document.getElementById('serviceGroup').classList.remove('error');}
         if(!document.getElementById('bookingDate').value){document.getElementById('dateGroup').classList.add('error');ok=false;}else{document.getElementById('dateGroup').classList.remove('error');}
         if(!document.getElementById('bookingTime').value){document.getElementById('timeGroup').classList.add('error');ok=false;}else{document.getElementById('timeGroup').classList.remove('error');}
-        if(ok){
-            alert('Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận.');
-            document.getElementById('bookingForm').reset();
-            document.getElementById('priceDisplay').style.display='none';
-            document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});
-        }
+        if(ok){alert('Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận.');document.getElementById('bookingForm').reset();document.getElementById('priceDisplay').style.display='none';document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});selectedList=[];renderServices();}
         return false;
     }
-
-    document.getElementById('doctorSelect').addEventListener('change',function(){document.getElementById('doctorGroup').classList.remove('error');});
     </script>
 </body>
 </html>
