@@ -69,6 +69,29 @@
         var h = document.getElementById('header');
         if (window.scrollY > 50) h.classList.add('scrolled');
         else h.classList.remove('scrolled');
+
+        if (window.location.pathname.indexOf('dat-lich') > -1) {
+            var sections = ['datlich', 'dichvu', 'bacsi'];
+            var current = '';
+            sections.forEach(function(id) {
+                var sec = document.getElementById(id);
+                if (sec) {
+                    var rect = sec.getBoundingClientRect();
+                    if (rect.top <= 150 && rect.bottom >= 150) { current = id; }
+                }
+            });
+            document.querySelectorAll('.nav-menu a').forEach(function(a) {
+                a.classList.remove('active');
+            });
+            if (current) {
+                document.querySelectorAll('.nav-menu a').forEach(function(a) {
+                    var href = a.getAttribute('href') || '';
+                    if (href.indexOf('#' + current) > -1) {
+                        a.classList.add('active');
+                    }
+                });
+            }
+        }
     });
 
     function toggleMenu() {
