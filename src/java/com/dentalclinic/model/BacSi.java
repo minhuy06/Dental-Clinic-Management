@@ -10,8 +10,11 @@ public class BacSi {
     
     // Đối tượng quan hệ (Dùng để chứa dữ liệu sau khi JOIN)
     private TaiKhoan taiKhoan; 
-    private List<ChuyenKhoa> danhSachChuyenKhoa;
-
+    private List<BacSiChuyenKhoa> danhSachChuyenKhoa;
+    private List<LichHen> danhSachLichHen;
+    private List<PhieuKham> danhSachPhieuKham;
+    private List<ChiTietDichVu> danhSachChiTietDichVu;
+    
     public BacSi() {}
 
     public BacSi(int bacSiID, int taiKhoanID, String anhDaiDien, String trinhDo) {
@@ -37,6 +40,16 @@ public class BacSi {
     public TaiKhoan getTaiKhoan() { return taiKhoan; }
     public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
 
-    public List<ChuyenKhoa> getDanhSachChuyenKhoa() { return danhSachChuyenKhoa; }
-    public void setDanhSachChuyenKhoa(List<ChuyenKhoa> danhSachChuyenKhoa) { this.danhSachChuyenKhoa = danhSachChuyenKhoa; }
+    public List<BacSiChuyenKhoa> getDanhSachChuyenKhoa() { return danhSachChuyenKhoa; }
+    public void setDanhSachChuyenKhoa(List<BacSiChuyenKhoa> danhSachChuyenKhoa) { 
+    this.danhSachChuyenKhoa = danhSachChuyenKhoa; 
+    }
+    public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
+    public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
+
+    public List<PhieuKham> getDanhSachPhieuKham() { return danhSachPhieuKham; }
+    public void setDanhSachPhieuKham(List<PhieuKham> danhSachPhieuKham) { this.danhSachPhieuKham = danhSachPhieuKham; }
+
+    public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
+    public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }
 }
