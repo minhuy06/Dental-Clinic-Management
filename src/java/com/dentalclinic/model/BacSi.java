@@ -1,91 +1,42 @@
 package com.dentalclinic.model;
 
-import java.time.LocalDate;
+import java.util.List;
 
 public class BacSi {
-    private int bacSiID;
-    private TaiKhoan taiKhoan;
-    private String hoTen;
-    private LocalDate ngaySinh;
-    private boolean gioiTinh;
-    private String chuyenKhoa;
+    private int bacSiID;      // Khớp với BacSi_ID (PK)
+    private int taiKhoanID;   // Khớp với TaiKhoan_ID (FK)
     private String anhDaiDien;
     private String trinhDo;
+    
+    // Đối tượng quan hệ (Dùng để chứa dữ liệu sau khi JOIN)
+    private TaiKhoan taiKhoan; 
+    private List<ChuyenKhoa> danhSachChuyenKhoa;
 
     public BacSi() {}
 
-    public BacSi(int bacSiID, TaiKhoan taiKhoan, String hoTen, LocalDate ngaySinh, boolean gioiTinh, String chuyenKhoa, String anhDaiDien, String trinhDo) {
+    public BacSi(int bacSiID, int taiKhoanID, String anhDaiDien, String trinhDo) {
         this.bacSiID = bacSiID;
-        this.taiKhoan = taiKhoan;
-        this.hoTen = hoTen;
-        this.ngaySinh = ngaySinh;
-        this.gioiTinh = gioiTinh;
-        this.chuyenKhoa = chuyenKhoa;
+        this.taiKhoanID = taiKhoanID;
         this.anhDaiDien = anhDaiDien;
         this.trinhDo = trinhDo;
     }
 
-    public int getBacSiID() {
-        return bacSiID;
-    }
+    // Getters and Setters
+    public int getBacSiID() { return bacSiID; }
+    public void setBacSiID(int bacSiID) { this.bacSiID = bacSiID; }
 
-    public void setBacSiID(int bacSiID) {
-        this.bacSiID = bacSiID;
-    }
+    public int getTaiKhoanID() { return taiKhoanID; }
+    public void setTaiKhoanID(int taiKhoanID) { this.taiKhoanID = taiKhoanID; }
 
-    public TaiKhoan getTaiKhoan() {
-        return taiKhoan;
-    }
+    public String getAnhDaiDien() { return anhDaiDien; }
+    public void setAnhDaiDien(String anhDaiDien) { this.anhDaiDien = anhDaiDien; }
 
-    public void setTaiKhoan(TaiKhoan taiKhoan) {
-        this.taiKhoan = taiKhoan;
-    }
+    public String getTrinhDo() { return trinhDo; }
+    public void setTrinhDo(String trinhDo) { this.trinhDo = trinhDo; }
 
-    public String getHoTen() {
-        return hoTen;
-    }
+    public TaiKhoan getTaiKhoan() { return taiKhoan; }
+    public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
 
-    public void setHoTen(String hoTen) {
-        this.hoTen = hoTen;
-    }
-
-    public LocalDate getNgaySinh() {
-        return ngaySinh;
-    }
-
-    public void setNgaySinh(LocalDate ngaySinh) {
-        this.ngaySinh = ngaySinh;
-    }
-
-    public boolean getGioiTinh() {
-        return gioiTinh;
-    }
-
-    public void setGioiTinh(boolean gioiTinh) {
-        this.gioiTinh = gioiTinh;
-    }
-
-    public String getChuyenKhoa() {
-        return chuyenKhoa;
-    }
-
-    public void setChuyenKhoa(String chuyenKhoa) {
-        this.chuyenKhoa = chuyenKhoa;
-    }
-
-    public String getAnhDaiDien() {
-        return anhDaiDien;
-    }
-
-    public void setAnhDaiDien(String anhDaiDien) {
-        this.anhDaiDien = anhDaiDien;
-    }
-
-    public String getTrinhDo() {
-        return trinhDo;
-    }
-
-    public void setTrinhDo(String trinhDo) {
-        this.trinhDo = trinhDo;
-    }
+    public List<ChuyenKhoa> getDanhSachChuyenKhoa() { return danhSachChuyenKhoa; }
+    public void setDanhSachChuyenKhoa(List<ChuyenKhoa> danhSachChuyenKhoa) { this.danhSachChuyenKhoa = danhSachChuyenKhoa; }
 }
