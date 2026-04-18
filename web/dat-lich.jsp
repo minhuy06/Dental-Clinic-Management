@@ -92,7 +92,6 @@
             </div>
         </section>
 
-        <div class="section-divider"><span class="divider-icon">💎</span></div>
 
         <!-- DICH VU -->
         <section class="services-price-section" id="dichvu">
@@ -152,7 +151,6 @@
             </div>
         </section>
 
-        <div class="section-divider on-gray"><span class="divider-icon">✨</span></div>
 
         <!-- BAC SI -->
         <section class="doctors-section" id="bacsi">
