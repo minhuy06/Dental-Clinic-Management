@@ -146,18 +146,21 @@ GO
 
 -- Ràng buộc khóa ngoại cho Bệnh Nhân, Bác Sĩ, Lễ Tân
 ALTER TABLE BenhNhan
-ADD CONSTRAINT FK_BenhNhan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+ADD CONSTRAINT FK_BenhNhan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID) ON DELETE CASCADE;
+GO
 
 ALTER TABLE BacSi
-ADD CONSTRAINT FK_BacSi_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+ADD CONSTRAINT FK_BacSi_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID) ON DELETE CASCADE;
+GO
 
 ALTER TABLE LeTan
-ADD CONSTRAINT FK_LeTan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+ADD CONSTRAINT FK_LeTan_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID) ON DELETE CASCADE;
 GO
 
 -- Ràng buộc khóa ngoại cho Lịch Hẹn
 ALTER TABLE LichHen
 ADD CONSTRAINT FK_LichHen_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID);
+go
 
 ALTER TABLE LichHen
 ADD CONSTRAINT FK_LichHen_BacSi FOREIGN KEY (BacSi_ID) REFERENCES BacSi(BacSi_ID);
@@ -165,12 +168,13 @@ GO
 
 -- Ràng buộc khóa ngoại cho Phiếu Khám
 ALTER TABLE PhieuKham
-ADD CONSTRAINT FK_PhieuKham_LichHen FOREIGN KEY (LichHen_ID) REFERENCES LichHen(LichHen_ID);
+ADD CONSTRAINT FK_PhieuKham_LichHen FOREIGN KEY (LichHen_ID) REFERENCES LichHen(LichHen_ID) ON DELETE SET NULL;
 GO
 
 -- Ràng buộc khóa ngoại cho Chi Tiết Dịch Vụ
 ALTER TABLE ChiTietDichVu
-ADD CONSTRAINT FK_ChiTietDichVu_PhieuKham FOREIGN KEY (PhieuKham_ID) REFERENCES PhieuKham(PhieuKham_ID);
+ADD CONSTRAINT FK_ChiTietDichVu_PhieuKham FOREIGN KEY (PhieuKham_ID) REFERENCES PhieuKham(PhieuKham_ID) ON DELETE CASCADE;
+GO
 
 ALTER TABLE ChiTietDichVu
 ADD CONSTRAINT FK_ChiTietDichVu_DichVu FOREIGN KEY (DichVu_ID) REFERENCES DichVu(DichVu_ID);
@@ -506,3 +510,433 @@ BEGIN
     END
 END;
 GO
+
+-- Xóa bảng Thuoc, ChiTietDonThuoc
+Drop table ChiTietDonThuoc
+go
+Drop table Thuoc
+go
+
+-- Thêm Phương thức thanh toán, phiếu giảm giá cho HoaDon
+alter table HoaDon
+add PhuongThucThanhToan nvarchar(50)
+go
+alter table HoaDon
+add PhieuGiamGia decimal 
+go
+
+-- Insert giá trị cho PhuongThucThanhToan và PhieuGiamGia
+UPDATE HoaDon
+SET PhuongThucThanhToan = N'Tiền mặt',
+    PhieuGiamGia = 0
+WHERE PhuongThucThanhToan IS NULL;
+go
+
+-- Xóa thuộc tính: HoTen, NgaySinh, GioiTinh của 3 bảng BacSi, BenhNhan và LeTan. Thêm 3 thuộc tính đó vào bảng TaiKhoan để tránh trùng lặp dữ liệu
+alter table TaiKhoan
+add HoTen NVARCHAR(100),
+    NgaySinh DATE,
+    GioiTinh BIT
+go
+
+-- Kéo dữ liệu ở BacSi sang
+update t
+set t.HoTen = b.HoTen,
+    t.NgaySinh = b.NgaySinh,
+    t.GioiTinh = b.GioiTinh
+from TaiKhoan as t
+join BacSi as b on b.TaiKhoan_ID = t.TaiKhoan_ID
+
+-- Kéo dữ liệu ở LeTan sang
+update t
+set t.HoTen = l.HoTen,
+    t.NgaySinh = l.NgaySinh,
+    t.GioiTinh = l.GioiTinh
+from TaiKhoan as t
+join LeTan as l on l.TaiKhoan_ID = t.TaiKhoan_ID
+
+-- Kéo dữ liệu ở BenhNhan sang
+update t
+set t.HoTen = b.HoTen,
+    t.NgaySinh = b.NgaySinh,
+    t.GioiTinh = b.GioiTinh
+from TaiKhoan as t
+join BenhNhan as b on b.TaiKhoan_ID = t.TaiKhoan_ID
+
+-- Xóa 3 thuộc tính
+alter table BacSi
+drop constraint CK_BacSi_NgaySinh
+go
+alter table BacSi
+drop column HoTen, NgaySinh, GioiTinh
+go
+
+alter table BenhNhan
+drop Constraint CK_BenhNhan_NgaySinh
+go
+alter table BenhNhan
+drop column HoTen, NgaySinh, GioiTinh
+go
+
+alter table LeTan
+drop Constraint CK_LeTan_NgaySinh
+go
+alter table LeTan
+drop column HoTen, NgaySinh, GioiTinh
+go
+
+-- Sửa bảng PhieuKham
+alter table PhieuKham
+add TrieuChung nvarchar(100), LyDoKham nvarchar(100), GhiChu nvarchar(200), BacSi_ID int
+go
+update PhieuKham
+set TrieuChung = N'Đau răng, chảy máu chân răng',
+    LyDoKham = N'Cảm thấy nhức răng',
+    GhiChu = N'Mua thuốc kháng sinh',
+    BacSi_ID = 1
+where TrieuChung is null
+go
+
+-- Khóa ngoại BacSi_ID
+ALTER TABLE PhieuKham
+ADD CONSTRAINT FK_PhieuKham_BacSi FOREIGN KEY (BacSi_ID) REFERENCES BacSi(BacSi_ID) ON DELETE SET NULL;
+GO
+
+-- Tạo bảng CaLam và LichLamViec
+create table CaLam(
+    Ca_Id int identity(1,1),
+    TenCa nvarchar(30) not null,
+    GioBatDau time not null,
+    GioKetThuc time not null,
+    Constraint PK_CaLam primary key(Ca_ID)
+);
+go
+
+create table LichLamViec(
+    Lich_ID int identity(1,1),
+    TaiKhoan_ID int not null,
+    Ca_ID int not null,
+    NgayLam date not null,
+    TrangThai nvarchar(30) not null,
+    Constraint PK_LichLamViec primary key(Lich_ID)
+);
+go
+
+-- Khóa ngoại
+alter table LichLamViec
+    add constraint FK_LichLamViec_CaLam foreign key(Ca_ID) references CaLam(Ca_ID)
+ALTER TABLE LichLamViec
+ADD CONSTRAINT FK_LichLamViec_TaiKhoan FOREIGN KEY (TaiKhoan_ID) REFERENCES TaiKhoan(TaiKhoan_ID);
+GO
+-- Insert dữ liệu cho 2 bảng
+INSERT INTO CaLam (TenCa, GioBatDau, GioKetThuc)
+VALUES 
+(N'Ca Sáng', '08:00:00', '12:00:00'),
+(N'Ca Chiều', '13:30:00', '17:30:00'),
+(N'Ca Tối', '18:00:00', '21:00:00');
+
+-- THỨ HAI (20/04/2026) - 6 dòng
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
+(21, 1, '2026-04-20', N'Đang làm việc'), (41, 1, '2026-04-20', N'Đang làm việc'),
+(22, 2, '2026-04-20', N'Đang làm việc'), (42, 2, '2026-04-20', N'Đang làm việc'),
+(23, 3, '2026-04-20', N'Đang làm việc'), (43, 3, '2026-04-20', N'Đang làm việc');
+
+-- THỨ BA (21/04/2026) - 6 dòng
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
+(24, 1, '2026-04-21', N'Đang làm việc'), (44, 1, '2026-04-21', N'Đang làm việc'),
+(25, 2, '2026-04-21', N'Đang làm việc'), (45, 2, '2026-04-21', N'Đang làm việc'),
+(26, 3, '2026-04-21', N'Đang làm việc'), (46, 3, '2026-04-21', N'Xin nghỉ');
+
+-- THỨ TƯ (22/04/2026) - 6 dòng
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
+(27, 1, '2026-04-22', N'Đang làm việc'), (47, 1, '2026-04-22', N'Đang làm việc'),
+(28, 2, '2026-04-22', N'Đang làm việc'), (48, 2, '2026-04-22', N'Đang làm việc'),
+(29, 3, '2026-04-22', N'Đã kín lịch'),   (49, 3, '2026-04-22', N'Đang làm việc');
+
+-- THỨ NĂM (23/04/2026) - 4 dòng
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
+(30, 1, '2026-04-23', N'Đang làm việc'), (50, 1, '2026-04-23', N'Đang làm việc'),
+(31, 2, '2026-04-23', N'Đang làm việc'), (51, 2, '2026-04-23', N'Đang làm việc');
+
+-- Xóa thuộc tính CaLamViec của LeTan
+alter table LeTan
+    drop Constraint CK_LeTan_CaLamViec
+alter table LeTan
+    drop column CaLamViec
+
+-- Xóa thuộc tính TienSuBenh của BenhNhan
+alter table BenhNhan
+    drop column TienSuBenh
+
+-- Thêm bảng PhongKham
+CREATE TABLE PhongKham (
+    Phong_ID INT IDENTITY(1,1) PRIMARY KEY,
+    TenPhong NVARCHAR(50) NOT NULL,
+    TrangThai NVARCHAR(50) DEFAULT N'Trống' -- Các trạng thái: Trống, Đang khám, Bảo trì
+);
+go
+
+INSERT INTO PhongKham (TenPhong, TrangThai)
+VALUES 
+(N'Phòng Khám 1', N'Trống'),
+(N'Phòng Khám 2', N'Đang khám'),
+(N'Phòng Khám 3', N'Trống'),
+(N'Phòng Phẫu Thuật 1', N'Trống'),
+(N'Phòng Phẫu Thuật 2', N'Bảo trì'),
+(N'Phòng Chỉnh Nha 1', N'Đang khám'),
+(N'Phòng Chỉnh Nha 2', N'Trống'),
+(N'Phòng VIP 1', N'Trống'),
+(N'Phòng X-Quang', N'Trống'),
+(N'Phòng Khám Dự Phòng', N'Ngừng hoạt động');
+GO
+
+alter table PhongKham
+    add constraint CK_PhongKham_TrangThai check (TrangThai in (N'Trống', N'Đang khám', N'Bảo trì', N'Ngừng hoạt động'))
+
+-- Thêm thuộc tính Phong_ID cho PhieuKham
+ALTER TABLE PhieuKham ADD Phong_ID INT;
+GO
+UPDATE PhieuKham 
+SET Phong_ID = 1 
+WHERE Phong_ID IS NULL;
+GO
+ALTER TABLE PhieuKham 
+ALTER COLUMN Phong_ID INT NOT NULL;
+GO
+
+-- Thêm khóa ngoại từ PhieuKham tới PhongKham
+alter table PhieuKham
+    add constraint FK_PhieuKham_PhongKham foreign key(Phong_ID) references PhongKham(Phong_ID) ON UPDATE CASCADE;
+go
+
+-- Thêm thuộc tính DichVu_ID cho LichHen (để NULL nếu không bắt buộc khách chọn ngay)
+ALTER TABLE LichHen
+    ADD DichVu_ID INT;
+go
+update LichHen
+    set DichVu_Id = 1
+    where DichVu_ID is null
+go
+ALTER TABLE LichHen
+    ADD CONSTRAINT FK_LichHen_DichVu FOREIGN KEY (DichVu_ID) REFERENCES DichVu(DichVu_ID);
+
+-- Tạo bảng TinNhan (CSKH)
+CREATE TABLE TinNhan (
+    TinNhan_ID INT IDENTITY(1,1) PRIMARY KEY,
+    NguoiGui_ID INT NOT NULL,
+    NguoiNhan_ID INT NOT NULL,
+    NoiDung NVARCHAR(MAX) NOT NULL,
+    ThoiGianGui DATETIME DEFAULT GETDATE(),
+    TrangThai BIT DEFAULT 0, -- 0: Chưa đọc, 1: Đã đọc
+
+    -- Tạo khóa ngoại liên kết với bảng TaiKhoan
+    CONSTRAINT FK_TinNhan_NguoiGui FOREIGN KEY (NguoiGui_ID) REFERENCES TaiKhoan(TaiKhoan_ID),
+    CONSTRAINT FK_TinNhan_NguoiNhan FOREIGN KEY (NguoiNhan_ID) REFERENCES TaiKhoan(TaiKhoan_ID)
+);
+go
+
+-- Thêm 20 dòng dữ liệu mẫu vào bảng TinNhan dựa trên TaiKhoan_ID thực tế
+INSERT INTO TinNhan (NguoiGui_ID, NguoiNhan_ID, NoiDung, ThoiGianGui, TrangThai) 
+VALUES
+-- Kịch bản 1: Bệnh nhân 1 (TaiKhoan_ID = 1) hỏi tư vấn niềng răng Lễ tân 1 (TaiKhoan_ID = 41)
+(1, 41, N'Chào phòng khám, cho mình hỏi chi phí niềng răng mắc cài kim loại hiện nay là bao nhiêu ạ?', DATEADD(day, -3, GETDATE()), 1),
+(41, 1, N'Dạ chào bạn, chi phí niềng răng mắc cài kim loại bên mình dao động từ 25-35 triệu tùy tình trạng mức độ lệch lạc của răng ạ.', DATEADD(day, -3, GETDATE()), 1),
+(1, 41, N'Mình thấy dạo này có niềng răng trong suốt, giá cả thế nào bạn nhỉ?', DATEADD(day, -3, GETDATE()), 1),
+(41, 1, N'Dạ niềng răng trong suốt Invisalign thì chi phí cao hơn, khoảng từ 80-120 triệu. Bác sĩ sẽ cần scan 3D răng để lên phác đồ chính xác nhất cho bạn.', DATEADD(day, -3, GETDATE()), 1),
+(1, 41, N'Vậy cuối tuần này phòng khám có lịch trống không? Mình qua khám thử.', DATEADD(day, -2, GETDATE()), 1),
+(41, 1, N'Dạ thứ 7 tuần này lúc 9h sáng bên em còn trống lịch bác sĩ Nam, em đặt lịch khám tư vấn miễn phí cho mình nhé?', DATEADD(day, -2, GETDATE()), 1),
+(1, 41, N'Ok bạn, đặt lịch cho mình nhé.', DATEADD(day, -2, GETDATE()), 1),
+(41, 1, N'Dạ phòng khám đã xác nhận lịch hẹn của bạn vào 9h00 sáng Thứ 7. Rất mong được đón tiếp bạn!', DATEADD(day, -2, GETDATE()), 1),
+
+-- Kịch bản 2: Bệnh nhân 2 (TaiKhoan_ID = 2) bị đau răng khôn khẩn cấp nhắn Lễ tân 2 (TaiKhoan_ID = 42)
+(2, 42, N'Bạn ơi, răng trong cùng của mình tự nhiên sưng to và đau quá, há miệng cũng khó khăn.', DATEADD(day, -1, GETDATE()), 1),
+(42, 2, N'Dạ chào anh/chị, triệu chứng của mình rất có thể là do mọc răng khôn bị biến chứng viêm lợi trùm rồi ạ.', DATEADD(day, -1, GETDATE()), 1),
+(2, 42, N'Bây giờ mình qua khám luôn được không? Đau quá không chịu nổi.', DATEADD(day, -1, GETDATE()), 1),
+(42, 2, N'Dạ anh/chị qua ngay nhé, bên em sẽ ưu tiên sắp xếp bác sĩ kiểm tra chụp X-Quang và xử lý giảm đau luôn cho mình ạ.', DATEADD(day, -1, GETDATE()), 1),
+(2, 42, N'Cảm ơn bạn, khoảng 15 phút nữa mình tới.', DATEADD(day, -1, GETDATE()), 1),
+
+-- Kịch bản 3: Chăm sóc khách hàng sau điều trị cho Bệnh nhân 3 (TaiKhoan_ID = 3)
+(3, 41, N'Hôm qua mình mới tẩy trắng răng xong, nay uống nước đá thấy hơi ê buốt, có sao không bạn?', DATEADD(hour, -5, GETDATE()), 1),
+(41, 3, N'Dạ chào bạn, triệu chứng ê buốt nhẹ từ 1-2 ngày đầu sau khi tẩy trắng là phản ứng hoàn toàn bình thường do men răng đang thích nghi lại ạ.', DATEADD(hour, -4, GETDATE()), 1),
+(41, 3, N'Bạn lưu ý tránh đồ ăn quá nóng, quá lạnh hoặc sậm màu trong thời gian này nhé. Có thể súc miệng bằng nước muối sinh lý ấm ạ.', DATEADD(hour, -4, GETDATE()), 1),
+(3, 41, N'À vâng, mình hiểu rồi, cảm ơn phòng khám.', DATEADD(hour, -1, GETDATE()), 1),
+
+-- Kịch bản 4: Tin nhắn mới (Chưa đọc - TrangThai = 0) để test hiển thị Badge thông báo trên Java
+(1, 41, N'Bạn ơi, ngày mai mình có việc đột xuất, có thể lùi lịch khám sang buổi chiều lúc 15h được không?', GETDATE(), 0),
+(2, 42, N'Bác sĩ kê cho mình đơn thuốc hôm qua nhưng mình làm mất tờ giấy rồi, bạn xem lại hồ sơ chụp gửi lại giúp mình qua đây được không?', GETDATE(), 0),
+(3, 41, N'Phòng khám cho mình hỏi bên mình có hỗ trợ trả góp qua thẻ tín dụng khi bọc răng sứ không nhỉ?', GETDATE(), 0);
+go
+
+-- Thêm BacSi_Id vào ChiTietDichVu
+ALTER TABLE ChiTietDichVu 
+ADD BacSi_ID INT;
+go
+UPDATE ChiTietDichVu 
+SET BacSi_ID = 1 
+WHERE BacSi_ID IS NULL;
+
+ALTER TABLE ChiTietDichVu 
+ALTER COLUMN BacSi_ID INT NOT NULL;
+
+ALTER TABLE ChiTietDichVu 
+    ADD CONSTRAINT FK_ChiTietDichVu_BacSi FOREIGN KEY (BacSi_ID) REFERENCES BacSi(BacSi_ID);
+
+
+-- Thêm Phong_ID vào LichLamViec
+ALTER TABLE LichLamViec
+ADD Phong_ID INT;
+go
+UPDATE LichLamViec
+SET Phong_ID = 1
+WHERE Phong_ID IS NULL;
+go
+
+ALTER TABLE LichLamViec
+ALTER COLUMN Phong_ID INT NOT NULL;
+
+ALTER TABLE LichLamViec
+    ADD CONSTRAINT FK_LichLamViec_PhongKham FOREIGN KEY (Phong_ID) REFERENCES PhongKham(Phong_ID)
+go
+
+-- Thêm thời gian dự kiến cho dịch vụ
+ALTER TABLE DichVu
+ADD ThoiLuongDuKien INT;
+go
+UPDATE DichVu
+SET ThoiLuongDuKien = 30
+WHERE ThoiLuongDuKien IS NULL;
+
+ALTER TABLE DichVu
+ALTER COLUMN ThoiLuongDuKien INT NOT NULL;
+
+-- Thêm bảng ChuyenKhoa n-n BacSi
+CREATE TABLE ChuyenKhoa (
+    ChuyenKhoa_ID INT IDENTITY(1,1) PRIMARY KEY,
+    TenChuyenKhoa NVARCHAR(100) NOT NULL
+);
+go
+-- Tạo bảng trung gian thể hiện 1 bác sĩ có nhiều chuyên khoa
+CREATE TABLE BacSi_ChuyenKhoa (
+    BacSi_ID INT NOT NULL,
+    ChuyenKhoa_ID INT NOT NULL,
+    Constraint PK_BacSi_ChuyenKhoa PRIMARY KEY (BacSi_ID, ChuyenKhoa_ID),
+    CONSTRAINT FK_BSCK_BacSi FOREIGN KEY (BacSi_ID) REFERENCES BacSi(BacSi_ID),
+    CONSTRAINT FK_BSCK_ChuyenKhoa FOREIGN KEY (ChuyenKhoa_ID) REFERENCES ChuyenKhoa(ChuyenKhoa_ID)
+);
+go
+-- Xóa ChuyenKhoa khỏi BacSi
+alter table BacSi
+    drop Constraint CK_BacSi_ChuyenKhoa
+alter table BacSi
+    drop column ChuyenKhoa
+
+-- Thêm dữ liệu
+INSERT INTO ChuyenKhoa (TenChuyenKhoa) 
+VALUES
+(N'Tổng quát'),
+(N'Chỉnh nha'),
+(N'Phục hình răng'),
+(N'Thẩm mỹ'),
+(N'Phẫu thuật miệng'),
+(N'Nhổ răng');
+
+INSERT INTO BacSi_ChuyenKhoa (BacSi_ID, ChuyenKhoa_ID) 
+VALUES
+(1, 1),  -- Bác sĩ 1: Tổng quát
+(2, 2),  -- Bác sĩ 2: Chỉnh nha
+(3, 3),  -- Bác sĩ 3: Phục hình răng
+(4, 4),  -- Bác sĩ 4: Thẩm mỹ
+(5, 5),  -- Bác sĩ 5: Phẫu thuật miệng
+(6, 6),  -- Bác sĩ 6: Nhổ răng
+
+(7, 1),  -- Bác sĩ 7: Tổng quát
+(8, 2),  -- Bác sĩ 8: Chỉnh nha
+(9, 3),  -- Bác sĩ 9: Phục hình răng
+(10, 4), -- Bác sĩ 10: Thẩm mỹ
+(11, 5), -- Bác sĩ 11: Phẫu thuật miệng
+(12, 6), -- Bác sĩ 12: Nhổ răng
+
+(13, 1), -- Bác sĩ 13: Tổng quát
+(14, 2), -- Bác sĩ 14: Chỉnh nha
+(15, 3), -- Bác sĩ 15: Phục hình răng
+(16, 4), -- Bác sĩ 16: Thẩm mỹ
+(17, 5), -- Bác sĩ 17: Phẫu thuật miệng
+(18, 6), -- Bác sĩ 18: Nhổ răng
+
+(19, 1), -- Bác sĩ 19: Tổng quát
+(20, 2), -- Bác sĩ 20: Chỉnh nha
+
+(1, 6),  -- Bác sĩ 1 (Tổng quát) nay có thể làm thêm (Nhổ răng)
+(2, 4),  -- Bác sĩ 2 (Chỉnh nha) nay có thể làm thêm (Thẩm mỹ)
+(5, 6),  -- Bác sĩ 5 (Phẫu thuật miệng) đương nhiên làm được (Nhổ răng)
+(11, 6); -- Bác sĩ 11 (Phẫu thuật miệng) cũng làm được (Nhổ răng)
+
+-- Tạo bảng PhongKham_DichVu xử lý quan hệ n-n
+CREATE TABLE PhongKham_DichVu (
+    Phong_ID INT NOT NULL,
+    DichVu_ID INT NOT NULL,    
+    CONSTRAINT PK_PhongKham_DichVu PRIMARY KEY (Phong_ID, DichVu_ID),
+    CONSTRAINT FK_PKDV_Phong FOREIGN KEY (Phong_ID) REFERENCES PhongKham(Phong_ID),
+    CONSTRAINT FK_PKDV_DichVu FOREIGN KEY (DichVu_ID) REFERENCES DichVu(DichVu_ID)
+);
+go
+
+INSERT INTO PhongKham_DichVu (Phong_ID, DichVu_ID)
+VALUES
+-- 1. Phòng Khám 1, 2, 3 (ID: 1, 2, 3) 
+-- Chuyên: Khám tổng quát, cạo vôi, trám răng, viêm nha chu
+(1, 1), (1, 2), (1, 3), (1, 20),
+(2, 1), (2, 2), (2, 3), (2, 20),
+(3, 1), (3, 2), (3, 3), (3, 20),
+
+-- 2. Phòng Phẫu Thuật 1 & 2 (ID: 4, 5)
+-- Chuyên: Nhổ răng, Lấy tủy, Cấy ghép Implant
+(4, 4), (4, 5), (4, 6), (4, 9), (4, 10), (4, 15), (4, 16),
+(5, 4), (5, 5), (5, 6), (5, 9), (5, 10), (5, 15), (5, 16),
+
+-- 3. Phòng Chỉnh Nha 1 & 2 (ID: 6, 7)
+-- Chuyên: Tẩy trắng, Bọc sứ, Dán sứ, Niềng răng
+(6, 7), (6, 8), (6, 11), (6, 12), (6, 13), (6, 14), (6, 17), (6, 18), (6, 19),
+(7, 7), (7, 8), (7, 11), (7, 12), (7, 13), (7, 14), (7, 17), (7, 18), (7, 19),
+
+-- 4. Phòng VIP 1 (ID: 8)
+-- Chuyên: Làm các dịch vụ cao cấp nhất (Implant, Invisalign, Sứ Zirconia...)
+(8, 1),  -- Vẫn phải khám tổng quát
+(8, 13), -- Bọc răng sứ Zirconia
+(8, 14), -- Mặt dán sứ Veneer
+(8, 16), -- Cấy ghép Implant cao cấp
+(8, 19), -- Niềng răng Invisalign
+
+-- 5. Phòng X-Quang (ID: 9)
+-- (Giả định tạm thời map với Khám tổng quát vì bảng Dịch vụ chưa có mã X-Quang)
+(9, 1),
+
+-- 6. Phòng Khám D (Phòng dự phòng) (ID: 10)
+-- Chỉ làm các ca cơ bản khi quá tải
+(10, 1), (10, 2);
+
+go
+-- Xử lý thêm ChuyenKhoa_ID vào DichVu
+ALTER TABLE DichVu ADD ChuyenKhoa_ID INT;
+go
+UPDATE DichVu
+SET ChuyenKhoa_ID = CASE 
+    -- 1: Tổng quát (Khám, Cạo vôi, Trám, Viêm nha chu, Lấy tủy)
+    WHEN DichVu_ID IN (1, 2, 3, 9, 10, 20) THEN 1 
+    -- 2: Chỉnh nha (Các loại Niềng răng)
+    WHEN DichVu_ID IN (17, 18, 19) THEN 2
+    -- 3: Phục hình răng (Bọc răng sứ Titanium, Cercon, Zirconia)
+    WHEN DichVu_ID IN (11, 12, 13) THEN 3
+    -- 4: Thẩm mỹ (Tẩy trắng, Dán sứ Veneer)
+    WHEN DichVu_ID IN (7, 8, 14) THEN 4
+    -- 5: Phẫu thuật miệng (Cấy ghép Implant)
+    WHEN DichVu_ID IN (15, 16) THEN 5
+    -- 6: Nhổ răng (Nhổ răng sữa, Nhổ răng khôn)
+    WHEN DichVu_ID IN (4, 5, 6) THEN 6
+END;
+
+ALTER TABLE DichVu ALTER COLUMN ChuyenKhoa_ID INT NOT NULL;
+
+ALTER TABLE DichVu
+ADD CONSTRAINT FK_DichVu_ChuyenKhoa 
+FOREIGN KEY (ChuyenKhoa_ID) REFERENCES ChuyenKhoa(ChuyenKhoa_ID)

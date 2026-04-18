@@ -14,7 +14,6 @@
 .section-divider::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:300px;height:1px;background:linear-gradient(to right,transparent,var(--border-light),transparent);}
 .section-divider .divider-icon{display:inline-block;background:var(--bg-white);padding:0 20px;position:relative;z-index:1;font-size:1.3rem;color:var(--primary);}
 .section-divider.on-gray .divider-icon{background:var(--bg-section);}
-
 .section-intro{max-width:640px;margin:0 auto 12px;text-align:center;font-size:0.88rem;color:var(--text-muted);line-height:1.7;}
 
 /* DOCTORS */
@@ -36,10 +35,13 @@
 .price-table{width:100%;border-collapse:collapse;background:var(--bg-white);font-size:0.9rem;}
 .price-table thead{background:var(--primary);color:var(--text-white);}
 .price-table th{padding:14px 20px;text-align:left;font-weight:600;font-size:0.88rem;letter-spacing:0.3px;}
-.price-table th:first-child{width:60px;text-align:center;}.price-table th:last-child{text-align:right;}
+.price-table th:first-child{width:50px;text-align:center;}
+.price-table th:nth-child(3){text-align:center;width:140px;}
+.price-table th:last-child{text-align:right;width:140px;}
 .price-table td{padding:13px 20px;border-bottom:1px solid var(--border-light);color:var(--text-body);}
 .price-table td:first-child{text-align:center;font-weight:600;color:var(--text-muted);}
 .price-table td.price{text-align:right;font-weight:700;color:var(--primary);white-space:nowrap;}
+.price-table td.time-cell{text-align:right;font-size:0.82rem;font-weight:600;color:var(--accent);white-space:nowrap;padding-right:30px;}
 .price-table tbody tr:hover{background:var(--primary-light);}
 .price-table tbody tr:last-child td{border-bottom:none;}
 .hidden-row{display:none;}
@@ -54,17 +56,32 @@
 .booking-note{background:rgba(255,255,255,0.12);border-left:3px solid rgba(255,255,255,0.4);padding:14px 16px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:0.82rem;color:rgba(255,255,255,0.8);line-height:1.6;}
 .booking-form{background:var(--bg-white);border:1.5px solid var(--border-light);border-radius:var(--radius-md);padding:36px 32px;}
 
+/* SERVICE ADD ROW */
+.service-add-row{display:flex;gap:8px;align-items:center;}
+.btn-add-svc{padding:11px 20px;font-size:0.85rem;white-space:nowrap;}
+
+/* SELECTED SERVICES LIST */
+.selected-services-list{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+.selected-service-item{display:flex;align-items:center;padding:12px 16px;background:var(--bg-white);border-radius:var(--radius-sm);border:1.5px solid var(--primary-light);transition:all 0.2s ease;}
+.selected-service-item:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(0,86,179,0.08);}
+.selected-service-item .svc-info{flex:1;min-width:0;}
+.selected-service-item .svc-name{font-weight:600;color:var(--text-dark);font-size:0.9rem;margin-bottom:2px;}
+.selected-service-item .svc-detail{font-size:0.78rem;color:var(--accent);font-weight:500;}
+.selected-service-item .svc-price{font-weight:700;color:var(--primary);white-space:nowrap;margin:0 16px;font-size:0.95rem;}
+.selected-service-item .svc-remove{width:28px;height:28px;display:flex;align-items:center;justify-content:center;background:none;border:1.5px solid #f8d7da;color:#e74c3c;cursor:pointer;font-size:0.85rem;border-radius:50%;transition:all 0.2s;flex-shrink:0;}
+.selected-service-item .svc-remove:hover{background:#e74c3c;color:white;border-color:#e74c3c;}
+
+/* PRICE DISPLAY */
+.price-display{margin-top:8px;padding:10px 14px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:0.88rem;color:var(--accent-dark);}
+.price-display strong{color:var(--accent);font-size:1.1rem;}
+
 /* TIME GRID */
 .time-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
 .time-slot{padding:10px 8px;text-align:center;font-size:0.85rem;font-weight:600;color:var(--text-body);background:var(--bg-light);border:1.5px solid var(--border-light);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.2s ease;font-family:var(--font-body);}
 .time-slot:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-light);}
 .time-slot.selected{background:var(--primary);color:white;border-color:var(--primary);}
 
-/* PRICE DISPLAY */
-.price-display{margin-top:8px;padding:10px 14px;background:var(--accent-light);border-radius:var(--radius-sm);font-size:0.88rem;color:var(--accent-dark);}
-.price-display strong{color:var(--accent);font-size:1.1rem;}
-
 /* RESPONSIVE */
 @media(max-width:992px){.doctors-grid{grid-template-columns:repeat(2,1fr);}.booking-wrapper{grid-template-columns:1fr;}.page-hero{height:260px;}.page-hero-content h1{font-size:1.8rem;}}
-@media(max-width:768px){.page-hero{height:220px;}.page-hero-content h1{font-size:1.5rem;}.doctors-grid{grid-template-columns:1fr;max-width:400px;margin:0 auto;}.time-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:768px){.page-hero{height:220px;}.page-hero-content h1{font-size:1.5rem;}.doctors-grid{grid-template-columns:1fr;max-width:400px;margin:0 auto;}.time-grid{grid-template-columns:repeat(3,1fr);}.service-add-row{flex-direction:column;}.service-add-row .btn-add-svc{width:100%;}}
 @media(max-width:480px){.price-table{font-size:0.82rem;}.price-table th,.price-table td{padding:10px 12px;}.booking-form{padding:24px 20px;}.booking-info{padding:24px 20px;}.page-hero{height:180px;}.time-grid{grid-template-columns:repeat(2,1fr);}}
