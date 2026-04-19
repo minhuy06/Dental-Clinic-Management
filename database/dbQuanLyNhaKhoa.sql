@@ -940,3 +940,17 @@ ALTER TABLE DichVu ALTER COLUMN ChuyenKhoa_ID INT NOT NULL;
 ALTER TABLE DichVu
 ADD CONSTRAINT FK_DichVu_ChuyenKhoa 
 FOREIGN KEY (ChuyenKhoa_ID) REFERENCES ChuyenKhoa(ChuyenKhoa_ID)
+
+-- Xóa NhomMau ở bảng BenhNhan
+alter table BenhNhan
+    drop Constraint CK_BenhNhan_NhomMau
+alter table BenhNhan
+    drop column NhomMau
+-- Thêm TienSuBenh
+ALTER TABLE BenhNhan 
+    ADD TienSuBenh NVARCHAR(MAX);
+go
+UPDATE BenhNhan
+SET TienSuBenh = N'Chưa ghi nhận'
+WHERE TienSuBenh IS NULL;
+GO

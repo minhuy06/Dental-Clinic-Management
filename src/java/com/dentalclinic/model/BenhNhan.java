@@ -5,9 +5,7 @@ public class BenhNhan {
     private int benhNhanID;     // Khớp cột BenhNhan_ID
     private int taiKhoanID;     // Khớp cột TaiKhoan_ID (Khóa ngoại)
     private String nhomMau;     // Khớp cột NhomMau
-    
-    // Nếu chốt thêm vào DB thì mở comment dòng dưới:
-    // private String tienSuBenh; 
+    private String tienSuBenh; 
 
     // Đối tượng quan hệ (Dùng để hứng dữ liệu chứa Tên, Tuổi, Giới tính khi JOIN)
     private TaiKhoan taiKhoan;
@@ -36,4 +34,7 @@ public class BenhNhan {
     
     public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
     public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
+    
+    public String getTienSuBenh() { return tienSuBenh; }
+    public void setTienSuBenh(String tienSuBenh) { this.tienSuBenh = tienSuBenh; }
 }
