@@ -1,39 +1,59 @@
 package com.dentalclinic.model;
 
+import java.util.List;
+
 public class DichVu {
     private int dichVuID;
     private String tenDichVu;
     private double giaTien;
+    private String thoiLuongDuKien;
+    private int chuyenKhoaID;  // FK -> ChuyenKhoa
+
+    // Đối tượng quan hệ
+    private ChuyenKhoa chuyenKhoa;
+    private List<PhongKhamDichVu> danhSachPhongKham;
+
+    private List<LichHen> danhSachLichHen;
+    private List<ChiTietDichVu> danhSachChiTietDichVu;
 
     public DichVu() {}
 
-    public DichVu(int dichVuID, String tenDichVu, double giaTien) {
+    public DichVu(int dichVuID, String tenDichVu, double giaTien, 
+                  String thoiLuongDuKien, int chuyenKhoaID) {
         this.dichVuID = dichVuID;
         this.tenDichVu = tenDichVu;
         this.giaTien = giaTien;
+        this.thoiLuongDuKien = thoiLuongDuKien;
+        this.chuyenKhoaID = chuyenKhoaID;
     }
 
-    public int getDichVuID() {
-        return dichVuID;
+    public int getDichVuID() { return dichVuID; }
+    public void setDichVuID(int dichVuID) { this.dichVuID = dichVuID; }
+
+    public String getTenDichVu() { return tenDichVu; }
+    public void setTenDichVu(String tenDichVu) { this.tenDichVu = tenDichVu; }
+
+    public double getGiaTien() { return giaTien; }
+    public void setGiaTien(double giaTien) { this.giaTien = giaTien; }
+
+    public String getThoiLuongDuKien() { return thoiLuongDuKien; }
+    public void setThoiLuongDuKien(String thoiLuongDuKien) { 
+        this.thoiLuongDuKien = thoiLuongDuKien; 
     }
 
-    public void setDichVuID(int dichVuID) {
-        this.dichVuID = dichVuID;
-    }
+    public int getChuyenKhoaID() { return chuyenKhoaID; }
+    public void setChuyenKhoaID(int chuyenKhoaID) { this.chuyenKhoaID = chuyenKhoaID; }
 
-    public String getTenDichVu() {
-        return tenDichVu;
-    }
+    public ChuyenKhoa getChuyenKhoa() { return chuyenKhoa; }
+    public void setChuyenKhoa(ChuyenKhoa chuyenKhoa) { this.chuyenKhoa = chuyenKhoa; }
 
-    public void setTenDichVu(String tenDichVu) {
-        this.tenDichVu = tenDichVu;
+    public List<PhongKhamDichVu> getDanhSachPhongKham() { return danhSachPhongKham; }
+    public void setDanhSachPhongKham(List<PhongKhamDichVu> danhSachPhongKham) { 
+        this.danhSachPhongKham = danhSachPhongKham; 
     }
+    public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
+    public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
 
-    public double getGiaTien() {
-        return giaTien;
-    }
-
-    public void setGiaTien(double giaTien) {
-        this.giaTien = giaTien;
-    }
+    public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
+    public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }
 }
