@@ -1,0 +1,116 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this template
+*/
+/* 
+    Created on : Apr 21, 2026, 5:44:08 AM
+    Author     : kinhm
+*/
+:root {
+    --neon-blue: #00d4ff;
+    --neon-orange: #ff8c00;
+    --bg-dark: #1a1a2e;
+}
+
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--bg-dark);
+    font-family: 'Inter', sans-serif;
+    color: white;
+    overflow: hidden;
+}
+
+.error-container { text-align: center; }
+
+.gear-wrapper {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+/* Hiệu ứng xoay bánh răng */
+.gear {
+    position: absolute;
+    color: #444;
+    animation: rotate 10s linear infinite;
+}
+
+.gear.one { font-size: 150px; top: 0; left: 0; }
+.gear.two { font-size: 100px; bottom: 20px; right: 0; animation-direction: reverse; color: #555; }
+.gear.three { font-size: 80px; top: 50px; right: 30px; color: #333; }
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Chú robot đang sửa chữa */
+.robot-repair {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 80px;
+    color: var(--neon-blue);
+    z-index: 2;
+    filter: drop-shadow(0 0 10px var(--neon-blue));
+    animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translate(-50%, -52%); }
+    50% { transform: translate(-50%, -48%); }
+}
+
+/* Tia lửa hàn điện */
+.spark {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    top: 60px;
+    right: 0;
+    box-shadow: 0 0 10px var(--neon-orange), 0 0 20px var(--neon-orange);
+    display: none;
+}
+
+.error-code {
+    position: absolute;
+    font-size: 80px;
+    font-weight: 900;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+    letter-spacing: 10px;
+    background: linear-gradient(to right, var(--neon-blue), var(--neon-orange));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.3;
+}
+
+.error-message h2 { margin-top: 40px; letter-spacing: 5px; color: var(--neon-orange); }
+.error-message p { opacity: 0.7; margin-bottom: 30px; }
+
+.btn-home {
+    display: inline-block;
+    padding: 12px 30px;
+    border: 2px solid var(--neon-blue);
+    color: var(--neon-blue);
+    text-decoration: none;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-home:hover {
+    background: var(--neon-blue);
+    color: var(--bg-dark);
+    box-shadow: 0 0 20px var(--neon-blue);
+}

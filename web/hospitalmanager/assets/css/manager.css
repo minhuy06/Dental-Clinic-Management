@@ -1,0 +1,70 @@
+/*
+Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+Click nbfs://nbhost/SystemFileSystem/Templates/ClientSide/css.css to edit this template
+*/
+/* 
+    Created on : Apr 21, 2026, 2:11:31 AM
+    Author     : kinhm
+*/
+:root {
+    --primary-color: #0d6efd;
+    --sidebar-bg: #ffffff;
+    --bg-color: #f4f7f6;
+    --text-color: #333333;
+    --hover-bg: #e9ecef;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+body { background-color: var(--bg-color); color: var(--text-color); }
+
+.wrapper { display: flex; height: 100vh; overflow: hidden; }
+
+/* --- SIDEBAR --- */
+.sidebar { width: 260px; background: var(--sidebar-bg); border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+.sidebar-header { padding: 20px; border-bottom: 1px solid #eee; }
+.user-profile { display: flex; align-items: center; gap: 15px; }
+.avatar { width: 45px; height: 45px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; }
+.user-details h4 { font-size: 16px; margin-bottom: 3px; }
+.user-details span { font-size: 12px; color: #777; }
+
+/* --- MENU LINKS --- */
+.nav-links { list-style: none; padding: 15px 0; flex: 1; overflow-y: auto; }
+.nav-links li a { display: flex; align-items: center; padding: 12px 20px; color: #555; text-decoration: none; transition: 0.3s; }
+.nav-links li a i { width: 25px; font-size: 18px; }
+.nav-links li a:hover, .nav-links li a.active { background: var(--hover-bg); color: var(--primary-color); border-right: 4px solid var(--primary-color); }
+
+/* --- DROPDOWN --- */
+.submenu { display: none; list-style: none; background: #fafafa; }
+.submenu li a { padding: 10px 20px 10px 50px; font-size: 14px; }
+.dropdown-menu.open .submenu { display: block; }
+.dropdown-menu.open .caret { transform: rotate(180deg); transition: 0.3s; }
+.caret { margin-left: auto; font-size: 12px !important; }
+
+/* --- FOOTER ĐĂNG XUẤT --- */
+.sidebar-footer { padding: 15px 20px; border-top: 1px solid #eee; }
+.logout-btn { color: #dc3545 !important; font-weight: 500; text-decoration: none; display: flex; gap: 10px; }
+
+/* --- MAIN PANEL --- */
+.main-panel { flex: 1; display: flex; flex-direction: column; }
+.topbar { height: 60px; background: white; border-bottom: 1px solid #ddd; display: flex; align-items: center; justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.content-area { padding: 30px; overflow-y: auto; flex: 1; }
+
+/* Hiệu ứng khi di chuột vào phần Profile */
+.user-profile.nav-item:hover {
+    background-color: #f0f4f8; /* Màu nền nhạt khi hover */
+    transform: translateY(-2px); /* Nhích nhẹ lên trên */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.user-profile.nav-item:active {
+    transform: translateY(0); /* Nhấn xuống khi click */
+    background-color: #e2e8f0;
+}
+
+.user-profile .avatar {
+    transition: transform 0.3s ease;
+}
+
+.user-profile:hover .avatar {
+    transform: scale(1.1); /* Avatar to lên một xíu cho sinh động */
+}

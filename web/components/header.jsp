@@ -20,7 +20,7 @@
                 boolean isDatLich = currentPage.contains("dat-lich");
                 boolean isHoSo = currentPage.contains("hoso");
             %>
-            <a href="${pageContext.request.contextPath}/index.jsp"
+            <a href="${pageContext.request.contextPath}/trangchu/trang-chu"
                 accesskey=""class="<%= isIndex ? "active" : "" %>">Trang chủ</a>
             <a href="${pageContext.request.contextPath}/dat-lich.jsp#datlich"
                 class="<%= isDatLich ? "active" : "" %>" data-section="datlich">Đặt lịch</a>

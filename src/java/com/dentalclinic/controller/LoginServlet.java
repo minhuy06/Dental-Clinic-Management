@@ -39,7 +39,7 @@ public class LoginServlet extends HttpServlet {
             }
             else if("Quản trị viên".equalsIgnoreCase(accountLogin.getVaiTro()))
             {
-                res.sendRedirect(req.getContextPath() + "/admin/create-staff.jsp");
+                res.sendRedirect(req.getContextPath() + "/hospitalmanager/index.jsp");
             } 
             else if("Lễ tân".equalsIgnoreCase(accountLogin.getVaiTro())) {
                 res.sendRedirect(req.getContextPath() + "/reception/index.jsp");

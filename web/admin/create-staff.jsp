@@ -13,5 +13,6 @@
     </head>
     <body>
         <h1>Hello: ${accountLogan.hoTen}</h1>
+        <a href="../hospitalmanager/index.jsp">Trang quản lý bệnh viện</a>
     </body>
 </html>

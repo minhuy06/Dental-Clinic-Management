@@ -11,29 +11,7 @@
 </head>
 <body>
     <!-- ==================== HEADER MÀU XANH ==================== -->
-    <div class="header">
-        <div class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-tooth"></i>
-            </div>
-            <div class="logo-text">
-                <h1>NHA KHOA 5AE</h1>
-                <p>HỆ THỐNG QUẢN LÝ LỊCH HẸN</p>
-            </div>
-        </div>
-        <ul class="nav-menu">
-            <li><a href="index.jsp" class="active">Lịch hẹn</a></li>
-            <li><a href="benhnhan.jsp">Bệnh nhân</a></li>
-            <li><a href="baocao.jsp">Báo cáo</a></li>
-            <li><a href="cskh.jsp">CSKH</a></li>
-        </ul>
-        <div class="user-info">
-            <i class="fas fa-bell" style="color: #bfdbfe; cursor: pointer;"></i>
-            <div class="avatar">
-                <i class="fas fa-user" style="color: white;"></i>
-            </div>
-        </div>
-    </div>
+    <jsp:include page="components/header.jsp"/>
 
     <div class="container">
         <!-- ==================== STATS CARDS ==================== -->
@@ -230,6 +208,7 @@
         <p style="font-size: 12px; margin-top: 5px;">© 2024 Nha Khoa 5AE - Hệ thống quản lý lịch hẹn chuyên nghiệp</p>
     </div>
 
-    <script src="${pageContext.request.contextPath}/js/lichhen.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/lichhen.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/dynamicStyle.js"></script>
 </body>
 </html>

@@ -42,13 +42,8 @@ public class AuthorizationFilter implements Filter{
             chain.doFilter(request, response);
             return;
         }
-        // Sử dụng key "accountLogan" như code Servlet lúc nãy của bro nhé
-        TaiKhoan account = (session != null) ? (TaiKhoan) session.getAttribute("accountLogan") : null;
-        System.out.println("--- FILTER DEBUG ---");
-        System.out.println("Path dang vao: " + path);
-        System.out.println("Session ton tai: " + (session != null));
-        System.out.println("User trong session: " + (account != null));
         
+        TaiKhoan account = (session != null) ? (TaiKhoan) session.getAttribute("accountLogan") : null;
         
         //Ngăn truy cập các dịch vụ bắt buộc đăng nhập
         if (account == null) {
@@ -59,11 +54,11 @@ public class AuthorizationFilter implements Filter{
         String vaiTro = account.getVaiTro().toUpperCase();
 
         // Ví dụ: Chỉ ADMIN mới được vào các trang bắt đầu bằng /admin/
-        if (path.startsWith("/admin/")) {
+        if (path.startsWith("/admin/") || path.startsWith("/hospitalmanager/")) {
             if ("Quản trị viên".equalsIgnoreCase(vaiTro)) {
                 chain.doFilter(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/error/error.jsp");
             }
             return;
         }
@@ -73,7 +68,7 @@ public class AuthorizationFilter implements Filter{
             if ("Bác sĩ".equalsIgnoreCase(vaiTro) || "Quản trị viên".equals(vaiTro)) {
                 chain.doFilter(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/error/error.jsp");
             }
             return;
         }
@@ -82,16 +77,18 @@ public class AuthorizationFilter implements Filter{
             if ("Lễ tân".equalsIgnoreCase(vaiTro)){
                 chain.doFilter(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/error/error.jsp");
             }
+            return;
         }
         //Phân quyền cho bệnh nhân
         if(path.startsWith("/patient/") || path.equals("/index.jsp") || path.equals("/dat-lich.jsp")){
             if("Bệnh nhân".equalsIgnoreCase(vaiTro)){
                 chain.doFilter(request, response);
             } else {
-                response.sendRedirect(request.getContextPath() + "/index.jsp");
+                response.sendRedirect(request.getContextPath() + "/error/error.jsp");
             }
+            return;
         } 
         chain.doFilter(request, response);
         
