@@ -1,9 +1,10 @@
 <%-- components/header.jsp - final version --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page import="com.dentalclinic.model.TaiKhoan" %>
 <%
     String currentPage = request.getRequestURI();
     // Demo: kiem tra dang nhap tu session
-    String loggedInUser = (String) session.getAttribute("loggedInUser");
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("accountLogan");
 %>
 
 <header class="header" id="header">
@@ -31,7 +32,7 @@
             <div class="nav-mobile-actions">
                 <% if (loggedInUser != null) { %>
                     <a href="${pageContext.request.contextPath}/patient/hoso.jsp" class="btn btn-primary" style="width:100%;">
-                        👤 <%= loggedInUser %>
+                        👤 <%= loggedInUser.getHoTen() + "(" +loggedInUser.getVaiTro() + ")" %>
                     </a>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
@@ -44,7 +45,7 @@
                 <div class="user-dropdown-wrapper">
                     <div class="user-avatar-btn" onclick="toggleUserDropdown()">
                         <div class="user-avatar-circle">👤</div>
-                        <span class="user-avatar-name"><%= loggedInUser %></span>
+                        <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
                         <span class="user-arrow">▼</span>
                     </div>
                     <div class="user-dropdown" id="userDropdown">

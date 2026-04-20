@@ -38,7 +38,9 @@
                 </div>
 
                 <form class="auth-form" id="loginForm" onsubmit="return handleLogin(event)">
-
+                    <!-- Thẻ báo lỗi đăng nhập -->
+                    <div id="message" style="color: #dc3545; text-align: center; margin-bottom: 15px; font-weight: 500; min-height: 20px;">
+                    </div>
                     <!-- So dien thoai -->
                     <div class="form-group" id="phoneGroup">
                         <label>Số điện thoại <span class="required">*</span></label>
@@ -142,12 +144,52 @@
                 passwordGroup.classList.remove('error');
             }
 
+            // NẾU DỮ LIỆU HỢP LỆ -> TIẾN HÀNH GỌI FETCH
             if (isValid) {
-                // Gui form den backend (Servlet)
-                // Hien tai chua co backend nen chi thong bao
-                // Demo: luu ten vao session thong qua URL (backend se xu ly thuc te)
-                window.location.href = '${pageContext.request.contextPath}/index.jsp?loginSuccess=true&phone=' + encodeURIComponent(phone);
-                // Khi co backend, dung: document.getElementById('loginForm').submit();
+                // 1. Đóng gói dữ liệu giống y hệt form submit truyền thống
+                const params = new URLSearchParams();
+                params.append('userPhone', phone);
+                params.append('userPassword', password);
+
+                // 2. Gửi request sang Servlet có url mapping là /login
+                fetch('login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                })
+                .then(response => {
+                    // 3. THÀNH CÔNG: Servlet chạy res.sendRedirect() thì response.redirected sẽ là true
+                    if (response.redirected) {
+                        window.location.href = response.url; 
+                        return; // Ngừng chạy tiếp đoạn dưới
+                    }
+                    // 4. THẤT BẠI: Nếu không redirect, lấy text (chữ ERROR) Servlet trả về
+                    return response.text(); 
+                })
+                .then(text => {
+                    // 5. Cập nhật giao diện báo lỗi mà không cần F5 load lại trang
+                    if (text === "ERROR") {
+                        let msgDiv = document.getElementById('message');
+                        if (msgDiv) {
+                            msgDiv.innerText = "Tài khoản hoặc mật khẩu không đúng!";
+                            msgDiv.style.color = "red";
+                        } else {
+                            // Backup đề phòng nhóm trưởng quên tạo thẻ div
+                            alert("Tài khoản hoặc mật khẩu không đúng!"); 
+                        }
+                    }
+                })
+                .catch(error => {
+                    // 6. Rớt mạng hoặc Tomcat sập
+                    console.error('Fetch error:', error);
+                    let msgDiv = document.getElementById('message');
+                    if (msgDiv) {
+                        msgDiv.innerText = "Lỗi kết nối máy chủ!";
+                        msgDiv.style.color = "red";
+                    }
+                });
             }
 
             return false;

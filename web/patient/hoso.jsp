@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/hoso.css">
 </head>
 <body>
-    <jsp:include page="../components/header.jsp" />
+    <jsp:include page="../components/header.jsp"/>
     <main class="profile-page">
         <div class="container">
             <div class="profile-layout">
@@ -21,8 +21,8 @@
                 <div class="profile-sidebar">
                     <div class="sidebar-header">
                         <div class="sidebar-avatar">👤</div>
-                        <h3>Nguyễn Văn An</h3>
-                        <p>0901000001</p>
+                        <h3>${accounLogan.hoTen}</h3>
+                        <p>${acountLogan.soDienThoai}</p>
                     </div>
                     <div class="sidebar-menu">
                         <div class="sidebar-menu-item <%= "info".equals(activeTab) ? "active" : "" %>" onclick="switchTab('info', this)"><span class="menu-icon">📋</span> Thông tin cá nhân</div>
@@ -38,12 +38,12 @@
                         <div class="profile-content-header"><h2>Thông tin cá nhân</h2><p>Xem và cập nhật thông tin của bạn</p></div>
                         <form class="info-form" id="infoForm" onsubmit="return saveInfo(event)">
                             <div class="form-row">
-                                <div class="form-group"><label>Họ và tên <span style="color:#e74c3c">*</span></label><input type="text" class="form-control" id="infoName" value="Nguyễn Văn An"></div>
-                                <div class="form-group"><label>Số điện thoại</label><input type="text" class="form-control" value="0901000001" disabled></div>
+                                <div class="form-group"><label>Họ và tên <span style="color:#e74c3c">*</span></label><input type="text" class="form-control" id="infoName" value="${accountLogan.hoTen}"></div>
+                                <div class="form-group"><label>Số điện thoại</label><input type="text" class="form-control" value="${accountLogan.soDienThoai}" disabled></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label>Email</label><input type="email" class="form-control" id="infoEmail" value="nguyenvanan@gmail.com"></div>
-                                <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="infoDob" value="1990-05-15"></div>
+                                <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="infoDob" value="${accountLogan.ngaySinh}"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label>Giới tính</label><select class="form-control" id="infoGender"><option value="1" selected>Nam</option><option value="0">Nữ</option></select></div>
