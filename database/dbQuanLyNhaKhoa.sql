@@ -954,3 +954,10 @@ UPDATE BenhNhan
 SET TienSuBenh = N'Chưa ghi nhận'
 WHERE TienSuBenh IS NULL;
 GO
+
+-- Thêm bảng DanhMuc
+create table DanhMuc(
+    MaDanhMuc int identity(1,1),
+    TenDanhMuc nvarchar(100) not null
+);
+go
