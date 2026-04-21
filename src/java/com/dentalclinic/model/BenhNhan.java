@@ -1,11 +1,10 @@
 package com.dentalclinic.model;
 
 import java.util.List;
+
 public class BenhNhan {
     private int benhNhanID;     // Khớp cột BenhNhan_ID
     private int taiKhoanID;     // Khớp cột TaiKhoan_ID (Khóa ngoại)
-    private String nhomMau;     // Khớp cột NhomMau
-    private String tienSuBenh; 
 
     // Đối tượng quan hệ (Dùng để hứng dữ liệu chứa Tên, Tuổi, Giới tính khi JOIN)
     private TaiKhoan taiKhoan;
@@ -13,10 +12,9 @@ public class BenhNhan {
 
     public BenhNhan() {}
 
-    public BenhNhan(int benhNhanID, int taiKhoanID, String nhomMau) {
+    public BenhNhan(int benhNhanID, int taiKhoanID) {
         this.benhNhanID = benhNhanID;
         this.taiKhoanID = taiKhoanID;
-        this.nhomMau = nhomMau;
     }
 
     // --- Getters và Setters ---
@@ -26,15 +24,9 @@ public class BenhNhan {
     public int getTaiKhoanID() { return taiKhoanID; }
     public void setTaiKhoanID(int taiKhoanID) { this.taiKhoanID = taiKhoanID; }
 
-    public String getNhomMau() { return nhomMau; }
-    public void setNhomMau(String nhomMau) { this.nhomMau = nhomMau; }
-
     public TaiKhoan getTaiKhoan() { return taiKhoan; }
     public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
     
     public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
     public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
-    
-    public String getTienSuBenh() { return tienSuBenh; }
-    public void setTienSuBenh(String tienSuBenh) { this.tienSuBenh = tienSuBenh; }
 }

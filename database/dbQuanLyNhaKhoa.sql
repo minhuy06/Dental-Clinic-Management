@@ -1054,3 +1054,45 @@ alter table TinNhan
 drop table TinNhan
 go
 
+-- TẠO BẢNG HoSo
+CREATE TABLE HoSo (
+    HoSo_ID     INT IDENTITY(1,1) PRIMARY KEY,
+    BenhNhan_ID INT NOT NULL UNIQUE,
+    DiaChi      NVARCHAR(255),
+    DiUngThuoc  NVARCHAR(500),
+    TienSuBenh  NVARCHAR(500),
+    TrangThai   NVARCHAR(50) NOT NULL DEFAULT N'Đang điều trị',
+    NgayDangKy  DATE NOT NULL DEFAULT GETDATE(),
+    GhiChu      NVARCHAR(1000),
+
+    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID)
+);
+go
+
+-- CHUYỂN TienSuBenh TỪ BenhNhan SANG HoSo
+INSERT INTO HoSo (BenhNhan_ID, TienSuBenh, NgayDangKy)
+SELECT BenhNhan_ID, TienSuBenh, GETDATE()
+FROM BenhNhan;
+
+-- Xóa cột TienSuBenh khỏi BenhNhan sau khi đã chuyển xong
+ALTER TABLE BenhNhan DROP COLUMN TienSuBenh;
+
+-- 3. INSERT 20 DÒNG DỮ LIỆU MẪU
+UPDATE TOP (20) HoSo
+SET 
+    DiaChi = CASE (HoSo_ID % 5)
+        WHEN 0 THEN N'123 Lê Duẩn, Đà Nẵng'
+        WHEN 1 THEN N'456 Nguyễn Văn Linh, Đà Nẵng'
+        WHEN 2 THEN N'78 đường 2/9, Đà Nẵng'
+        WHEN 3 THEN N'12 Quang Trung, Đà Nẵng'
+        ELSE N'99 Điện Biên Phủ, Đà Nẵng' END,
+    DiUngThuoc = CASE (HoSo_ID % 4)
+        WHEN 0 THEN N'Không'
+        WHEN 1 THEN N'Dị ứng Penicillin'
+        WHEN 2 THEN N'Dị ứng thuốc tê'
+        ELSE N'Dị ứng Aspirin' END,
+    TrangThai = CASE (HoSo_ID % 3)
+        WHEN 0 THEN N'Đang điều trị'
+        WHEN 1 THEN N'Đã hoàn thành'
+        ELSE N'Tạm dừng' END,
+    GhiChu = N'Dữ liệu mẫu hệ thống';
