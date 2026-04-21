@@ -13,7 +13,7 @@ public class DichVu {
     private ChuyenKhoa chuyenKhoa;
     private List<PhongKhamDichVu> danhSachPhongKham;
 
-    private List<LichHen> danhSachLichHen;
+    private List<ChiTietLichHen> lichSuDatDichVu;
     private List<ChiTietDichVu> danhSachChiTietDichVu;
 
     public DichVu() {}
@@ -51,8 +51,13 @@ public class DichVu {
     public void setDanhSachPhongKham(List<PhongKhamDichVu> danhSachPhongKham) { 
         this.danhSachPhongKham = danhSachPhongKham; 
     }
-    public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
-    public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
+    public List<ChiTietLichHen> getLichSuDatDichVu() {
+        return lichSuDatDichVu;
+    }
+
+    public void setLichSuDatDichVu(List<ChiTietLichHen> lichSuDatDichVu) {
+        this.lichSuDatDichVu = lichSuDatDichVu;
+    }
 
     public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
     public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }

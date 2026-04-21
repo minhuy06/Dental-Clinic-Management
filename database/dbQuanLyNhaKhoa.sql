@@ -833,43 +833,40 @@ alter table BacSi
 -- Thêm dữ liệu
 INSERT INTO ChuyenKhoa (TenChuyenKhoa) 
 VALUES
-(N'Tổng quát'),
+(N'Nha khoa tổng quát'),
 (N'Chỉnh nha'),
-(N'Phục hình răng'),
-(N'Thẩm mỹ'),
-(N'Phẫu thuật miệng'),
-(N'Nhổ răng');
+(N'Nha khoa thẩm mỹ'),
+(N'Phẫu thuật & Implant'),
+(N'Nha khoa Trẻ em');
 
-INSERT INTO BacSi_ChuyenKhoa (BacSi_ID, ChuyenKhoa_ID) 
-VALUES
-(1, 1),  -- Bác sĩ 1: Tổng quát
-(2, 2),  -- Bác sĩ 2: Chỉnh nha
-(3, 3),  -- Bác sĩ 3: Phục hình răng
-(4, 4),  -- Bác sĩ 4: Thẩm mỹ
-(5, 5),  -- Bác sĩ 5: Phẫu thuật miệng
-(6, 6),  -- Bác sĩ 6: Nhổ răng
+INSERT INTO BacSi_ChuyenKhoa (BacSi_ID, ChuyenKhoa_ID)
+VALUES 
+-- 1. Nhóm Bác sĩ Tổng quát (ID Chuyên khoa = 1)
+(1, 1), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 1),
 
-(7, 1),  -- Bác sĩ 7: Tổng quát
-(8, 2),  -- Bác sĩ 8: Chỉnh nha
-(9, 3),  -- Bác sĩ 9: Phục hình răng
-(10, 4), -- Bác sĩ 10: Thẩm mỹ
-(11, 5), -- Bác sĩ 11: Phẫu thuật miệng
-(12, 6), -- Bác sĩ 12: Nhổ răng
+-- 2. Nhóm Bác sĩ Chỉnh nha - Niềng răng (ID Chuyên khoa = 2)
+(8, 2), (9, 2), (10, 2), (11, 2),
 
-(13, 1), -- Bác sĩ 13: Tổng quát
-(14, 2), -- Bác sĩ 14: Chỉnh nha
-(15, 3), -- Bác sĩ 15: Phục hình răng
-(16, 4), -- Bác sĩ 16: Thẩm mỹ
-(17, 5), -- Bác sĩ 17: Phẫu thuật miệng
-(18, 6), -- Bác sĩ 18: Nhổ răng
+-- 3. Nhóm Bác sĩ Thẩm mỹ - Bọc sứ (ID Chuyên khoa = 3)
+(12, 3), (13, 3), (14, 3), (15, 3),
 
-(19, 1), -- Bác sĩ 19: Tổng quát
-(20, 2), -- Bác sĩ 20: Chỉnh nha
+-- 4. Nhóm Bác sĩ Phẫu thuật & Implant (ID Chuyên khoa = 4)
+(16, 4), (17, 4), (18, 4),
 
-(1, 6),  -- Bác sĩ 1 (Tổng quát) nay có thể làm thêm (Nhổ răng)
-(2, 4),  -- Bác sĩ 2 (Chỉnh nha) nay có thể làm thêm (Thẩm mỹ)
-(5, 6),  -- Bác sĩ 5 (Phẫu thuật miệng) đương nhiên làm được (Nhổ răng)
-(11, 6); -- Bác sĩ 11 (Phẫu thuật miệng) cũng làm được (Nhổ răng)
+-- 5. Nhóm Bác sĩ Trẻ em (ID Chuyên khoa = 5)
+(19, 5), (20, 5),
+
+-- CÁC BÁC SĨ ĐA NĂNG (KIÊM NHIỆM 2 CHUYÊN KHOA)
+-- Đây là lý do chúng ta cần bảng trung gian này!
+
+-- Bác sĩ 1: Vừa làm Tổng quát, vừa khám Trẻ em
+(1, 5),  
+
+-- Bác sĩ 12: Tay nghề cao, vừa làm Thẩm mỹ, vừa khám Tổng quát
+(12, 1), 
+
+-- Bác sĩ 16: Trưởng khoa, vừa Cắm Implant, vừa làm Thẩm mỹ
+(16, 3);
 
 -- Tạo bảng PhongKham_DichVu xử lý quan hệ n-n
 CREATE TABLE PhongKham_DichVu (
@@ -921,18 +918,16 @@ ALTER TABLE DichVu ADD ChuyenKhoa_ID INT;
 go
 UPDATE DichVu
 SET ChuyenKhoa_ID = CASE 
-    -- 1: Tổng quát (Khám, Cạo vôi, Trám, Viêm nha chu, Lấy tủy)
+    -- 1: Nha khoa tổng quát (Khám, Cạo vôi, Trám, Viêm nha chu, Lấy tủy)
     WHEN DichVu_ID IN (1, 2, 3, 9, 10, 20) THEN 1 
-    -- 2: Chỉnh nha (Các loại Niềng răng)
+    -- 2: Chỉnh nha (Niềng răng)
     WHEN DichVu_ID IN (17, 18, 19) THEN 2
-    -- 3: Phục hình răng (Bọc răng sứ Titanium, Cercon, Zirconia)
-    WHEN DichVu_ID IN (11, 12, 13) THEN 3
-    -- 4: Thẩm mỹ (Tẩy trắng, Dán sứ Veneer)
-    WHEN DichVu_ID IN (7, 8, 14) THEN 4
-    -- 5: Phẫu thuật miệng (Cấy ghép Implant)
-    WHEN DichVu_ID IN (15, 16) THEN 5
-    -- 6: Nhổ răng (Nhổ răng sữa, Nhổ răng khôn)
-    WHEN DichVu_ID IN (4, 5, 6) THEN 6
+    -- 3: Nha khoa thẩm mỹ (Bọc sứ, Tẩy trắng, Dán sứ)
+    WHEN DichVu_ID IN (7, 8, 11, 12, 13, 14) THEN 3
+    -- 4: Phẫu thuật & Implant (Cắm Implant, Nhổ răng khôn)
+    WHEN DichVu_ID IN (5, 6, 15, 16) THEN 4
+    -- 5: Nha khoa Trẻ em (Nhổ răng sữa)
+    WHEN DichVu_ID IN (4) THEN 5
 END;
 
 ALTER TABLE DichVu ALTER COLUMN ChuyenKhoa_ID INT NOT NULL;
@@ -954,3 +949,150 @@ UPDATE BenhNhan
 SET TienSuBenh = N'Chưa ghi nhận'
 WHERE TienSuBenh IS NULL;
 GO
+
+-- Xử lý khi đặt lịch chọn nhiều dịch vụ và số răng
+ALTER TABLE LichHen DROP CONSTRAINT FK_LichHen_DichVu;
+ALTER TABLE LichHen DROP COLUMN DichVu_ID;
+GO
+
+-- Thêm thuộc tính TinhTheoRang để nhận biết dịch vụ nào cần chọn số răng
+alter table DichVu
+    add TinhTheoRang bit
+go
+update DichVu
+    set TinhTheoRang = case
+        WHEN DichVu_ID IN (
+        3,  -- Trám răng Composite
+        4,  -- Nhổ răng sữa
+        5,  -- Nhổ răng khôn mọc thẳng
+        6,  -- Nhổ răng khôn mọc ngầm
+        9,  -- Lấy tủy răng cửa
+        10, -- Lấy tủy răng hàm
+        11, -- Bọc răng sứ Titan
+        12, -- Bọc răng sứ Cercon
+        13, -- Bọc răng sứ Zirconia
+        14, -- Mặt dán sứ Veneer
+        15, -- Cấy ghép Implant
+        16  -- Cấy ghép Implant Cao cấp
+    ) THEN 1
+
+    -- NHÓM 2: CÁC DỊCH VỤ TRỌN GÓI / TOÀN HÀM (Set = 0)
+    WHEN DichVu_ID IN (
+        1,  -- Khám tổng quát
+        2,  -- Cạo vôi răng
+        7,  -- Tẩy trắng răng Laser
+        8,  -- Tẩy trắng răng tại nhà
+        17, -- Niềng răng mắc cài kim loại
+        18, -- Niềng răng mắc cài sứ
+        19, -- Niềng răng Invisalign
+        20  -- Điều trị viêm nha chu
+    ) THEN 0
+END;
+alter table DichVu
+    alter column TinhTheoRang bit not null
+go
+
+-- Tạo bảng Chi Tiết Lịch Hẹn
+CREATE TABLE ChiTietLichHen (
+    ChiTietLichHen_ID INT IDENTITY(1,1) PRIMARY KEY,
+    LichHen_ID INT NOT NULL,
+    DichVu_ID INT NOT NULL,
+    
+    SoLuong INT DEFAULT 1,          -- Mặc định là 1, nếu bọc 3 răng sứ thì lưu số 3
+    
+    CONSTRAINT FK_CTLH_LichHen FOREIGN KEY (LichHen_ID) REFERENCES LichHen(LichHen_ID) ON DELETE CASCADE,
+    CONSTRAINT FK_CTLH_DichVu FOREIGN KEY (DichVu_ID) REFERENCES DichVu(DichVu_ID)
+);
+GO
+
+-- Thêm dữ liệu cho ChiTietLichHen
+INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID, SoLuong) VALUES
+(1, 1, 1),(1, 2, 1),(2, 1, 1),
+(2, 17, 1),(4, 7, 1),(7, 2, 1),
+(8, 1, 1),(9, 1, 1),(14, 1, 1),
+(19, 1, 1),(11, 1, 1),(11, 10, 1),
+(17, 20, 1),
+
+-- CÁC CA TIỂU PHẪU / TRÁM RĂNG (Số lượng 2 - 4)
+(5, 1, 1),
+(5, 6, 2), -- Số lượng: 2
+
+(6, 1, 1),
+(6, 4, 3), -- Số lượng: 3
+
+(12, 1, 1),
+(12, 5, 2), -- Số lượng: 2
+
+(13, 1, 1),
+(13, 3, 4), -- Số lượng: 4
+
+(15, 1, 1),
+(15, 15, 2), -- Số lượng: 2
+
+(18, 5, 1), -- Số lượng: 1
+(18, 6, 1), -- Số lượng: 1
+
+-- CÁC CA THẨM MỸ LỚN / VIP (Số lượng 6 - 16)
+(3, 1, 1),
+(3, 13, 6), -- Số lượng: 6
+
+(10, 1, 1),
+(10, 14, 8), -- Số lượng: 8 
+
+(16, 1, 1),
+(16, 14, 16), -- Số lượng: 16 
+
+(20, 7, 1),  -- Tẩy trắng (Số lượng: 1 vì là trọn gói)
+(20, 11, 4);
+GO
+
+-- Xóa bảng TinNhan
+alter table TinNhan
+    drop constraint FK_TinNhan_NguoiGui
+alter table TinNhan
+    drop constraint FK_TinNhan_NguoiNhan
+drop table TinNhan
+go
+
+-- TẠO BẢNG HoSo
+CREATE TABLE HoSo (
+    HoSo_ID     INT IDENTITY(1,1) PRIMARY KEY,
+    BenhNhan_ID INT NOT NULL UNIQUE,
+    DiaChi      NVARCHAR(255),
+    DiUngThuoc  NVARCHAR(500),
+    TienSuBenh  NVARCHAR(500),
+    TrangThai   NVARCHAR(50) NOT NULL DEFAULT N'Đang điều trị',
+    NgayDangKy  DATE NOT NULL DEFAULT GETDATE(),
+    GhiChu      NVARCHAR(1000),
+
+    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID)
+);
+go
+
+-- CHUYỂN TienSuBenh TỪ BenhNhan SANG HoSo
+INSERT INTO HoSo (BenhNhan_ID, TienSuBenh, NgayDangKy)
+SELECT BenhNhan_ID, TienSuBenh, GETDATE()
+FROM BenhNhan;
+
+-- Xóa cột TienSuBenh khỏi BenhNhan sau khi đã chuyển xong
+ALTER TABLE BenhNhan DROP COLUMN TienSuBenh;
+
+-- 3. INSERT 20 DÒNG DỮ LIỆU MẪU
+UPDATE TOP (20) HoSo
+SET 
+    DiaChi = CASE (HoSo_ID % 5)
+        WHEN 0 THEN N'123 Lê Duẩn, Đà Nẵng'
+        WHEN 1 THEN N'456 Nguyễn Văn Linh, Đà Nẵng'
+        WHEN 2 THEN N'78 đường 2/9, Đà Nẵng'
+        WHEN 3 THEN N'12 Quang Trung, Đà Nẵng'
+        ELSE N'99 Điện Biên Phủ, Đà Nẵng' END,
+    DiUngThuoc = CASE (HoSo_ID % 4)
+        WHEN 0 THEN N'Không'
+        WHEN 1 THEN N'Dị ứng Penicillin'
+        WHEN 2 THEN N'Dị ứng thuốc tê'
+        ELSE N'Dị ứng Aspirin' END,
+    TrangThai = CASE (HoSo_ID % 3)
+        WHEN 0 THEN N'Đang điều trị'
+        WHEN 1 THEN N'Đã hoàn thành'
+        ELSE N'Tạm dừng' END,
+    GhiChu = N'Dữ liệu mẫu hệ thống';
