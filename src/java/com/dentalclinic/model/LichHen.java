@@ -2,13 +2,13 @@ package com.dentalclinic.model;
 
 import java.sql.Date;
 import java.sql.Time;
+import java.util.List;
 
 public class LichHen {
     // --- Các thuộc tính cơ bản (Khớp 100% với cột trong Database) ---
     private int lichHenID;      // Khớp cột LichHen_ID (PK)
     private int benhNhanID;     // Khớp cột BenhNhan_ID (FK)
     private int bacSiID;        // Khớp cột BacSi_ID (FK)
-    private int dichVuID;       // Khớp cột DichVu_ID (FK)
     
     private Date ngayKham;      // Khớp cột NgayKham
     private Time gioKham;       // Khớp cột GioKham
@@ -18,16 +18,15 @@ public class LichHen {
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
     private BacSi bacSi;
-    private DichVu dichVu;
+    private List<ChiTietLichHen> danhSachDichVuDat;
     // Constructor mặc định
     public LichHen() {}
 
     // Constructor đầy đủ tham số cơ bản (Dành cho lúc INSERT/UPDATE)
-    public LichHen(int lichHenID, int benhNhanID, int bacSiID, int dichVuID, Date ngayKham, Time gioKham, String ghiChu, String trangThai) {
+    public LichHen(int lichHenID, int benhNhanID, int bacSiID, Date ngayKham, Time gioKham, String ghiChu, String trangThai) {
         this.lichHenID = lichHenID;
         this.benhNhanID = benhNhanID;
         this.bacSiID = bacSiID;
-        this.dichVuID = dichVuID;
         this.ngayKham = ngayKham;
         this.gioKham = gioKham;
         this.ghiChu = ghiChu;
@@ -44,9 +43,6 @@ public class LichHen {
 
     public int getBacSiID() { return bacSiID; }
     public void setBacSiID(int bacSiID) { this.bacSiID = bacSiID; }
-
-    public int getDichVuID() { return dichVuID; }
-    public void setDichVuID(int dichVuID) { this.dichVuID = dichVuID; }
 
     public Date getNgayKham() { return ngayKham; }
     public void setNgayKham(Date ngayKham) { this.ngayKham = ngayKham; }
@@ -67,7 +63,12 @@ public class LichHen {
 
     public BacSi getBacSi() { return bacSi; }
     public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
+    
+    public List<ChiTietLichHen> getDanhSachDichVuDat() {
+        return danhSachDichVuDat;
+    }
 
-    public DichVu getDichVu() { return dichVu; }
-    public void setDichVu(DichVu dichVu) { this.dichVu = dichVu; }
+    public void setDanhSachDichVuDat(List<ChiTietLichHen> danhSachDichVuDat) {
+        this.danhSachDichVuDat = danhSachDichVuDat;
+    }
 }
