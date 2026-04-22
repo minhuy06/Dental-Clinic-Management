@@ -20,7 +20,7 @@
             <div class="page-hero-overlay"></div>
             <div class="page-hero-content">
                 <div class="hero-breadcrumb"><a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a><span class="separator">›</span><span>Đặt lịch, Dịch vụ & Bác sĩ</span></div>
-                <h1>Chăm Sóc Răng Miệng Toàn Diện</h1>
+                <h1>Chăm sóc răng miệng toàn diện</h1>
                 <p>Đặt lịch khám nhanh chóng, dịch vụ đa dạng, bác sĩ chuyên khoa hàng đầu</p>
             </div>
         </section>
@@ -28,7 +28,7 @@
         <!-- DAT LICH -->
         <section class="booking-section" id="datlich">
             <div class="container">
-                <div class="section-title"><h2>Đặt Lịch Khám</h2></div>
+                <div class="section-title"><h2>Đặt lịch khám</h2></div>
                 <p class="section-intro">Chọn dịch vụ, ngày giờ phù hợp. Phòng khám sẽ phân bác sĩ và liên hệ xác nhận trong 30 phút.</p>
 
                 <div class="new-booking-card">
@@ -87,7 +87,7 @@
         <!-- DICH VU -->
         <section class="services-price-section" id="dichvu">
             <div class="container">
-                <div class="section-title"><h2>Dịch Vụ</h2></div>
+                <div class="section-title"><h2>Dịch vụ</h2></div>
                 <p class="section-intro">Giá niêm yết công khai, minh bạch. Không phát sinh chi phí ẩn.</p>
                 <div class="service-toolbar">
                     <input type="text" class="form-control service-search" id="serviceSearch" placeholder="🔍 Tìm kiếm dịch vụ..." oninput="filterServices()">
@@ -121,7 +121,7 @@
         <!-- BAC SI -->
         <section class="doctors-section" id="bacsi">
             <div class="container">
-                <div class="section-title"><h2>Đội Ngũ Bác Sĩ</h2></div>
+                <div class="section-title"><h2>Đội ngũ bác sĩ</h2></div>
                 <p class="section-intro">Các bác sĩ được đào tạo chuyên sâu, nhiều năm kinh nghiệm.</p>
                 <div class="doctors-grid">
                     <div class="doctor-card"><div class="doctor-img"><img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=300&h=300&fit=crop" alt="BS"></div><div class="doctor-info"><h3>BS. Nguyễn Hải</h3><span class="doctor-specialty">Tổng quát</span><span class="doctor-degree">CKI</span></div></div>
