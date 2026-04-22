@@ -1,4 +1,4 @@
-<%-- components/footer.jsp - FINAL --%>
+<%-- components/footer.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <footer class="footer" id="contact">
     <div class="container">
