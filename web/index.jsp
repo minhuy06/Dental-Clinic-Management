@@ -1,7 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
     if ("true".equals(request.getParameter("loginSuccess"))) {
-        String phone = request.getParameter("phone");
         session.setAttribute("loggedInUser", "Khách hàng");
     }
     if ("true".equals(request.getParameter("logout"))) {
@@ -70,15 +69,15 @@
         <section class="services-section" id="services"><div class="container">
             <div class="section-title fade-in"><h2>Dịch vụ nổi bật</h2><p>Đa dạng dịch vụ nha khoa chất lượng cao</p></div>
             <div class="services-grid">
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">💎</div><h3>Bọc răng sứ</h3><p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">😁</div><h3>Niềng răng</h3><p>Chỉnh nha mắc cài kim loại, sứ hoặc Invisalign.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">🦷</div><h3>Trồng răng Implant</h3><p>Phục hồi răng mất bằng trụ Implant Titanium trọn đời.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">✨</div><h3>Tẩy trắng răng</h3><p>Công nghệ Laser an toàn, trắng sáng chỉ sau 1 buổi.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">💎</div><h3>Bọc Răng Sứ</h3><p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">😁</div><h3>Niềng Răng</h3><p>Chỉnh nha mắc cài kim loại, sứ hoặc Invisalign.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">🦷</div><h3>Trồng Răng Implant</h3><p>Phục hồi răng mất bằng trụ Implant Titanium trọn đời.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">✨</div><h3>Tẩy Trắng Răng</h3><p>Công nghệ Laser an toàn, trắng sáng chỉ sau 1 buổi.</p></div>
             </div>
             <div class="text-center mt-3"><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
         </div></section>
 
-        <!-- DANH GIA KHACH HANG -->
+        <!-- REVIEWS -->
         <section class="reviews-section" id="reviews"><div class="container">
             <div class="section-title fade-in"><h2>Đánh giá từ khách hàng</h2><p>Những chia sẻ chân thực từ khách hàng đã sử dụng dịch vụ</p></div>
 
@@ -118,21 +117,8 @@
         </div></section>
     </main>
     <jsp:include page="components/footer.jsp" />
+
     <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
-    <script>
-        var selectedRating = 0;
-        function setRating(n) {
-            selectedRating = n;
-            document.querySelectorAll('#reviewStarsInput .star-input').forEach(function(s, i) { s.textContent = i < n ? '★' : '☆'; s.style.color = i < n ? '#f39c12' : '#ccc'; });
-        }
-        function submitReview() {
-            var text = document.getElementById('reviewText').value.trim();
-            if (!selectedRating) { alert('Vui lòng chọn số sao'); return; }
-            if (!text) { alert('Vui lòng nhập nội dung đánh giá'); return; }
-            alert('✅ Cảm ơn bạn đã gửi đánh giá!');
-            document.getElementById('reviewText').value = '';
-            setRating(0);
-        }
-    </script>
+    <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
 </body>
 </html>
