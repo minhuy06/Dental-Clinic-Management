@@ -13,10 +13,10 @@ public class VerifyOTPServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         
-        // Đảm bảo được được tiếng Việt có dấu
+        // Đảm bảo đọc được tiếng Việt có dấu
         request.setCharacterEncoding("UTF-8");
         
-        // Thiết lập kiểu trả về là chữ thuần túy (Text) cho JavaScript đọc
+        // Thiết lập kiểu trả về là chữ thuần túy cho JavaScript đọc
         response.setContentType("text/plain;charset=UTF-8");
         
         // Lấy mã từ người dùng và mã từ hệ thống
@@ -24,24 +24,30 @@ public class VerifyOTPServlet extends HttpServlet {
         HttpSession session = request.getSession();
         String systemOTP = (String) session.getAttribute("VERIFY_OTP");
         
-        // So sánh
-        if(systemOTP != null && systemOTP.equals(userOTP)){
+        // So sánh (Thêm trim() để tránh lỗi do người dùng copy paste dư khoảng trắng)
+        if(systemOTP != null && userOTP != null && systemOTP.equals(userOTP.trim())){
             
-            // Lấy thông tin lưu Database
+            // Lấy toàn bộ thông tin đăng ký từ Session
             String hoTen = (String) session.getAttribute("TEMP_HoTen");
             String sdt = (String) session.getAttribute("TEMP_SDT");
+            String email = (String) session.getAttribute("TEMP_Email");
             String matKhau = (String) session.getAttribute("TEMP_MatKhau");
             
-            // Gọi dao lưu vào database
+            // ====================================================================
+            // 2. GỌI DAO ĐỂ LƯU VÀO DATABASE TẠI ĐÂY
+            // Ví dụ: 
+            // KhachHangDAO dao = new KhachHangDAO();
+            // dao.insertKhachHang(hoTen, sdt, email, matKhau);
+            // ====================================================================
             
-            
-            // Xóa Session
+            // Xóa Session dọn dẹp bộ nhớ
             session.removeAttribute("TEMP_HoTen");
             session.removeAttribute("TEMP_SDT");
+            session.removeAttribute("TEMP_Email"); // <--- Bổ sung xóa Email
             session.removeAttribute("TEMP_MatKhau");
             session.removeAttribute("VERIFY_OTP");
             
-            // Thành công -> In chữ SUCCESS để JavaScript biết và chuyển sang trang Đăng nhập
+            // 4. Thành công -> In chữ SUCCESS để JavaScript chuyển sang trang Đăng nhập
             response.getWriter().write("SUCCESS");
         }
         else{
