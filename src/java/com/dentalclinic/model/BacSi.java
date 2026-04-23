@@ -14,6 +14,7 @@ public class BacSi {
     private List<LichHen> danhSachLichHen;
     private List<PhieuKham> danhSachPhieuKham;
     private List<ChiTietDichVu> danhSachChiTietDichVu;
+    private String tenChuyenKhoa;
     
     public BacSi() {}
 
@@ -52,4 +53,7 @@ public class BacSi {
 
     public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
     public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }
+    
+    public String getTenChuyenKhoa() { return tenChuyenKhoa; }
+public void setTenChuyenKhoa(String tenChuyenKhoa) { this.tenChuyenKhoa = tenChuyenKhoa; }
 }
