@@ -16,6 +16,9 @@ public class RegisterServlet extends HttpServlet {
         // Đảm bảo được được tiếng Việt có dấu
         request.setCharacterEncoding("UTF-8");
         
+        // Thiết lập kiểu trả về là chữ thuần túy (Text) cho JavaScript đọc
+        response.setContentType("text/plain;charset=UTF-8");
+        
         // Lấy dữ liệu từ Form
         String hoTen = request.getParameter("txtHoTen");
         String sdt = request.getParameter("txtSDT");
@@ -35,13 +38,12 @@ public class RegisterServlet extends HttpServlet {
             session.setAttribute("TEMP_MatKhau", matKhau);
             session.setAttribute("VERIFY_OTP", otpCode);
             
-            // Chuyển sang trang nhập OTP
-            response.sendRedirect("account/xac-thuc-otp.jsp");
+            // In chữ SUCCESS
+            response.getWriter().write("SUCCESS");
         }
         else{
-            // Nếu lỗi gửi tin nhắn
-            request.setAttribute("errorMsg", "Không thể gửi SMS, vui lòng kiểm tra lại số điện thoại");
-            request.getRequestDispatcher("account/dang-ky.jsp").forward(request, response);
+            // In chữ ERROR
+            response.getWriter().write("ERROR");
         }
     }
 }

@@ -13,6 +13,12 @@ public class VerifyOTPServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
         
+        // Đảm bảo được được tiếng Việt có dấu
+        request.setCharacterEncoding("UTF-8");
+        
+        // Thiết lập kiểu trả về là chữ thuần túy (Text) cho JavaScript đọc
+        response.setContentType("text/plain;charset=UTF-8");
+        
         // Lấy mã từ người dùng và mã từ hệ thống
         String userOTP = request.getParameter("txtOTP");
         HttpSession session = request.getSession();
@@ -35,12 +41,12 @@ public class VerifyOTPServlet extends HttpServlet {
             session.removeAttribute("TEMP_MatKhau");
             session.removeAttribute("VERIFY_OTP");
             
-            // Thành công -> Bắn về trang Đăng nhập
-            response.sendRedirect("account/login.jsp?msg=success"); // "?msg=success" dùng để in thông báo đăng kí thành công
+            // Thành công -> In chữ SUCCESS để JavaScript biết và chuyển sang trang Đăng nhập
+            response.getWriter().write("SUCCESS");
         }
         else{
-            request.setAttribute("errorMsg", "Mã OTP không chính xác!");
-            request.getRequestDispatcher("account/xac-thuc-otp.jsp").forward(request, response);
+            // Sai mã OTP thì in chữ ERROR
+            response.getWriter().write("ERROR_OTP");
         }
     }
 }
