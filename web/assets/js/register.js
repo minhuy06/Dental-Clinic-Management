@@ -112,8 +112,10 @@ function handleRegister(e) {
         var formData = new URLSearchParams();
         formData.append('txtHoTen', document.getElementById('regName').value.trim());
         formData.append('txtSDT', phone);
-        formData.append('txtEmail', email); // <-- Dòng quan trọng nhất để Java gửi được Email
+        formData.append('txtEmail', email); 
         formData.append('txtMatKhau', pass);
+        formData.append('txtNgaySinh', document.getElementById('regDob').value);
+        formData.append('txtGioiTinh', document.getElementById('regGender').value);
 
         fetch('../RegisterServlet', {
             method: 'POST',

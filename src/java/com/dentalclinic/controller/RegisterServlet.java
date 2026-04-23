@@ -24,6 +24,8 @@ public class RegisterServlet extends HttpServlet {
         String sdt = request.getParameter("txtSDT");
         String email = request.getParameter("txtEmail");
         String matKhau = request.getParameter("txtMatKhau");
+        String ngaySinh = request.getParameter("txtNgaySinh"); 
+        String gioiTinh = request.getParameter("txtGioiTinh");
         
         // Gọi Service gửi OTP qua Gmail
         EmailService emailService = new EmailService();
@@ -39,6 +41,8 @@ public class RegisterServlet extends HttpServlet {
             session.setAttribute("TEMP_SDT", sdt);
             session.setAttribute("TEMP_Email", email);
             session.setAttribute("TEMP_MatKhau", matKhau);
+            session.setAttribute("TEMP_NgaySinh", ngaySinh);
+            session.setAttribute("TEMP_GioiTinh", gioiTinh);
             
             // Lưu mã OTP hệ thống sinh ra để đối chiếu với mã khách hàng nhập
             session.setAttribute("VERIFY_OTP", otpCode);
