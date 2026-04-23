@@ -11,10 +11,11 @@ import java.sql.SQLException;
 public class BenhNhanDAO {
 
     public BenhNhan getBenhNhanByTaiKhoanID(int taiKhoanID) {
-        String sql = "SELECT bn.BenhNhan_ID, bn.TaiKhoan_ID, bn.NhomMau, bn.TienSuBenh, " +
+        String sql = "SELECT bn.BenhNhan_ID, bn.TaiKhoan_ID, hs.TienSuBenh,hs.DiaChi,hs.DiUngThuoc, " +
                      "tk.HoTen, tk.NgaySinh, tk.GioiTinh, tk.SoDienThoai " +
                      "FROM BenhNhan bn " +
                      "JOIN TaiKhoan tk ON bn.TaiKhoan_ID = tk.TaiKhoan_ID " +
+                     "JOIN HoSo hs ON hs.BenhNhan_ID = bn.BenhNhan_ID " +
                      "WHERE bn.TaiKhoan_ID = ?";
 
         try (Connection conn = DBConnection.getConnection();
