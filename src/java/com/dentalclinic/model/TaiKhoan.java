@@ -15,8 +15,6 @@ public class TaiKhoan {
     private boolean gioiTinh;    // Khớp cột GioiTinh (Ví dụ: true = Nam, false = Nữ)
 
     private List<LichLamViec> danhSachLichLamViec;
-    private List<TinNhan> danhSachTinNhanGui;   // Tin nhắn đã gửi
-    private List<TinNhan> danhSachTinNhanNhan;
     // Constructor mặc định
     public TaiKhoan() {}
 
@@ -61,10 +59,4 @@ public class TaiKhoan {
     
     public List<LichLamViec> getDanhSachLichLamViec() { return danhSachLichLamViec; }
     public void setDanhSachLichLamViec(List<LichLamViec> danhSachLichLamViec) { this.danhSachLichLamViec = danhSachLichLamViec; }
-
-    public List<TinNhan> getDanhSachTinNhanGui() { return danhSachTinNhanGui; }
-    public void setDanhSachTinNhanGui(List<TinNhan> danhSachTinNhanGui) { this.danhSachTinNhanGui = danhSachTinNhanGui; }
-
-    public List<TinNhan> getDanhSachTinNhanNhan() { return danhSachTinNhanNhan; }
-    public void setDanhSachTinNhanNhan(List<TinNhan> danhSachTinNhanNhan) { this.danhSachTinNhanNhan = danhSachTinNhanNhan; }
 }
