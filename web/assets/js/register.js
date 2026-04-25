@@ -1,6 +1,3 @@
-// ==================================================================
-// PHẦN 1: CÁC HÀM TIỆN ÍCH GIAO DIỆN (Giữ nguyên)
-// ==================================================================
 function togglePass(id, btn) {
     var i = document.getElementById(id);
     i.type = i.type === 'password' ? 'text' : 'password';
@@ -47,23 +44,24 @@ function startOtpTimer() {
     }, 1000);
 }
 
-// ==================================================================
-// PHẦN 2: XỬ LÝ GỬI FORM ĐĂNG KÝ VÀ YÊU CẦU OTP EMAIL
-// ==================================================================
+// === DANG KY - GOI RegisterServlet ===
+
 function handleRegister(e) {
     e.preventDefault();
     var ok = true;
 
-    // --- KIỂM TRA LỖI NHẬP LIỆU CỦA FORM ---
+    // Kiem tra ho ten
     if (!document.getElementById('regName').value.trim()) {
         document.getElementById('nameGroup').classList.add('error');
         ok = false;
-    } else { document.getElementById('nameGroup').classList.remove('error'); }
+    } else {
+        document.getElementById('nameGroup').classList.remove('error');
+    }
 
+    // Kiem tra SDT + Email (phai co it nhat 1)
     var phone = document.getElementById('regPhone').value.trim();
     var email = document.getElementById('regEmail').value.trim();
     var hasContact = false;
-    
     document.getElementById('phoneGroup').classList.remove('error');
     document.getElementById('emailGroup').classList.remove('error');
     document.getElementById('contactError').style.display = 'none';
@@ -85,97 +83,88 @@ function handleRegister(e) {
         ok = false;
     }
 
+    // Kiem tra ngay sinh
     if (!document.getElementById('regDob').value) {
         document.getElementById('dobGroup').classList.add('error');
         ok = false;
-    } else { document.getElementById('dobGroup').classList.remove('error'); }
+    } else {
+        document.getElementById('dobGroup').classList.remove('error');
+    }
 
+    // Kiem tra mat khau
     var pass = document.getElementById('regPassword').value;
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/.test(pass)) {
         document.getElementById('passGroup').classList.add('error');
         ok = false;
-    } else { document.getElementById('passGroup').classList.remove('error'); }
+    } else {
+        document.getElementById('passGroup').classList.remove('error');
+    }
 
+    // Kiem tra xac nhan mat khau
     if (document.getElementById('regConfirm').value !== pass) {
         document.getElementById('confirmGroup').classList.add('error');
         ok = false;
-    } else { document.getElementById('confirmGroup').classList.remove('error'); }
+    } else {
+        document.getElementById('confirmGroup').classList.remove('error');
+    }
 
-    // --- NẾU FORM HỢP LỆ -> GỌI BACKEND JAVA ---
+    // Neu form hop le -> goi backend RegisterServlet
     if (ok) {
         var btnSubmit = e.target.querySelector('button[type="submit"]');
         var originalText = btnSubmit.innerHTML;
-        btnSubmit.innerHTML = "Đang gửi OTP...";
-        btnSubmit.disabled = true; // Chặn người dùng spam click
+        btnSubmit.innerHTML = 'Đang gửi OTP...';
+        btnSubmit.disabled = true;
 
-        // Đóng gói dữ liệu (Đã vá lỗi: Truyền thêm biến txtEmail)
         var formData = new URLSearchParams();
         formData.append('txtHoTen', document.getElementById('regName').value.trim());
         formData.append('txtSDT', phone);
-        formData.append('txtEmail', email); 
         formData.append('txtMatKhau', pass);
-        formData.append('txtNgaySinh', document.getElementById('regDob').value);
-        formData.append('txtGioiTinh', document.getElementById('regGender').value);
 
         fetch('../RegisterServlet', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: formData.toString()
         })
-        .then(response => response.text())
-        .then(result => {
+        .then(function(response) { return response.text(); })
+        .then(function(result) {
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
-
-            if (result.trim() === "SUCCESS") {
-                // Mở popup nhập mã khi Java báo gửi Email thành công
+            if (result.trim() === 'SUCCESS') {
                 document.getElementById('otpModal').classList.add('show');
                 startOtpTimer();
                 document.querySelector('.otp-box').focus();
             } else {
-                // Đã vá lỗi: Cập nhật lại câu thông báo phù hợp với việc dùng Email
-                alert("Lỗi: Không thể gửi mã OTP. Hãy kiểm tra lại địa chỉ Email của bạn!");
+                alert('Lỗi: Không thể gửi SMS. Hãy kiểm tra lại số điện thoại!');
             }
         })
-        .catch(err => {
+        .catch(function(err) {
             console.error(err);
-            alert("Lỗi kết nối đến máy chủ!");
+            alert('Lỗi kết nối đến máy chủ!');
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
         });
     }
+
     return false;
 }
 
-// ==================================================================
-// PHẦN 3: GỌI SERVLET ĐỂ XÁC THỰC MÃ OTP 
-// ==================================================================
+// === XAC THUC OTP - GOI VerifyOTPServlet ===
+
 function verifyOtp() {
     var code = '';
     document.querySelectorAll('.otp-box').forEach(function(b) { code += b.value; });
-    
+
     if (code.length < 6) {
         alert('Vui lòng nhập đủ 6 số');
         return;
     }
 
-    // Đã vá lỗi: Tìm đúng ID của nút Xác Nhận (Không dùng class .sys-close nữa)
-    // Lưu ý: Nhớ thêm id="btnConfirmOtp" vào nút bấm trong file HTML
-    var btnVerify = document.getElementById('btnConfirmOtp'); 
-    
-    // Viết thêm hàm dự phòng lỡ bạn chưa kịp thêm ID vào HTML
-    if (!btnVerify) { 
-        btnVerify = document.querySelector('button[onclick="verifyOtp()"]'); 
-    }
+    // Nut xac nhan trong otpModal (class sys-close)
+    var btnVerify = document.querySelector('#otpModal .sys-close');
+    var originalText = btnVerify.innerHTML;
+    btnVerify.innerHTML = 'Đang kiểm tra...';
+    btnVerify.disabled = true;
 
-    var originalText = "Xác nhận";
-    if (btnVerify) {
-        originalText = btnVerify.innerHTML;
-        btnVerify.innerHTML = "Đang kiểm tra...";
-        btnVerify.disabled = true;
-    }
-
-    // Đóng gói mã OTP gửi xuống Servlet
     var formData = new URLSearchParams();
     formData.append('txtOTP', code);
 
@@ -184,33 +173,26 @@ function verifyOtp() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: formData.toString()
     })
-    .then(response => response.text())
-    .then(result => {
-        if (btnVerify) {
-            btnVerify.innerHTML = originalText;
-            btnVerify.disabled = false;
-        }
-
-        if (result.trim() === "SUCCESS") {
+    .then(function(response) { return response.text(); })
+    .then(function(result) {
+        btnVerify.innerHTML = originalText;
+        btnVerify.disabled = false;
+        if (result.trim() === 'SUCCESS') {
             alert('✅ Đăng ký thành công!');
             document.getElementById('otpModal').classList.remove('show');
-            // Chuyển sang trang đăng nhập
             var basePath = window.CONTEXT_PATH ? window.CONTEXT_PATH : '';
             window.location.href = basePath + '/account/login.jsp?msg=success';
         } else {
             alert('❌ Mã OTP không chính xác. Vui lòng thử lại!');
-            // Xóa trắng 6 ô để nhập lại
             var boxes = document.querySelectorAll('.otp-box');
             boxes.forEach(function(b) { b.value = ''; });
             boxes[0].focus();
         }
     })
-    .catch(err => {
+    .catch(function(err) {
         console.error(err);
-        alert("Lỗi kết nối đến máy chủ!");
-        if (btnVerify) {
-            btnVerify.innerHTML = originalText;
-            btnVerify.disabled = false;
-        }
+        alert('Lỗi kết nối đến máy chủ!');
+        btnVerify.innerHTML = originalText;
+        btnVerify.disabled = false;
     });
 }

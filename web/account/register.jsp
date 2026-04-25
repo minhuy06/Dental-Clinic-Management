@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - Nha Khoa KVONE</title>
+    <title>Đăng ký - Nha Khoa Kvone</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
@@ -31,13 +31,13 @@
                             <div class="form-error">SĐT không hợp lệ</div>
                         </div>
                         <div class="form-group" id="emailGroup">
-                            <label>Email <span style="color:#e74c3c">*</span></label>
+                            <label>Email</label>
                             <input type="email" class="form-control" id="regEmail" placeholder="VD: abc@gmail.com">
                             <div class="form-error">Email không hợp lệ</div>
                         </div>
                     </div>
                     <div class="form-group" id="contactError" style="display:none;">
-                        <div class="form-error" style="display:block;">Vui lòng nhập địa chỉ Email để nhận mã OTP</div>
+                        <div class="form-error" style="display:block;">Vui lòng nhập SĐT hoặc Email (ít nhất 1)</div>
                     </div>
 
                     <div class="form-row">
@@ -82,11 +82,12 @@
         </div>
     </main>
 
+    <!-- OTP MODAL -->
     <div class="system-modal-overlay" id="otpModal">
         <div class="system-modal" style="max-width:380px;">
-            <span class="sys-icon">✉️</span>
+            <span class="sys-icon">📱</span>
             <div class="sys-title">Xác thực OTP</div>
-            <div class="sys-msg">Nhập mã 6 số đã gửi đến Email của bạn</div>
+            <div class="sys-msg">Nhập mã 6 số đã gửi đến SĐT/Email của bạn</div>
             <div class="otp-inputs" id="otpInputs">
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)" onkeydown="otpBack(event,0)">
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
@@ -96,15 +97,11 @@
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
             </div>
             <div class="otp-timer" id="otpTimer">Gửi lại mã sau <span id="otpCountdown">60</span>s</div>
-            <button id="btnConfirmOtp" class="sys-confirm btn btn-primary" onclick="verifyOtp()" style="margin-top:16px; width: 100%;">Xác nhận</button>
+            <button class="sys-close" onclick="verifyOtp()" style="margin-top:16px;">Xác nhận</button>
         </div>
     </div>
 
     <jsp:include page="../components/footer.jsp" />
-    <script>
-        // Cung cấp biến môi trường cho Javascript để chuyển trang mượt mà
-        window.CONTEXT_PATH = "${pageContext.request.contextPath}";
-    </script>
     <script src="${pageContext.request.contextPath}/assets/js/register.js"></script>
 </body>
 </html>
