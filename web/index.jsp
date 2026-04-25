@@ -25,10 +25,10 @@
         <!-- SLIDESHOW -->
         <section class="slideshow" id="slideshow">
             <div class="slideshow-track" id="slideshowTrack">
-                <div class="slide"><img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=1400&h=500&fit=crop" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Ưu đãi tháng 4</span><h2>Giảm 30% Tẩy Trắng Răng Laser</h2><p>Công nghệ Laser hiện đại, an toàn. Răng trắng sáng tự nhiên chỉ sau 1 buổi.</p></div></div></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1606811841689-23dfddce3e95?w=1400&h=500&fit=crop" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Hot Deal</span><h2>Niềng Răng Trả Góp 0% Lãi Suất</h2><p>Niềng răng mắc cài sứ hoặc Invisalign với chính sách trả góp không lãi suất.</p></div></div></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?w=1400&h=500&fit=crop" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Khuyến mãi</span><h2>Bọc Răng Sứ Chỉ Từ 2 Triệu/Răng</h2><p>Răng sứ Cercon, Zirconia cao cấp. Bảo hành lên đến 10 năm.</p></div></div></div>
-                <div class="slide"><img src="https://images.unsplash.com/photo-1598256989800-fe5f95da9787?w=1400&h=500&fit=crop" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Mới</span><h2>Cấy Ghép Implant - Tặng CT Scan</h2><p>Trồng răng Implant Titanium bền vững trọn đời. Miễn phí CT Scan.</p></div></div></div>
+                <div class="slide"><img src="${pageContext.request.contextPath}/assets/img/slides/slide1.jpg" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Ưu đãi tháng 4</span><h2>Giảm 30% tẩy trắng răng Laser</h2><p>Công nghệ Laser hiện đại, an toàn. Răng trắng sáng tự nhiên chỉ sau 1 buổi.</p></div></div></div>
+                <div class="slide"><img src="${pageContext.request.contextPath}/assets/img/slides/slide2.jpg" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Hot Deal</span><h2>Niềng răng trả góp 0% lãi suất</h2><p>Niềng răng mắc cài sứ hoặc Invisalign với chính sách trả góp không lãi suất.</p></div></div></div>
+                <div class="slide"><img src="${pageContext.request.contextPath}/assets/img/slides/slide3.jpg" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Khuyến mãi</span><h2>Bọc răng sứ chỉ từ 2 Triệu/Răng</h2><p>Răng sứ Cercon, Zirconia cao cấp. Bảo hành lên đến 10 năm.</p></div></div></div>
+                <div class="slide"><img src="${pageContext.request.contextPath}/assets/img/slides/slide4.jpg" alt="Slide"><div class="slide-overlay"><div class="slide-content"><span class="slide-badge">Mới</span><h2>Cấy ghép Implant - Tặng CT Scan</h2><p>Trồng răng Implant Titanium bền vững trọn đời. Miễn phí CT Scan.</p></div></div></div>
             </div>
             <button class="slide-btn-prev" onclick="changeSlide(-1)">&#10094;</button>
             <button class="slide-btn-next" onclick="changeSlide(1)">&#10095;</button>
@@ -46,7 +46,7 @@
         <!-- ABOUT -->
         <section class="about-section" id="about"><div class="container"><div class="about-grid">
             <div class="about-image fade-in">
-                <img src="https://images.unsplash.com/photo-1629909613654-28e377c37b09?w=600&h=400&fit=crop" alt="Phong kham">
+                <img src="${pageContext.request.contextPath}/assets/img/phong-kham.jpg" alt="Phong kham">
                 <div class="experience-badge"><div class="number">15+</div><div class="text">Năm kinh nghiệm</div></div>
             </div>
             <div class="about-content fade-in">
@@ -69,10 +69,10 @@
         <section class="services-section" id="services"><div class="container">
             <div class="section-title fade-in"><h2>Dịch vụ nổi bật</h2><p>Đa dạng dịch vụ nha khoa chất lượng cao</p></div>
             <div class="services-grid">
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">💎</div><h3>Bọc Răng Sứ</h3><p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">😁</div><h3>Niềng Răng</h3><p>Chỉnh nha mắc cài kim loại, sứ hoặc Invisalign.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">🦷</div><h3>Trồng Răng Implant</h3><p>Phục hồi răng mất bằng trụ Implant Titanium trọn đời.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">✨</div><h3>Tẩy Trắng Răng</h3><p>Công nghệ Laser an toàn, trắng sáng chỉ sau 1 buổi.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">💎</div><h3>Bọc răng Sứ</h3><p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">😁</div><h3>Niềng răng</h3><p>Chỉnh nha mắc cài kim loại, sứ hoặc Invisalign.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">🦷</div><h3>Trồng răng Implant</h3><p>Phục hồi răng mất bằng trụ Implant Titanium trọn đời.</p></div>
+                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">✨</div><h3>Tẩy trắng răng</h3><p>Công nghệ Laser an toàn, trắng sáng chỉ sau 1 buổi.</p></div>
             </div>
             <div class="text-center mt-3"><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
         </div></section>
