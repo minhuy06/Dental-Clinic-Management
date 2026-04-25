@@ -11,7 +11,6 @@ public class ChiTietDichVu {
     // Đối tượng quan hệ
     private PhieuKham phieuKham;
     private DichVu dichVu;
-    private BacSi bacSi;
 
     public ChiTietDichVu() {}
 
@@ -48,7 +47,4 @@ public class ChiTietDichVu {
 
     public DichVu getDichVu() { return dichVu; }
     public void setDichVu(DichVu dichVu) { this.dichVu = dichVu; }
-
-    public BacSi getBacSi() { return bacSi; }
-    public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
 }

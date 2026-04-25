@@ -1058,7 +1058,6 @@ go
 -- TẠO BẢNG HoSo
 CREATE TABLE HoSo (
     HoSo_ID     INT IDENTITY(1,1) PRIMARY KEY,
-    BenhNhan_ID INT NOT NULL UNIQUE,
     DiaChi      NVARCHAR(255),
     DiUngThuoc  NVARCHAR(500),
     TienSuBenh  NVARCHAR(500),
@@ -1066,13 +1065,14 @@ CREATE TABLE HoSo (
     NgayDangKy  DATE NOT NULL DEFAULT GETDATE(),
     GhiChu      NVARCHAR(1000),
 
-    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID)
+    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (HoSo_ID) REFERENCES BenhNhan(BenhNhan_ID),
+    Constraint UQ_HoSo_BenhNhan unique(HoSo_ID)
 );
 go
 
 -- CHUYỂN TienSuBenh TỪ BenhNhan SANG HoSo
-INSERT INTO HoSo (BenhNhan_ID, TienSuBenh, NgayDangKy)
-SELECT BenhNhan_ID, TienSuBenh, GETDATE()
+INSERT INTO HoSo (TienSuBenh, NgayDangKy)
+SELECT TienSuBenh, GETDATE()
 FROM BenhNhan;
 
 -- Xóa cột TienSuBenh khỏi BenhNhan sau khi đã chuyển xong
@@ -1098,3 +1098,9 @@ SET
         ELSE N'Tạm dừng' END,
     GhiChu = N'Dữ liệu mẫu hệ thống';
 
+    -- Xóa cột BacSi_ID trong ChiTietDichVu (1 bác sĩ làm hết)
+alter table ChiTietDichVu
+    drop constraint FK_ChiTietDichVu_BacSi
+alter table ChiTietDichVu
+    drop column BacSi_ID
+go
