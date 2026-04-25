@@ -100,7 +100,7 @@ CREATE TABLE PhieuKham (
     LichHen_ID INT NULL, 
     ChanDoan NVARCHAR(200),
     NgayTao DATETIME DEFAULT GETDATE(), 
-    TrangThai NVARCHAR(100) DEFAULT N'Chờ thanh toán',
+    TrangThai NVARCHAR(100),
     CONSTRAINT PK_PhieuKham PRIMARY KEY (PhieuKham_ID)
 );
 GO
@@ -434,6 +434,9 @@ ADD CONSTRAINT CK_LichHen_TrangThai CHECK (TrangThai IN (N'Chờ xác nhận', N
 GO
 
 -- Bảng Phiếu Khám
+ALTER TABLE PhieuKham
+    add Constraint DF_PhieuKham_TrangThai DEFAULT  N'Chờ thanh toán' for TrangThai
+
 ALTER TABLE PhieuKham
 ADD CONSTRAINT CK_PhieuKham_NgayTao CHECK (NgayTao <= GETDATE() AND NgayTao >= '2020-01-01');
 
@@ -1098,9 +1101,19 @@ SET
         ELSE N'Tạm dừng' END,
     GhiChu = N'Dữ liệu mẫu hệ thống';
 
-    -- Xóa cột BacSi_ID trong ChiTietDichVu (1 bác sĩ làm hết)
+-- Xóa cột BacSi_ID trong ChiTietDichVu (1 bác sĩ làm hết)
 alter table ChiTietDichVu
     drop constraint FK_ChiTietDichVu_BacSi
 alter table ChiTietDichVu
     drop column BacSi_ID
 go
+
+-- Xóa TrangThai và TrieuChung trong PhieuKham
+alter table PhieuKham
+    drop constraint CK_PhieuKham_TrangThai
+alter table PhieuKham
+    drop constraint DF_PhieuKham_TrangThai
+alter table PhieuKham
+    drop column TrangThai
+alter table PhieuKham
+    drop column TrieuChung
