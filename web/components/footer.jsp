@@ -7,10 +7,10 @@
                 <div class="footer-logo">Nha Khoa <span>Kvone</span></div>
                 <p>Hệ thống Nha khoa Kvone - Nơi kiến tạo nụ cười rạng rỡ. Đội ngũ bác sĩ giàu kinh nghiệm, trang thiết bị hiện đại.</p>
                 <div class="footer-social">
-                    <a href="javascript:void(0)" onclick="showSystemModal()" title="Facebook"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/facebook.svg" alt="Facebook"></a>
+                    <a href="javascript:void(0)" onclick="showSystemModal()" title="Facebook"><img src="${pageContext.request.contextPath}/assets/img/icons/facebook.svg" alt="Facebook"></a>
                     <a href="javascript:void(0)" onclick="showSystemModal()" title="Zalo" style="font-weight:700;color:rgba(255,255,255,0.6);">Z</a>
-                    <a href="javascript:void(0)" onclick="showSystemModal()" title="YouTube"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/youtube.svg" alt="YouTube"></a>
-                    <a href="javascript:void(0)" onclick="showSystemModal()" title="Instagram"><img src="https://cdn.jsdelivr.net/gh/simple-icons/simple-icons/icons/instagram.svg" alt="Instagram"></a>
+                    <a href="javascript:void(0)" onclick="showSystemModal()" title="YouTube"><img src="${pageContext.request.contextPath}/assets/img/icons/youtube.svg" alt="YouTube"></a>
+                    <a href="javascript:void(0)" onclick="showSystemModal()" title="Instagram"><img src="${pageContext.request.contextPath}/assets/img/icons/instagram.svg" alt="Instagram"></a>
                 </div>
             </div>
             <div class="footer-col">
