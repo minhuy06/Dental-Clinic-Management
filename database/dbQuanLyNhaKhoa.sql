@@ -10,7 +10,6 @@ CREATE TABLE TaiKhoan (
     MatKhau VARCHAR(100) NOT NULL,
     VaiTro NVARCHAR(30) NOT NULL, 
     TrangThai NVARCHAR(50) DEFAULT N'Hoạt động',
-    Email varchar(100) UNIQUE,
     CONSTRAINT PK_TaiKhoan PRIMARY KEY (TaiKhoan_ID),
     CONSTRAINT UQ_TaiKhoan_SoDienThoai UNIQUE (SoDienThoai)
 );
@@ -199,45 +198,45 @@ GO
 
 -- INSERT dữ liệu mồi
 -- 1. INSERT TÀI KHOẢN
-INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai, Email) VALUES
+INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
 -- 1 Admin
-('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động', 'admin.kvone@gmail.com'),
+('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động'),
 
 -- 20 Bệnh nhân
-('0901000001', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan01@gmail.com'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan02@gmail.com'), 
-('0901000003', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan03@gmail.com'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan04@gmail.com'),
-('0901000005', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan05@gmail.com'), ('0901000006', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan06@gmail.com'), 
-('0901000007', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan07@gmail.com'), ('0901000008', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan08@gmail.com'),
-('0901000009', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan09@gmail.com'), ('0901000010', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan10@gmail.com'), 
-('0901000011', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan11@gmail.com'), ('0901000012', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan12@gmail.com'),
-('0901000013', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan13@gmail.com'), ('0901000014', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan14@gmail.com'), 
-('0901000015', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan15@gmail.com'), ('0901000016', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan16@gmail.com'),
-('0901000017', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan17@gmail.com'), ('0901000018', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan18@gmail.com'), 
-('0901000019', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan19@gmail.com'), ('0901000020', '123456', N'Bệnh nhân', N'Hoạt động', 'benhnhan20@gmail.com'),
+('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'), 
+('0901000003', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000005', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000006', '123456', N'Bệnh nhân', N'Hoạt động'), 
+('0901000007', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000008', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000009', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000010', '123456', N'Bệnh nhân', N'Hoạt động'), 
+('0901000011', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000012', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000013', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000014', '123456', N'Bệnh nhân', N'Hoạt động'), 
+('0901000015', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000016', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000017', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000018', '123456', N'Bệnh nhân', N'Hoạt động'), 
+('0901000019', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000020', '123456', N'Bệnh nhân', N'Hoạt động'),
 
 -- 20 Bác sĩ
-('0902000001', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi01@gmail.com'), ('0902000002', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi02@gmail.com'), 
-('0902000003', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi03@gmail.com'), ('0902000004', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi04@gmail.com'),
-('0902000005', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi05@gmail.com'), ('0902000006', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi06@gmail.com'), 
-('0902000007', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi07@gmail.com'), ('0902000008', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi08@gmail.com'),
-('0902000009', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi09@gmail.com'), ('0902000010', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi10@gmail.com'), 
-('0902000011', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi11@gmail.com'), ('0902000012', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi12@gmail.com'),
-('0902000013', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi13@gmail.com'), ('0902000014', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi14@gmail.com'), 
-('0902000015', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi15@gmail.com'), ('0902000016', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi16@gmail.com'),
-('0902000017', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi17@gmail.com'), ('0902000018', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi18@gmail.com'), 
-('0902000019', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi19@gmail.com'), ('0902000020', '123456', N'Bác sĩ', N'Hoạt động', 'bacsi20@gmail.com'),
+('0902000001', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000002', '123456', N'Bác sĩ', N'Hoạt động'), 
+('0902000003', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000004', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000005', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000006', '123456', N'Bác sĩ', N'Hoạt động'), 
+('0902000007', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000008', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000009', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000010', '123456', N'Bác sĩ', N'Hoạt động'), 
+('0902000011', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000012', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000013', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000014', '123456', N'Bác sĩ', N'Hoạt động'), 
+('0902000015', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000016', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000017', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000018', '123456', N'Bác sĩ', N'Hoạt động'), 
+('0902000019', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000020', '123456', N'Bác sĩ', N'Hoạt động'),
 
 -- 20 Lễ tân
-('0903000001', '123456', N'Lễ tân', N'Hoạt động', 'letan01@gmail.com'), ('0903000002', '123456', N'Lễ tân', N'Hoạt động', 'letan02@gmail.com'), 
-('0903000003', '123456', N'Lễ tân', N'Hoạt động', 'letan03@gmail.com'), ('0903000004', '123456', N'Lễ tân', N'Hoạt động', 'letan04@gmail.com'),
-('0903000005', '123456', N'Lễ tân', N'Hoạt động', 'letan05@gmail.com'), ('0903000006', '123456', N'Lễ tân', N'Hoạt động', 'letan06@gmail.com'), 
-('0903000007', '123456', N'Lễ tân', N'Hoạt động', 'letan07@gmail.com'), ('0903000008', '123456', N'Lễ tân', N'Hoạt động', 'letan08@gmail.com'),
-('0903000009', '123456', N'Lễ tân', N'Hoạt động', 'letan09@gmail.com'), ('0903000010', '123456', N'Lễ tân', N'Hoạt động', 'letan10@gmail.com'), 
-('0903000011', '123456', N'Lễ tân', N'Hoạt động', 'letan11@gmail.com'), ('0903000012', '123456', N'Lễ tân', N'Hoạt động', 'letan12@gmail.com'),
-('0903000013', '123456', N'Lễ tân', N'Hoạt động', 'letan13@gmail.com'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động', 'letan14@gmail.com'), 
-('0903000015', '123456', N'Lễ tân', N'Hoạt động', 'letan15@gmail.com'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động', 'letan16@gmail.com'),
-('0903000017', '123456', N'Lễ tân', N'Hoạt động', 'letan17@gmail.com'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động', 'letan18@gmail.com'), 
-('0903000019', '123456', N'Lễ tân', N'Hoạt động', 'letan19@gmail.com'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động', 'letan20@gmail.com');
+('0903000001', '123456', N'Lễ tân', N'Hoạt động'), ('0903000002', '123456', N'Lễ tân', N'Hoạt động'), 
+('0903000003', '123456', N'Lễ tân', N'Hoạt động'), ('0903000004', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000005', '123456', N'Lễ tân', N'Hoạt động'), ('0903000006', '123456', N'Lễ tân', N'Hoạt động'), 
+('0903000007', '123456', N'Lễ tân', N'Hoạt động'), ('0903000008', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000009', '123456', N'Lễ tân', N'Hoạt động'), ('0903000010', '123456', N'Lễ tân', N'Hoạt động'), 
+('0903000011', '123456', N'Lễ tân', N'Hoạt động'), ('0903000012', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'), 
+('0903000015', '123456', N'Lễ tân', N'Hoạt động'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'), 
+('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động');
 GO
 
 -- 2. INSERT BỆNH NHÂN

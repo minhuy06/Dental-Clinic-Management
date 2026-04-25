@@ -12,7 +12,6 @@ public class TaiKhoan {
     private String hoTen;        // Khớp cột HoTen
     private Date ngaySinh;       // Khớp cột NgaySinh
     private boolean gioiTinh;    // Khớp cột GioiTinh (Ví dụ: true = Nam, false = Nữ)
-    private String email;
 
     private List<LichLamViec> danhSachLichLamViec;
     // Constructor mặc định
@@ -20,7 +19,7 @@ public class TaiKhoan {
 
     // Constructor đầy đủ tham số
     public TaiKhoan(int taiKhoanID, String soDienThoai, String matKhau, String vaiTro, 
-                    String trangThai, String hoTen, Date ngaySinh, boolean gioiTinh, String email) {
+                    String trangThai, String hoTen, Date ngaySinh, boolean gioiTinh) {
         this.taiKhoanID = taiKhoanID;
         this.soDienThoai = soDienThoai;
         this.matKhau = matKhau;
@@ -29,7 +28,6 @@ public class TaiKhoan {
         this.hoTen = hoTen;
         this.ngaySinh = ngaySinh;
         this.gioiTinh = gioiTinh;
-        this.email = email;
     }
 
     // ================= GETTERS VÀ SETTERS =================
@@ -57,9 +55,6 @@ public class TaiKhoan {
 
     public boolean isGioiTinh() { return gioiTinh; } // Chú ý: boolean dùng 'is' thay vì 'get'
     public void setGioiTinh(boolean gioiTinh) { this.gioiTinh = gioiTinh; }
-    
-    public String getEmail(){return email;}
-    public void setEmail(String email){this.email = email;}
     
     public List<LichLamViec> getDanhSachLichLamViec() { return danhSachLichLamViec; }
     public void setDanhSachLichLamViec(List<LichLamViec> danhSachLichLamViec) { this.danhSachLichLamViec = danhSachLichLamViec; }
