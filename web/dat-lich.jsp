@@ -1,4 +1,8 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    String loggedInUser = (String) session.getAttribute("loggedInUser");
+    boolean isLoggedIn  = (loggedInUser != null);
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -26,124 +30,81 @@
             <div class="container">
                 <div class="section-title"><h2>Đặt lịch khám</h2></div>
                 <p class="section-intro">Chọn dịch vụ, ngày giờ phù hợp. Phòng khám sẽ phân bác sĩ và liên hệ xác nhận trong 30 phút.</p>
-                <div class="booking-wrapper">
-                    <div class="booking-info">
-                        <h3>📍 Thông tin phòng khám</h3>
-                        <ul>
-                            <li>🏥 48 Cao Thắng, Hải Châu, Đà Nẵng</li>
-                            <li>📞 1900 1533</li>
-                            <li>🕐 T2 - T7: 8:00 - 17:00</li>
-                            <li>🕐 Chủ nhật: 8:00 - 12:00</li>
-                        </ul>
-                        <div class="booking-note"><strong>Quy trình:</strong><br>1. Bạn chọn dịch vụ & ngày giờ<br>2. Phòng khám xác nhận & phân bác sĩ<br>3. Bạn đến khám theo lịch hẹn</div>
-                    </div>
-                    <form class="booking-form" id="bookingForm" onsubmit="return handleBooking(event)">
-                        <!-- Chon dich vu (nhieu) -->
-                        <div class="form-group" id="serviceGroup">
-                            <label>Chọn dịch vụ <span style="color:#e74c3c">*</span></label>
-                            <select class="form-control" id="serviceAdd">
-                                <option value="">-- Chọn dịch vụ để thêm --</option>
-                                <option value="1" data-price="100000" data-time="20 phút">Khám tổng quát</option>
-                                <option value="2" data-price="200000" data-time="30 phút">Cạo vôi răng</option>
-                                <option value="3" data-price="300000" data-time="30 phút">Trám răng Composite</option>
-                                <option value="4" data-price="100000" data-time="15 phút">Nhổ răng sữa</option>
-                                <option value="5" data-price="1000000" data-time="30 phút">Nhổ răng khôn mọc thẳng</option>
-                                <option value="6" data-price="3000000" data-time="60 phút">Nhổ răng khôn mọc ngầm</option>
-                                <option value="7" data-price="2500000" data-time="45 phút">Tẩy trắng răng Laser</option>
-                                <option value="8" data-price="1500000" data-time="20 phút">Tẩy trắng răng tại nhà</option>
-                                <option value="9" data-price="800000" data-time="45 phút">Lấy tủy răng cửa</option>
-                                <option value="10" data-price="1500000" data-time="60 phút">Lấy tủy răng hàm</option>
-                                <option value="11" data-price="2000000" data-time="45 phút/răng">Bọc răng sứ Titan</option>
-                                <option value="12" data-price="5000000" data-time="45 phút/răng">Bọc răng sứ Cercon</option>
-                                <option value="13" data-price="6000000" data-time="45 phút/răng">Bọc răng sứ Zirconia</option>
-                                <option value="14" data-price="7000000" data-time="60 phút/răng">Mặt dán sứ Veneer</option>
-                                <option value="15" data-price="15000000" data-time="60-90 phút">Cấy ghép Implant</option>
-                                <option value="16" data-price="30000000" data-time="60-90 phút">Cấy ghép Implant cao cấp</option>
-                                <option value="17" data-price="25000000" data-time="60 phút/lần">Niềng răng mắc cài kim loại</option>
-                                <option value="18" data-price="35000000" data-time="60 phút/lần">Niềng răng mắc cài sứ</option>
-                                <option value="19" data-price="80000000" data-time="45 phút/lần">Niềng răng Invisalign</option>
-                                <option value="20" data-price="500000" data-time="30 phút">Điều trị viêm nha chu</option>
-                            </select>
-                            <button type="button" onclick="addService()" style="margin-top:10px;padding:9px 22px;font-size:0.85rem;font-weight:600;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--font-body);">+ Thêm dịch vụ</button>
-                            <div class="form-error">Vui lòng chọn ít nhất 1 dịch vụ</div>
-                            <div id="selectedServices" style="margin-top:14px;"></div>
-                            <div id="priceDisplay" style="display:none;margin-top:10px;padding:12px 16px;background:#fff4e6;border-radius:6px;font-size:0.9rem;color:#d35400;">
-                                Tổng chi phí dự kiến: <strong id="priceValue" style="color:#e67e22;font-size:1.1rem;"></strong> VNĐ
-                            </div>
-                        </div>
+
+                <div class="new-booking-card">
+                    <!-- Ngay + Gio -->
+                    <div class="nb-row-2">
                         <div class="form-group" id="dateGroup">
-                            <label>Chọn ngày khám <span style="color:#e74c3c">*</span></label>
+                            <label>Ngày khám <span class="req">*</span></label>
                             <input type="date" class="form-control" id="bookingDate">
-                            <div class="form-error">Vui lòng chọn ngày khám</div>
+                            <div class="form-error">Vui lòng chọn ngày</div>
                         </div>
                         <div class="form-group" id="timeGroup">
-                            <label>Chọn giờ khám <span style="color:#e74c3c">*</span></label>
-                            <div class="time-grid" id="timeGrid"></div>
-                            <input type="hidden" id="bookingTime">
-                            <div class="form-error">Vui lòng chọn giờ khám</div>
+                            <label>Giờ khám <span class="req">*</span></label>
+                            <select class="form-control" id="bookingTimeSelect">
+                                <option value="">Chọn giờ</option>
+                            </select>
+                            <div class="form-error">Vui lòng chọn giờ</div>
                         </div>
-                        <div class="form-group">
-                            <label>Ghi chú</label>
-                            <textarea class="form-control" id="bookingNote" placeholder="Mô tả triệu chứng hoặc yêu cầu của bạn..." rows="3"></textarea>
+                    </div>
+
+                    <!-- Dich vu checkbox grid -->
+                    <div class="form-group" id="serviceGroup">
+                        <label>🦷 Chọn dịch vụ (có thể chọn nhiều) <span class="req">*</span></label>
+                        <div class="svc-checkbox-grid" id="svcCheckboxGrid"></div>
+                        <div class="form-error">Vui lòng chọn ít nhất 1 dịch vụ</div>
+                    </div>
+
+                    <!-- Dich vu da chon -->
+                    <div id="selectedServicesBox" class="nb-selected-box" style="display:none;">
+                        <div class="nb-selected-header">🛒 Dịch vụ đã chọn</div>
+                        <div class="nb-selected-list" id="nbSelectedList"></div>
+                        <div class="nb-total">
+                            <span class="nb-total-label">💰 Tổng tiền:</span>
+                            <span id="nbTotalValue">0</span> đ
                         </div>
-                        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Đặt lịch hẹn</button>
-                    </form>
+                    </div>
+
+                    <!-- Ghi chu -->
+                    <div class="form-group" style="margin-top:16px;">
+                        <label>Ghi chú</label>
+                        <textarea class="form-control" id="bookingNote" placeholder="Ghi chú thêm..." rows="3"></textarea>
+                    </div>
+
+                    <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px;">
+                        <button type="button" onclick="resetBookingForm()" class="btn btn-outline">Hủy</button>
+                        <button type="button" onclick="handleBooking()" class="btn btn-primary">Lưu lịch hẹn</button>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <div class="section-divider"><span class="divider-icon">💎</span></div>
+        <div style="text-align:center;padding:30px 0;">
+            <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
+            <div style="margin-top:-10px;display:inline-block;background:white;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
+        </div>
 
         <!-- DICH VU -->
         <section class="services-price-section" id="dichvu">
             <div class="container">
                 <div class="section-title"><h2>Dịch vụ</h2></div>
                 <p class="section-intro">Giá niêm yết công khai, minh bạch. Không phát sinh chi phí ẩn.</p>
+                <div class="service-toolbar">
+                    <input type="text" class="form-control service-search" id="serviceSearch" placeholder="🔍 Tìm kiếm dịch vụ..." oninput="filterServices()">
+                    <select class="form-control service-filter" id="serviceFilter" onchange="filterServices()">
+                        <option value="all">Tất cả danh mục</option>
+                        <option value="kham">Khám & Chẩn đoán</option>
+                        <option value="tham-my">Thẩm mỹ</option>
+                        <option value="chinh-nha">Chỉnh nha</option>
+                        <option value="phau-thuat">Phẫu thuật</option>
+                        <option value="tre-em">Trẻ em</option>
+                        <option value="khac">Khác</option>
+                    </select>
+                </div>
                 <div class="price-table-wrapper">
                     <table class="price-table" id="priceTable">
                         <thead><tr><th>STT</th><th>Dịch vụ</th><th>⏱ Thời gian</th><th>Giá (VNĐ)</th></tr></thead>
-                        <tbody>
-                            <tr><td>1</td><td>Khám tổng quát<br><small style="color:var(--text-muted)">Kiểm tra răng miệng toàn diện</small></td><td class="time-cell">🕐 20 phút</td><td class="price">100,000</td></tr>
-                            <tr><td>2</td><td>Cạo vôi răng<br><small style="color:var(--text-muted)">Loại bỏ mảng bám, vôi răng</small></td><td class="time-cell">🕐 30 phút</td><td class="price">200,000</td></tr>
-                            <tr><td>3</td><td>Trám răng Composite<br><small style="color:var(--text-muted)">Trám thẩm mỹ bằng vật liệu Composite</small></td><td class="time-cell">🕐 30 phút</td><td class="price">300,000</td></tr>
-                            <tr><td>4</td><td>Nhổ răng sữa<br><small style="color:var(--text-muted)">Nhổ răng sữa cho trẻ em</small></td><td class="time-cell">🕐 15 phút</td><td class="price">100,000</td></tr>
-                            <tr><td>5</td><td>Nhổ răng khôn mọc thẳng<br><small style="color:var(--text-muted)">Nhổ răng khôn không phẫu thuật</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,000,000</td></tr>
-                            <tr><td>6</td><td>Nhổ răng khôn mọc ngầm<br><small style="color:var(--text-muted)">Tiểu phẫu nhổ răng khôn phức tạp</small></td><td class="time-cell">🕐 60 phút</td><td class="price">3,000,000</td></tr>
-                            <tr><td>7</td><td>Tẩy trắng răng Laser<br><small style="color:var(--text-muted)">Tẩy trắng bằng công nghệ Laser</small></td><td class="time-cell">🕐 45 phút</td><td class="price">2,500,000</td></tr>
-                            <tr><td>8</td><td>Tẩy trắng răng tại nhà<br><small style="color:var(--text-muted)">Máng tẩy trắng sử dụng tại nhà</small></td><td class="time-cell">🕐 20 phút</td><td class="price">1,500,000</td></tr>
-                            <tr><td>9</td><td>Lấy tủy răng cửa<br><small style="color:var(--text-muted)">Điều trị tủy răng cửa bị viêm</small></td><td class="time-cell">🕐 45 phút</td><td class="price">800,000</td></tr>
-                            <tr><td>10</td><td>Lấy tủy răng hàm<br><small style="color:var(--text-muted)">Điều trị tủy răng hàm nhiều chân</small></td><td class="time-cell">🕐 60 phút</td><td class="price">1,500,000</td></tr>
-                            <tr class="hidden-row"><td>11</td><td>Bọc răng sứ Titan<br><small style="color:var(--text-muted)">Răng sứ kim loại Titan tiêu chuẩn</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">2,000,000</td></tr>
-                            <tr class="hidden-row"><td>12</td><td>Bọc răng sứ Cercon<br><small style="color:var(--text-muted)">Răng sứ Cercon cao cấp Đức</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">5,000,000</td></tr>
-                            <tr class="hidden-row"><td>13</td><td>Bọc răng sứ Zirconia<br><small style="color:var(--text-muted)">Răng sứ Zirconia nguyên khối</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">6,000,000</td></tr>
-                            <tr class="hidden-row"><td>14</td><td>Mặt dán sứ Veneer<br><small style="color:var(--text-muted)">Dán sứ siêu mỏng thẩm mỹ</small></td><td class="time-cell">🕐 60 phút/răng</td><td class="price">7,000,000</td></tr>
-                            <tr class="hidden-row"><td>15</td><td>Cấy ghép Implant tiêu chuẩn<br><small style="color:var(--text-muted)">Trụ Implant Titanium tiêu chuẩn</small></td><td class="time-cell">🕐 60-90 phút</td><td class="price">15,000,000</td></tr>
-                            <tr class="hidden-row"><td>16</td><td>Cấy ghép Implant cao cấp<br><small style="color:var(--text-muted)">Trụ Implant cao cấp Châu Âu</small></td><td class="time-cell">🕐 60-90 phút</td><td class="price">30,000,000</td></tr>
-                            <tr class="hidden-row"><td>17</td><td>Niềng răng mắc cài kim loại<br><small style="color:var(--text-muted)">Chỉnh nha mắc cài kim loại truyền thống</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">25,000,000</td></tr>
-                            <tr class="hidden-row"><td>18</td><td>Niềng răng mắc cài sứ<br><small style="color:var(--text-muted)">Chỉnh nha mắc cài sứ thẩm mỹ</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">35,000,000</td></tr>
-                            <tr class="hidden-row"><td>19</td><td>Niềng răng Invisalign<br><small style="color:var(--text-muted)">Khay trong suốt chỉnh nha hiện đại</small></td><td class="time-cell">🕐 45 phút/lần</td><td class="price">80,000,000</td></tr>
-                            <tr class="hidden-row"><td>20</td><td>Điều trị viêm nha chu<br><small style="color:var(--text-muted)">Điều trị viêm nướu, viêm nha chu</small></td><td class="time-cell">🕐 30 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>21</td><td>Chụp X-quang răng<br><small style="color:var(--text-muted)">Chụp phim X-quang kỹ thuật số</small></td><td class="time-cell">🕐 10 phút</td><td class="price">150,000</td></tr>
-                            <tr class="hidden-row"><td>22</td><td>Chụp CT Cone Beam<br><small style="color:var(--text-muted)">Chụp CT 3D toàn hàm</small></td><td class="time-cell">🕐 15 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>23</td><td>Trám răng thẩm mỹ<br><small style="color:var(--text-muted)">Trám thẩm mỹ phục hồi hình dáng</small></td><td class="time-cell">🕐 30 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>24</td><td>Điều trị tủy răng trẻ em<br><small style="color:var(--text-muted)">Lấy tủy răng sữa cho trẻ</small></td><td class="time-cell">🕐 30 phút</td><td class="price">600,000</td></tr>
-                            <tr class="hidden-row"><td>25</td><td>Nhổ răng vĩnh viễn thường<br><small style="color:var(--text-muted)">Nhổ răng lung lay, răng sâu nặng</small></td><td class="time-cell">🕐 20 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>26</td><td>Phẫu thuật cắt lợi trùm<br><small style="color:var(--text-muted)">Cắt lợi trùm răng khôn</small></td><td class="time-cell">🕐 30 phút</td><td class="price">800,000</td></tr>
-                            <tr class="hidden-row"><td>27</td><td>Ghép xương hàm<br><small style="color:var(--text-muted)">Ghép xương chuẩn bị cấy Implant</small></td><td class="time-cell">🕐 60 phút</td><td class="price">5,000,000</td></tr>
-                            <tr class="hidden-row"><td>28</td><td>Nâng xoang hàm<br><small style="color:var(--text-muted)">Nâng xoang hỗ trợ Implant hàm trên</small></td><td class="time-cell">🕐 90 phút</td><td class="price">8,000,000</td></tr>
-                            <tr class="hidden-row"><td>29</td><td>Răng giả tháo lắp nhựa<br><small style="color:var(--text-muted)">Hàm giả nhựa dẻo tháo lắp</small></td><td class="time-cell">🕐 45 phút/lần</td><td class="price">2,000,000</td></tr>
-                            <tr class="hidden-row"><td>30</td><td>Răng giả tháo lắp kim loại<br><small style="color:var(--text-muted)">Hàm giả khung kim loại bền chắc</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">4,000,000</td></tr>
-                            <tr class="hidden-row"><td>31</td><td>Cầu răng sứ (3 đơn vị)<br><small style="color:var(--text-muted)">Phục hình cầu răng sứ 3 đơn vị</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">9,000,000</td></tr>
-                            <tr class="hidden-row"><td>32</td><td>Điều trị cười hở lợi<br><small style="color:var(--text-muted)">Phẫu thuật chỉnh hình nướu</small></td><td class="time-cell">🕐 45 phút</td><td class="price">3,000,000</td></tr>
-                            <tr class="hidden-row"><td>33</td><td>Tạo hình nướu thẩm mỹ<br><small style="color:var(--text-muted)">Chỉnh sửa đường viền nướu</small></td><td class="time-cell">🕐 30 phút</td><td class="price">2,500,000</td></tr>
-                            <tr class="hidden-row"><td>34</td><td>Điều trị đau khớp thái dương<br><small style="color:var(--text-muted)">Điều trị rối loạn khớp hàm</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,500,000</td></tr>
-                            <tr class="hidden-row"><td>35</td><td>Máng chống nghiến răng<br><small style="color:var(--text-muted)">Máng bảo vệ răng khi ngủ</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,200,000</td></tr>
-                            <tr class="hidden-row"><td>36</td><td>Trám răng sữa trẻ em<br><small style="color:var(--text-muted)">Trám răng sữa bị sâu cho bé</small></td><td class="time-cell">🕐 15 phút</td><td class="price">150,000</td></tr>
-                            <tr class="hidden-row"><td>37</td><td>Bôi Fluoride phòng sâu<br><small style="color:var(--text-muted)">Bôi gel Fluoride ngừa sâu răng</small></td><td class="time-cell">🕐 15 phút</td><td class="price">200,000</td></tr>
-                            <tr class="hidden-row"><td>38</td><td>Trám bít hố rãnh<br><small style="color:var(--text-muted)">Bít hố rãnh phòng sâu răng hàm</small></td><td class="time-cell">🕐 20 phút</td><td class="price">250,000</td></tr>
-                            <tr class="hidden-row"><td>39</td><td>Khám nha khoa định kỳ trẻ em<br><small style="color:var(--text-muted)">Khám kiểm tra răng miệng cho bé</small></td><td class="time-cell">🕐 15 phút</td><td class="price">80,000</td></tr>
-                            <tr class="hidden-row"><td>40</td><td>Tư vấn thiết kế nụ cười DSD<br><small style="color:var(--text-muted)">Digital Smile Design - thiết kế nụ cười số</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,000,000</td></tr>
-                        </tbody>
+                        <tbody id="serviceTableBody"></tbody>
                     </table>
                 </div>
                 <div class="text-center mt-3">
@@ -152,7 +113,10 @@
             </div>
         </section>
 
-        <div class="section-divider on-gray"><span class="divider-icon">✨</span></div>
+        <div style="text-align:center;padding:30px 0;">
+            <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
+            <div style="margin-top:-10px;display:inline-block;background:#f0f4f8;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
+        </div>
 
         <!-- BAC SI -->
         <section class="doctors-section" id="bacsi">
@@ -172,71 +136,20 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
-    <script>
-    (function(){var t=new Date().toISOString().split('T')[0];document.getElementById('bookingDate').setAttribute('min',t);})();
+    <!-- POPUP YEU CAU DANG NHAP -->
+    <div class="system-modal-overlay" id="loginRequiredModal" onclick="if(event.target===this)closeLoginModal()">
+        <div class="system-modal">
+            <span class="sys-icon">🔐</span>
+            <div class="sys-title">Yêu cầu đăng nhập</div>
+            <div class="sys-msg">Bạn cần đăng nhập để đặt lịch khám. Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục.</div>
+            <div style="display:flex;gap:12px;justify-content:center;">
+                <button class="sys-close" onclick="goToLogin()">🔑 Đăng nhập</button>
+                <button class="sys-close" style="background:var(--text-muted);" onclick="closeLoginModal()">Hủy</button>
+            </div>
+        </div>
+    </div>
 
-    var weekdayTimes=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'];
-    var sundayTimes=['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30'];
-
-    function buildTimeGrid(times){
-        var grid=document.getElementById('timeGrid');grid.innerHTML='';document.getElementById('bookingTime').value='';
-        times.forEach(function(t){var btn=document.createElement('div');btn.className='time-slot';btn.textContent=t;
-        btn.onclick=function(){document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});this.classList.add('selected');document.getElementById('bookingTime').value=t;document.getElementById('timeGroup').classList.remove('error');};grid.appendChild(btn);});
-    }
-    buildTimeGrid(weekdayTimes);
-
-    document.getElementById('bookingDate').addEventListener('change',function(){
-        var d=new Date(this.value).getDay();buildTimeGrid(d===0?sundayTimes:weekdayTimes);document.getElementById('dateGroup').classList.remove('error');
-    });
-
-    // === CHON NHIEU DICH VU ===
-    var selectedList=[];
-
-    function addService(){
-        var sel=document.getElementById('serviceAdd');var opt=sel.options[sel.selectedIndex];if(!opt.value)return;
-        if(selectedList.find(function(s){return s.id===opt.value;})){alert('Dịch vụ này đã được chọn!');return;}
-        selectedList.push({id:opt.value,name:opt.text,price:parseInt(opt.getAttribute('data-price')),time:opt.getAttribute('data-time')});
-        sel.selectedIndex=0;renderServices();document.getElementById('serviceGroup').classList.remove('error');
-    }
-
-    function removeService(id){selectedList=selectedList.filter(function(s){return s.id!==id;});renderServices();}
-
-    function renderServices(){
-        var c=document.getElementById('selectedServices');
-        var d=document.getElementById('priceDisplay');
-        if(selectedList.length===0){c.innerHTML='';d.style.display='none';return;}
-
-        var html='<table style="width:100%;border-collapse:collapse;font-size:0.88rem;">';
-        html+='<thead><tr style="background:#f0f4f8;"><th style="text-align:left;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Dịch vụ</th><th style="text-align:left;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Thời gian</th><th style="text-align:right;padding:10px 12px;font-size:0.78rem;color:#4a4a5a;font-weight:600;">Giá</th><th style="width:40px;"></th></tr></thead>';
-        html+='<tbody>';
-        var total=0;
-        selectedList.forEach(function(s){
-            total+=s.price;
-            html+='<tr style="border-bottom:1px solid #dee2e6;">';
-            html+='<td style="padding:10px 12px;font-weight:600;color:#1a1a2e;">'+s.name+'</td>';
-            html+='<td style="padding:10px 12px;color:#e67e22;font-weight:500;font-size:0.82rem;">⏱ '+s.time+'</td>';
-            html+='<td style="padding:10px 12px;text-align:right;font-weight:700;color:#0056b3;white-space:nowrap;">'+s.price.toLocaleString('vi-VN')+' đ</td>';
-            html+='<td style="padding:10px 6px;text-align:center;"><button type="button" onclick="removeService(\''+s.id+'\')" style="width:26px;height:26px;border-radius:50%;border:1.5px solid #f8d7da;background:white;color:#e74c3c;cursor:pointer;font-size:0.8rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;" onmouseover="this.style.background=\'#e74c3c\';this.style.color=\'white\';this.style.borderColor=\'#e74c3c\'" onmouseout="this.style.background=\'white\';this.style.color=\'#e74c3c\';this.style.borderColor=\'#f8d7da\'">✕</button></td>';
-            html+='</tr>';
-        });
-        html+='</tbody></table>';
-
-        c.innerHTML=html;
-        document.getElementById('priceValue').textContent=total.toLocaleString('vi-VN');
-        d.style.display='block';
-    }
-
-    var servicesExpanded=false;
-    function toggleServices(){servicesExpanded=!servicesExpanded;document.querySelectorAll('.hidden-row').forEach(function(r){r.style.display=servicesExpanded?'table-row':'none';});document.getElementById('showMoreBtn').textContent=servicesExpanded?'Thu gọn ↑':'Xem thêm dịch vụ ↓';}
-
-    function handleBooking(e){
-        e.preventDefault();var ok=true;
-        if(selectedList.length===0){document.getElementById('serviceGroup').classList.add('error');ok=false;}else{document.getElementById('serviceGroup').classList.remove('error');}
-        if(!document.getElementById('bookingDate').value){document.getElementById('dateGroup').classList.add('error');ok=false;}else{document.getElementById('dateGroup').classList.remove('error');}
-        if(!document.getElementById('bookingTime').value){document.getElementById('timeGroup').classList.add('error');ok=false;}else{document.getElementById('timeGroup').classList.remove('error');}
-        if(ok){alert('Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận.');document.getElementById('bookingForm').reset();document.getElementById('priceDisplay').style.display='none';document.querySelectorAll('.time-slot').forEach(function(s){s.classList.remove('selected');});selectedList=[];renderServices();}
-        return false;
-    }
-    </script>
+    <script>window.IS_LOGGED_IN = <%= isLoggedIn %>;</script>
+    <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js"></script>
 </body>
 </html>

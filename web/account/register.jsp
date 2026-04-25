@@ -4,340 +4,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký - Nha Khoa Kvone</title>
+    <title>Đăng ký - Nha Khoa KVONE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
 <body>
-
-    <!-- HEADER -->
     <jsp:include page="../components/header.jsp" />
-
-    <!-- TRANG DANG KY -->
-    <section class="auth-page">
+    <main class="auth-page">
         <div class="auth-container">
-
-            <!-- Ben trai: Banner -->
-            <div class="auth-banner">
-                <div class="auth-banner-content">
-                    <span class="tooth-icon">🦷</span>
-                    <h2>Tạo tài khoản mới</h2>
-                    <p>
-                        Đăng ký để đặt lịch khám nhanh chóng, 
-                        theo dõi lịch sử điều trị và nhận ưu đãi 
-                        độc quyền từ Nha Khoa Kvone.
-                    </p>
+            <div class="auth-box" style="max-width:520px;">
+                <div class="auth-header">
+                    <h2>Đăng ký tài khoản</h2>
+                    <p>Tạo tài khoản để đặt lịch khám nhanh chóng</p>
                 </div>
-            </div>
-
-            <!-- Ben phai: Form -->
-            <div class="auth-form-wrapper">
-                <div class="auth-form-header">
-                    <h2>Đăng ký</h2>
-                    <p>Điền thông tin để tạo tài khoản mới</p>
-                </div>
-
-                <form class="auth-form" id="registerForm" onsubmit="return handleRegister(event)" autocomplete="off">
-
-                    <!-- Ho ten -->
+                <form id="registerForm" onsubmit="return handleRegister(event)">
                     <div class="form-group" id="nameGroup">
-                        <label>Họ và tên <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">👤</span>
-                            <input type="text" 
-                                   class="form-control-icon" 
-                                   id="fullName" 
-                                   placeholder="Nhập họ và tên"
-                                   autocomplete="off">
-                        </div>
-                        <div class="form-error-msg" id="passwordError">Mật khẩu tối thiểu 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt (!@#$%^&*)</div>
+                        <label>Họ và tên <span style="color:#e74c3c">*</span></label>
+                        <input type="text" class="form-control" id="regName" placeholder="VD: Nguyễn Văn An">
+                        <div class="form-error">Vui lòng nhập họ và tên</div>
                     </div>
 
-                    <!-- So dien thoai -->
-                    <div class="form-group" id="phoneGroup">
-                        <label>Số điện thoại <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📞</span>
-                            <input type="tel" 
-                                   class="form-control-icon" 
-                                   id="phone" 
-                                   placeholder="Nhập số điện thoại"
-                                   maxlength="10"
-                                   autocomplete="off">
+                    <div class="form-row">
+                        <div class="form-group" id="phoneGroup">
+                            <label>Số điện thoại</label>
+                            <input type="tel" class="form-control" id="regPhone" placeholder="VD: 0901234567">
+                            <div class="form-error">SĐT không hợp lệ</div>
                         </div>
-                        <div class="form-error-msg" id="phoneError">Số điện thoại phải đủ 10 số</div>
+                        <div class="form-group" id="emailGroup">
+                            <label>Email <span style="color:#e74c3c">*</span></label>
+                            <input type="email" class="form-control" id="regEmail" placeholder="VD: abc@gmail.com">
+                            <div class="form-error">Email không hợp lệ</div>
+                        </div>
+                    </div>
+                    <div class="form-group" id="contactError" style="display:none;">
+                        <div class="form-error" style="display:block;">Vui lòng nhập địa chỉ Email để nhận mã OTP</div>
                     </div>
 
-                    <!-- Ngay sinh -->
-                    <div class="form-group" id="dobGroup">
-                        <label>Ngày sinh <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">📅</span>
-                            <input type="date" 
-                                   class="form-control-icon" 
-                                   id="dob"
-                                   autocomplete="off">
+                    <div class="form-row">
+                        <div class="form-group" id="dobGroup">
+                            <label>Ngày sinh <span style="color:#e74c3c">*</span></label>
+                            <input type="date" class="form-control" id="regDob">
+                            <div class="form-error">Vui lòng chọn ngày sinh</div>
                         </div>
-                        <div class="form-error-msg" id="dobError">Vui lòng chọn ngày sinh</div>
+                        <div class="form-group">
+                            <label>Giới tính <span style="color:#e74c3c">*</span></label>
+                            <select class="form-control" id="regGender">
+                                <option value="1">Nam</option>
+                                <option value="0">Nữ</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <!-- Mat khau -->
-                    <div class="form-group" id="passwordGroup">
-                        <label>Mật khẩu <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" 
-                                   class="form-control-icon" 
-                                   id="password" 
-                                   placeholder="Nhập mật khẩu (Abc@1234)"
-                                   autocomplete="new-password">
-                            <button type="button" class="toggle-password" onclick="togglePass('password', this)">👁</button>
+                    <div class="form-group" id="passGroup">
+                        <label>Mật khẩu <span style="color:#e74c3c">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" id="regPassword" placeholder="Tối thiểu 8 ký tự, gồm hoa/thường/số/đặc biệt" oninput="checkRegStrength(this.value)">
+                            <button type="button" class="toggle-pass" onclick="togglePass('regPassword',this)">👁</button>
                         </div>
-                        <div class="form-error-msg" id="passwordError">Mật khẩu phải có tối thiểu 6 ký tự</div>
+                        <div class="password-strength"><div class="password-strength-bar" id="regStrengthBar"></div></div>
+                        <div class="form-error">Mật khẩu không đạt yêu cầu (cần hoa, thường, số, đặc biệt, tối thiểu 8 ký tự)</div>
                     </div>
-
-                    <!-- Xac nhan mat khau -->
                     <div class="form-group" id="confirmGroup">
-                        <label>Xác nhận mật khẩu <span class="required">*</span></label>
-                        <div class="input-wrapper">
-                            <span class="input-icon">🔒</span>
-                            <input type="password" 
-                                   class="form-control-icon" 
-                                   id="confirmPassword" 
-                                   placeholder="Nhập lại mật khẩu"
-                                   autocomplete="new-password">
-                            <button type="button" class="toggle-password" onclick="togglePass('confirmPassword', this)">👁</button>
+                        <label>Xác nhận mật khẩu <span style="color:#e74c3c">*</span></label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control" id="regConfirm" placeholder="Nhập lại mật khẩu">
+                            <button type="button" class="toggle-pass" onclick="togglePass('regConfirm',this)">👁</button>
                         </div>
-                        <div class="form-error-msg" id="confirmError">Mật khẩu nhập lại không khớp</div>
+                        <div class="form-error">Mật khẩu xác nhận không khớp</div>
                     </div>
 
-                    <!-- Nut dang ky -->
-                    <button type="submit" class="btn-submit">Đăng ký</button>
-
-                    <!-- Ke ngang -->
-                    <div class="auth-divider">hoặc</div>
-
-                    <!-- Chuyen sang dang nhap -->
-                    <div class="auth-switch">
-                        Đã có tài khoản? 
-                        <a href="${pageContext.request.contextPath}/account/login.jsp">Đăng nhập ngay</a>
-                    </div>
-
+                    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">Đăng ký</button>
                 </form>
+                <div class="auth-footer">
+                    <p>Đã có tài khoản? <a href="${pageContext.request.contextPath}/account/login.jsp">Đăng nhập</a></p>
+                </div>
             </div>
-
         </div>
-    </section>
+    </main>
 
-    <!-- POPUP OTP -->
-    <div class="otp-overlay" id="otpOverlay">
-        <div class="otp-popup">
-            <div class="otp-header">
-                <span class="otp-icon">📩</span>
-                <h3>Xác thực OTP</h3>
-                <p>Mã xác thực đã được gửi đến số điện thoại <strong id="otpPhone"></strong></p>
-            </div>
-
+    <div class="system-modal-overlay" id="otpModal">
+        <div class="system-modal" style="max-width:380px;">
+            <span class="sys-icon">✉️</span>
+            <div class="sys-title">Xác thực OTP</div>
+            <div class="sys-msg">Nhập mã 6 số đã gửi đến Email của bạn</div>
             <div class="otp-inputs" id="otpInputs">
-                <input type="text" maxlength="1" class="otp-box" data-index="0" autocomplete="off">
-                <input type="text" maxlength="1" class="otp-box" data-index="1" autocomplete="off">
-                <input type="text" maxlength="1" class="otp-box" data-index="2" autocomplete="off">
-                <input type="text" maxlength="1" class="otp-box" data-index="3" autocomplete="off">
-                <input type="text" maxlength="1" class="otp-box" data-index="4" autocomplete="off">
-                <input type="text" maxlength="1" class="otp-box" data-index="5" autocomplete="off">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)" onkeydown="otpBack(event,0)">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,2)" onkeydown="otpBack(event,2)">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,3)" onkeydown="otpBack(event,3)">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
+                <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
             </div>
-
-            <div class="otp-timer">
-                Gửi lại mã sau <span id="otpTimer">60</span>s
-            </div>
-
-            <button class="otp-btn-confirm" onclick="verifyOTP()">Xác nhận</button>
-
-            <button class="otp-close" onclick="closeOTP()">Hủy</button>
+            <div class="otp-timer" id="otpTimer">Gửi lại mã sau <span id="otpCountdown">60</span>s</div>
+            <button id="btnConfirmOtp" class="sys-confirm btn btn-primary" onclick="verifyOtp()" style="margin-top:16px; width: 100%;">Xác nhận</button>
         </div>
     </div>
 
-    <!-- FOOTER -->
     <jsp:include page="../components/footer.jsp" />
-
-    <!-- JavaScript -->
     <script>
-        // Chan chon ngay tuong lai cho ngay sinh
-        (function() {
-            var today = new Date().toISOString().split('T')[0];
-            document.getElementById('dob').setAttribute('max', today);
-        })();
-
-        // Toggle hien/an mat khau
-        function togglePass(inputId, btn) {
-            var input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                btn.textContent = '🙈';
-            } else {
-                input.type = 'password';
-                btn.textContent = '👁';
-            }
-        }
-
-        // Xu ly dang ky
-        function handleRegister(event) {
-            event.preventDefault();
-            var isValid = true;
-
-            var name = document.getElementById('fullName').value.trim();
-            var phone = document.getElementById('phone').value.trim();
-            var dob = document.getElementById('dob').value;
-            var password = document.getElementById('password').value;
-            var confirm = document.getElementById('confirmPassword').value;
-
-            // Kiem tra ho ten
-            if (name.length === 0) {
-                document.getElementById('nameGroup').classList.add('error');
-                isValid = false;
-            } else {
-                document.getElementById('nameGroup').classList.remove('error');
-            }
-
-            // Kiem tra SDT (dung 10 so)
-            var phoneRegex = /^[0-9]{10}$/;
-            if (!phoneRegex.test(phone)) {
-                document.getElementById('phoneGroup').classList.add('error');
-                isValid = false;
-            } else {
-                document.getElementById('phoneGroup').classList.remove('error');
-            }
-
-            // Kiem tra ngay sinh
-            if (!dob) {
-                document.getElementById('dobGroup').classList.add('error');
-                isValid = false;
-            } else {
-                document.getElementById('dobGroup').classList.remove('error');
-            }
-
-            // Kiem tra mat khau manh (toi thieu 8 ky tu, co chu hoa, chu thuong, so, ky tu dac biet)
-            var strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])[A-Za-z0-9!@#$%^&*]{8,}$/;
-            if (!strongRegex.test(password)) {
-                document.getElementById('passwordGroup').classList.add('error');
-                isValid = false;
-            } else {
-                document.getElementById('passwordGroup').classList.remove('error');
-            }
-
-            // Kiem tra mat khau trung khop
-            if (confirm !== password || confirm.length === 0) {
-                document.getElementById('confirmGroup').classList.add('error');
-                isValid = false;
-            } else {
-                document.getElementById('confirmGroup').classList.remove('error');
-            }
-
-            if (isValid) {
-                showOTP(phone);
-            }
-
-            return false;
-        }
-
-        // === OTP POPUP ===
-        var otpTimerInterval;
-
-        function showOTP(phone) {
-            // Hien thi so dien thoai da an mot phan
-            var maskedPhone = phone.substring(0, 3) + '****' + phone.substring(7);
-            document.getElementById('otpPhone').textContent = maskedPhone;
-
-            // Hien popup
-            document.getElementById('otpOverlay').classList.add('show');
-
-            // Focus vao o dau tien
-            var firstBox = document.querySelector('.otp-box[data-index="0"]');
-            if (firstBox) firstBox.focus();
-
-            // Bat dau dem nguoc 60s
-            startOTPTimer();
-        }
-
-        function closeOTP() {
-            document.getElementById('otpOverlay').classList.remove('show');
-            clearInterval(otpTimerInterval);
-
-            // Xoa cac o OTP
-            document.querySelectorAll('.otp-box').forEach(function(box) {
-                box.value = '';
-            });
-        }
-
-        function startOTPTimer() {
-            var seconds = 60;
-            var timerEl = document.getElementById('otpTimer');
-            timerEl.textContent = seconds;
-
-            clearInterval(otpTimerInterval);
-            otpTimerInterval = setInterval(function() {
-                seconds--;
-                timerEl.textContent = seconds;
-                if (seconds <= 0) {
-                    clearInterval(otpTimerInterval);
-                    timerEl.textContent = '0';
-                }
-            }, 1000);
-        }
-
-        function verifyOTP() {
-            var otpCode = '';
-            document.querySelectorAll('.otp-box').forEach(function(box) {
-                otpCode += box.value;
-            });
-
-            if (otpCode.length < 6) {
-                alert('Vui lòng nhập đủ 6 số OTP');
-                return;
-            }
-
-            // Demo: chap nhan moi ma OTP
-            alert('Đăng ký thành công! Vui lòng đăng nhập.');
-            closeOTP();
-            window.location.href = '${pageContext.request.contextPath}/account/login.jsp';
-            // Khi co backend: gui OTP len server xac thuc
-        }
-
-        // Auto focus sang o tiep theo khi nhap
-        document.querySelectorAll('.otp-box').forEach(function(box, index, boxes) {
-            box.addEventListener('input', function() {
-                this.value = this.value.replace(/[^0-9]/g, '');
-                if (this.value.length === 1 && index < boxes.length - 1) {
-                    boxes[index + 1].focus();
-                }
-            });
-
-            box.addEventListener('keydown', function(e) {
-                // Khi bam Backspace, quay lai o truoc
-                if (e.key === 'Backspace' && this.value === '' && index > 0) {
-                    boxes[index - 1].focus();
-                }
-            });
-        });
-
-        // Xoa loi khi nguoi dung go lai
-        document.getElementById('fullName').addEventListener('input', function() {
-            document.getElementById('nameGroup').classList.remove('error');
-        });
-        document.getElementById('phone').addEventListener('input', function() {
-            document.getElementById('phoneGroup').classList.remove('error');
-            this.value = this.value.replace(/[^0-9]/g, '');
-        });
-        document.getElementById('dob').addEventListener('input', function() {
-            document.getElementById('dobGroup').classList.remove('error');
-        });
-        document.getElementById('password').addEventListener('input', function() {
-            document.getElementById('passwordGroup').classList.remove('error');
-        });
-        document.getElementById('confirmPassword').addEventListener('input', function() {
-            document.getElementById('confirmGroup').classList.remove('error');
-        });
+        // Cung cấp biến môi trường cho Javascript để chuyển trang mượt mà
+        window.CONTEXT_PATH = "${pageContext.request.contextPath}";
     </script>
-
+    <script src="${pageContext.request.contextPath}/assets/js/register.js"></script>
 </body>
 </html>

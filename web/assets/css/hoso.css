@@ -191,6 +191,7 @@
     border-radius: var(--radius-full);
     cursor: pointer;
     transition: all 0.2s ease;
+    font-family: var(--font-body);
 }
 
 .filter-chip:hover {
@@ -326,7 +327,7 @@
 }
 
 /* ============================================
-   MODAL CHI TIET PHIEU KHAM
+   MODAL OVERLAY + BOX (chung)
    ============================================ */
 .modal-overlay {
     position: fixed;
@@ -400,117 +401,48 @@
     background: rgba(255,255,255,0.3);
 }
 
-.modal-body {
-    padding: 28px;
-}
-
-.modal-section {
-    margin-bottom: 24px;
-}
-
-.modal-section:last-child {
-    margin-bottom: 0;
-}
-
-.modal-section-title {
-    font-family: var(--font-body);
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--primary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 12px;
-    padding-bottom: 8px;
-    border-bottom: 2px solid var(--primary-light);
-}
-
-.info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px 20px;
-}
-
-.info-item {
-    font-size: 0.88rem;
-}
-
-.info-item .label {
-    color: var(--text-muted);
-    font-size: 0.78rem;
-    display: block;
-    margin-bottom: 2px;
-}
-
-.info-item .value {
-    color: var(--text-dark);
-    font-weight: 600;
-}
-
-.detail-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.85rem;
-}
-
-.detail-table th {
-    padding: 10px 12px;
-    background: var(--bg-section);
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.78rem;
-    color: var(--text-dark);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.detail-table th:last-child { text-align: right; }
-
-.detail-table td {
-    padding: 10px 12px;
-    border-bottom: 1px solid var(--border-light);
-    color: var(--text-body);
-}
-
-.detail-table td:last-child {
-    text-align: right;
-    font-weight: 600;
-    color: var(--primary);
-    white-space: nowrap;
-}
-
-.modal-total {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 20px;
-    background: var(--accent-light);
-    border-radius: var(--radius-sm);
-    margin-top: 16px;
-}
-
-.modal-total .label {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-dark);
-}
-
-.modal-total .total-amount {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--accent);
-    font-family: var(--font-heading);
-}
-
 .modal-footer {
     padding: 20px 28px;
     border-top: 1px solid var(--border-light);
     display: flex;
     justify-content: flex-end;
     gap: 10px;
+    background: white;
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* Confirm box (xac nhan huy / dang xuat) */
+.confirm-box {
+    max-width: 420px;
+    text-align: center;
+}
+
+.confirm-box .modal-body {
+    padding: 32px 28px 24px;
+}
+
+.confirm-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+}
+
+.confirm-title {
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 8px;
+}
+
+.confirm-message {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    line-height: 1.6;
 }
 
 /* ============================================
-   CHI TIET PHIEU KHAM - DESIGN MOI
+   CHI TIET PHIEU KHAM - DESIGN CHUYEN NGHIEP
    ============================================ */
 .modal-box.receipt-modal {
     max-width: 720px;
@@ -524,8 +456,9 @@
 .receipt-hero {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
     color: white;
-    padding: 24px 28px 28px;
+    padding: 24px 28px 32px;
     position: relative;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .receipt-hero::after {
@@ -569,7 +502,7 @@
     right: 28px;
     padding: 6px 14px;
     border-radius: var(--radius-full);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -579,13 +512,17 @@
     background: #d4edda;
     color: #155724;
 }
-.receipt-status-pill.unpaid {
+.receipt-status-pill.confirmed {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+.receipt-status-pill.pending {
     background: #fff3cd;
     color: #856404;
 }
-.receipt-status-pill.pending {
-    background: rgba(255,255,255,0.2);
-    color: white;
+.receipt-status-pill.cancelled {
+    background: #f8d7da;
+    color: #721c24;
 }
 
 .receipt-content {
@@ -598,6 +535,10 @@
     padding: 20px 22px;
     margin-bottom: 14px;
     box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.receipt-card:last-child {
+    margin-bottom: 0;
 }
 
 .receipt-card-title {
@@ -626,7 +567,7 @@
     font-size: 0.9rem;
 }
 
-/* Doctor info card */
+/* Doctor mini card */
 .doctor-card-mini {
     display: flex;
     align-items: center;
@@ -678,7 +619,7 @@
     margin-top: 4px;
 }
 
-/* Info row (ngay gio) */
+/* Info row */
 .info-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -718,7 +659,7 @@
     font-weight: 600;
 }
 
-/* Kham benh - ly do, trieu chung, chan doan, ghi chu */
+/* Trieu chung - Chan doan - Ghi chu */
 .medical-item {
     margin-bottom: 12px;
 }
@@ -753,7 +694,7 @@
     font-weight: 500;
 }
 
-/* Services table - new design */
+/* Dich vu - gia */
 .services-list {
     background: white;
 }
@@ -799,7 +740,7 @@
     white-space: nowrap;
 }
 
-/* Tong tien - new */
+/* Tong tien */
 .receipt-total-box {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
     border-radius: var(--radius-md);
@@ -822,7 +763,6 @@
     font-weight: 700;
 }
 
-/* Empty state */
 .medical-empty {
     text-align: center;
     padding: 20px;
@@ -831,46 +771,10 @@
     font-style: italic;
 }
 
-/* Modal xac nhan huy */
-.confirm-box {
-    max-width: 400px;
-    text-align: center;
-}
-
-.confirm-box .modal-body {
-    padding: 32px 28px 24px;
-}
-
-.confirm-icon {
-    font-size: 3rem;
-    margin-bottom: 16px;
-    display: block;
-}
-
-.confirm-title {
-    font-family: var(--font-body);
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--text-dark);
-    margin-bottom: 8px;
-}
-
-.confirm-message {
-    font-size: 0.88rem;
-    color: var(--text-muted);
-    line-height: 1.6;
-}
-
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
     .profile-layout {
         grid-template-columns: 1fr;
-    .info-row { grid-template-columns: 1fr; }
-    .receipt-hero { padding: 20px; }
-    .receipt-hero h3 { font-size: 1.2rem; }
-    .receipt-status-pill { position: static; display: inline-block; margin-top: 8px; }
-    .receipt-content { padding: 20px; }
-    .receipt-card { padding: 16px; }
     }
 
     .profile-sidebar {
@@ -912,7 +816,332 @@
         padding: 24px 20px;
     }
 
-    .info-grid {
+    .info-row {
         grid-template-columns: 1fr;
     }
+
+    .receipt-hero {
+        padding: 20px;
+    }
+
+    .receipt-hero h3 {
+        font-size: 1.2rem;
+    }
+
+    .receipt-status-pill {
+        position: static;
+        display: inline-block;
+        margin-bottom: 8px;
+    }
+
+    .receipt-content {
+        padding: 20px;
+    }
+
+    .receipt-card {
+        padding: 16px;
+    }
+}
+
+/* INFO DISPLAY (read-only) */
+.info-display{background:var(--bg-section);border-radius:var(--radius-md);padding:24px;border:1px solid var(--border-light);}
+.info-row-display{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:16px;}
+.info-row-display:last-child{margin-bottom:0;}
+.info-field .field-label{display:block;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.4px;margin-bottom:4px;font-weight:600;}
+.info-field .field-value{font-size:0.95rem;color:var(--text-dark);font-weight:600;}
+
+/* BTN EDIT (lich hen) */
+.btn-action.btn-edit{border-color:var(--accent);color:var(--accent);}
+.btn-action.btn-edit:hover{background:var(--accent);color:white;}
+
+@media(max-width:768px){.info-row-display{grid-template-columns:1fr;}}
+
+/* Fix edit appointment modal - ensure no overflow issues */
+#editAppointmentModal .modal-body{overflow-y:auto;overflow-x:hidden;padding:24px 28px;}
+#editSvcGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-height:220px;overflow-y:auto;overflow-x:hidden;padding:6px;border:1.5px solid var(--border-light);border-radius:var(--radius-sm);}
+#editSelectedBox{margin-top:12px;background:var(--primary-light);border:1.5px solid rgba(0,86,179,0.2);border-radius:var(--radius-md);padding:14px;}
+#editSelectedList{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+
+/* ============================================
+   EDIT APPOINTMENT MODAL - REDESIGNED (EAM)
+   ============================================ */
+
+/* Overlay dùng chung .modal-overlay đã có */
+
+.eam-box {
+    background: var(--bg-white);
+    border-radius: var(--radius-lg);
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 32px 80px rgba(0,20,60,0.28);
+    transform: translateY(28px) scale(0.97);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    overflow: hidden;
+}
+
+.modal-overlay.show .eam-box {
+    transform: translateY(0) scale(1);
+}
+
+/* Header gradient */
+.eam-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 28px;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    flex-shrink: 0;
+}
+
+.eam-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.eam-header-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.25);
+}
+
+.eam-header-text h3 {
+    color: white;
+    font-family: var(--font-body);
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0 0 3px;
+}
+
+.eam-header-text p {
+    color: rgba(255,255,255,0.72);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.eam-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    color: white;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.eam-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: rotate(90deg);
+}
+
+/* Body scroll */
+.eam-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.eam-body::-webkit-scrollbar { width: 6px; }
+.eam-body::-webkit-scrollbar-track { background: #f0f4f8; border-radius: 3px; }
+.eam-body::-webkit-scrollbar-thumb { background: #b0c4de; border-radius: 3px; }
+
+/* Section blocks */
+.eam-section {
+    background: var(--bg-white);
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-md);
+    padding: 20px 22px;
+    margin-bottom: 16px;
+    transition: border-color 0.2s;
+}
+
+.eam-section:hover {
+    border-color: rgba(0,86,179,0.25);
+}
+
+.eam-section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 16px;
+}
+
+.eam-step {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0,86,179,0.3);
+}
+
+.eam-row-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.eam-label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 6px;
+}
+
+.eam-input {
+    border-width: 1.5px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+}
+
+.eam-input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(0,86,179,0.1) !important;
+}
+
+/* Override svc-checkbox-grid inside modal */
+.eam-section .svc-checkbox-grid {
+    max-height: 240px;
+    border: 1.5px solid var(--border-light);
+    border-radius: var(--radius-sm);
+    background: var(--bg-white);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 8px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+/* Selected services box inside modal */
+.eam-selected-box {
+    margin-top: 14px;
+    background: linear-gradient(135deg, #eef4ff 0%, #e8f0fe 100%);
+    border: 1.5px solid rgba(0,86,179,0.18);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    overflow: hidden;
+}
+
+.eam-selected-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed rgba(0,86,179,0.2);
+}
+
+.eam-svc-count {
+    background: var(--primary);
+    color: white;
+    padding: 2px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+/* nb-selected-list inside eam reuses existing nb-svc-item styles */
+.eam-selected-box .nb-selected-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+/* Total bar */
+.eam-total-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    border-radius: var(--radius-sm);
+    padding: 12px 18px;
+    margin-top: 4px;
+}
+
+.eam-total-label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.85);
+    font-weight: 500;
+}
+
+.eam-total-value {
+    font-family: var(--font-heading);
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: white;
+}
+
+.eam-total-value span {
+    color: #ffd166;
+}
+
+/* Footer */
+.eam-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 18px 28px;
+    border-top: 1.5px solid var(--border-light);
+    background: var(--bg-section);
+    flex-shrink: 0;
+}
+
+.eam-save-btn {
+    padding: 12px 28px !important;
+    font-size: 0.92rem !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    box-shadow: 0 4px 16px rgba(0,86,179,0.3) !important;
+    transition: all 0.25s ease !important;
+}
+
+.eam-save-btn:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(0,86,179,0.4) !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .eam-box { max-height: 95vh; }
+    .eam-body { padding: 20px 16px; }
+    .eam-header { padding: 16px 20px; }
+    .eam-footer { padding: 14px 20px; }
+    .eam-row-2 { grid-template-columns: 1fr; }
+    .eam-section .svc-checkbox-grid { grid-template-columns: 1fr; }
+    .eam-selected-box .nb-selected-list { grid-template-columns: 1fr; }
 }

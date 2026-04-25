@@ -4,7 +4,6 @@ import java.sql.Date;
 
 public class HoSo {
     private int hoSoID;
-    private int benhNhanID;
     private String diaChi;
     private String diUngThuoc;
     private String tienSuBenh;
@@ -18,10 +17,9 @@ public class HoSo {
     }
 
     // Constructor đầy đủ tham số
-    public HoSo(int hoSoID, int benhNhanID, String diaChi, String diUngThuoc, 
+    public HoSo(int hoSoID, String diaChi, String diUngThuoc, 
                 String tienSuBenh, String trangThai, Date ngayDangKy, String ghiChu) {
         this.hoSoID = hoSoID;
-        this.benhNhanID = benhNhanID;
         this.diaChi = diaChi;
         this.diUngThuoc = diUngThuoc;
         this.tienSuBenh = tienSuBenh;
@@ -33,9 +31,6 @@ public class HoSo {
     // Getter và Setter
     public int getHoSoID() { return hoSoID; }
     public void setHoSoID(int hoSoID) { this.hoSoID = hoSoID; }
-
-    public int getBenhNhanID() { return benhNhanID; }
-    public void setBenhNhanID(int benhNhanID) { this.benhNhanID = benhNhanID; }
 
     public String getDiaChi() { return diaChi; }
     public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
