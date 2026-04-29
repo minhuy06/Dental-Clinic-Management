@@ -1,9 +1,3 @@
-/**
- * ==================== NHA KHOA 5AE - ADMIN.JS ====================
- */
-
-// ==================== DỮ LIỆU MẪU ====================
-
 var services = [
     {id:1, name:'Khám tổng quát', desc:'Kiểm tra răng miệng toàn diện', time:'20 phút', price:100000, cat:'kham', perUnit:false, unit:'', status:'active'},
     {id:2, name:'Cạo vôi răng', desc:'Loại bỏ mảng bám, vôi răng', time:'30 phút', price:200000, cat:'kham', perUnit:false, unit:'', status:'active'},
@@ -169,8 +163,7 @@ function renderServices() {
 function updateSvcStats() {
     document.getElementById('statTotalServices').innerText = services.length;
     document.getElementById('statActiveServices').innerText = services.filter(function(s){return s.status==='active';}).length;
-    var total = services.reduce(function(a,s){return a+s.price;}, 0);
-    document.getElementById('statAvgPrice').innerText = Math.round(total/services.length/1000) + 'K';
+    document.getElementById('statSuspended').innerText = services.filter(function(s){return s.status==='inactive';}).length;
 }
 
 function goSvcPage(p) { svcPage = p; renderServices(); }
@@ -321,10 +314,8 @@ function openStaffModal() {
     document.getElementById('staffSpecialty').value = '';
     document.getElementById('staffDegree').value = '';
     document.getElementById('staffPhone').value = '';
-    document.getElementById('staffEmail').value = '';
     document.getElementById('staffStartDate').value = '';
     document.getElementById('staffStatus').value = 'active';
-    document.getElementById('staffNotes').value = '';
     document.getElementById('staffModal').style.display = 'flex';
 }
 
@@ -339,10 +330,8 @@ function editStaff(id) {
     document.getElementById('staffSpecialty').value = s.specialty || '';
     document.getElementById('staffDegree').value = s.degree || '';
     document.getElementById('staffPhone').value = s.phone;
-    document.getElementById('staffEmail').value = s.email || '';
     document.getElementById('staffStartDate').value = s.startDate || '';
     document.getElementById('staffStatus').value = s.status;
-    document.getElementById('staffNotes').value = s.notes || '';
     document.getElementById('staffModal').style.display = 'flex';
 }
 
@@ -355,12 +344,11 @@ function saveStaff() {
 
     var data = {
         name: name, role: document.getElementById('staffRole').value,
-        specialty: document.getElementById('staffSpecialty').value.trim(),
+        specialty: document.getElementById('staffSpecialty').value,
         degree: document.getElementById('staffDegree').value.trim(),
-        phone: phone, email: document.getElementById('staffEmail').value.trim(),
+        phone: phone,
         startDate: document.getElementById('staffStartDate').value,
-        status: document.getElementById('staffStatus').value,
-        notes: document.getElementById('staffNotes').value.trim()
+        status: document.getElementById('staffStatus').value
     };
 
     if (editingStaffId) {
@@ -412,14 +400,11 @@ function renderAccounts() {
             var statusBadge = a.status === 'active'
                 ? '<span class="badge badge-active"><i class="fas fa-circle"></i> Hoạt động</span>'
                 : '<span class="badge badge-inactive"><i class="fas fa-ban"></i> Bị khóa</span>';
-            var contact = a.phone || '';
-            if (a.email) contact += (contact ? ' / ' : '') + '<span style="color:var(--text-sub);font-size:0.8rem">' + escapeHtml(a.email) + '</span>';
             return '<tr>' +
                 '<td><span style="font-weight:700;color:var(--primary-color)">#' + a.id + '</span></td>' +
                 '<td style="font-weight:600">' + escapeHtml(a.name) + '</td>' +
-                '<td style="font-family:monospace;color:var(--text-sub)">' + escapeHtml(a.username) + '</td>' +
+                '<td>' + (a.phone || '—') + '</td>' +
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
-                '<td>' + (contact || '—') + '</td>' +
                 '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
                 '<td><div class="action-btns">' +
@@ -451,11 +436,9 @@ function openAccountModal() {
     document.getElementById('accModalTitle').innerText = 'Thêm tài khoản mới';
     document.getElementById('accId').value = '';
     document.getElementById('accName').value = '';
-    document.getElementById('accUsername').value = '';
     document.getElementById('accRole').value = 'customer';
     document.getElementById('accPassword').value = '';
     document.getElementById('accPhone').value = '';
-    document.getElementById('accEmail').value = '';
     document.getElementById('accStatus').value = 'active';
     document.getElementById('accountModal').style.display = 'flex';
 }
@@ -467,11 +450,9 @@ function editAccount(id) {
     document.getElementById('accModalTitle').innerText = 'Sửa tài khoản';
     document.getElementById('accId').value = a.id;
     document.getElementById('accName').value = a.name;
-    document.getElementById('accUsername').value = a.username;
     document.getElementById('accRole').value = a.role;
     document.getElementById('accPassword').value = '';
     document.getElementById('accPhone').value = a.phone || '';
-    document.getElementById('accEmail').value = a.email || '';
     document.getElementById('accStatus').value = a.status;
     document.getElementById('accountModal').style.display = 'flex';
 }
@@ -480,20 +461,17 @@ function closeAccountModal() { document.getElementById('accountModal').style.dis
 
 function saveAccount() {
     var name = document.getElementById('accName').value.trim();
-    var username = document.getElementById('accUsername').value.trim();
-    if (!name || !username) { showToast('Vui lòng điền đủ họ tên và tên đăng nhập!', 'error'); return; }
+    var phone = document.getElementById('accPhone').value.trim();
+    if (!name || !phone) { showToast('Vui lòng điền đủ họ tên và số điện thoại!', 'error'); return; }
     if (!editingAccId && !document.getElementById('accPassword').value) {
         showToast('Vui lòng nhập mật khẩu!', 'error'); return;
     }
-
     var data = {
-        name: name, username: username,
+        name: name,
         role: document.getElementById('accRole').value,
-        phone: document.getElementById('accPhone').value.trim(),
-        email: document.getElementById('accEmail').value.trim(),
+        phone: phone,
         status: document.getElementById('accStatus').value
     };
-
     if (editingAccId) {
         var idx = accounts.findIndex(function(a){return a.id===editingAccId;});
         if (idx > -1) { accounts[idx] = Object.assign({}, accounts[idx], data); showToast('Đã cập nhật tài khoản'); }
@@ -522,6 +500,81 @@ function deleteAccount(id) {
     showToast('Đã xóa tài khoản');
 }
 
+// ==================== DOANH THU ====================
+var revenueData = [
+    {month:'T1/2024', revenue:48500000, appointments:42, services:68},
+    {month:'T2/2024', revenue:52300000, appointments:47, services:74},
+    {month:'T3/2024', revenue:61200000, appointments:55, services:89},
+    {month:'T4/2024', revenue:58700000, appointments:51, services:82},
+    {month:'T5/2024', revenue:73400000, appointments:64, services:103},
+    {month:'T6/2024', revenue:69800000, appointments:60, services:97},
+    {month:'T7/2024', revenue:81200000, appointments:72, services:116},
+    {month:'T8/2024', revenue:76500000, appointments:68, services:109},
+    {month:'T9/2024', revenue:88900000, appointments:79, services:128},
+    {month:'T10/2024', revenue:92100000, appointments:83, services:134},
+    {month:'T11/2024', revenue:105600000, appointments:94, services:152},
+    {month:'T12/2024', revenue:118300000, appointments:106, services:171}
+];
+
+var revenueDetails = [
+    {id:1, date:'15/12/2024', patient:'Nguyễn Văn Hiển', service:'Bọc sứ Zirconia x2', amount:12000000, method:'Chuyển khoản'},
+    {id:2, date:'14/12/2024', patient:'Trần Thị Thảo', service:'Niềng răng Invisalign', amount:80000000, method:'Trả góp'},
+    {id:3, date:'13/12/2024', patient:'Lê Anh Nam', service:'Implant cao cấp x1', amount:30000000, method:'Tiền mặt'},
+    {id:4, date:'12/12/2024', patient:'Phạm Thu Hà', service:'Tẩy trắng Laser', amount:2500000, method:'Chuyển khoản'},
+    {id:5, date:'11/12/2024', patient:'Hoàng Văn Tuấn', service:'Khám + Cạo vôi', amount:300000, method:'Tiền mặt'},
+    {id:6, date:'10/12/2024', patient:'Đặng Thị Hoa', service:'Bọc sứ Cercon x3', amount:15000000, method:'Chuyển khoản'},
+    {id:7, date:'09/12/2024', patient:'Bùi Minh Quân', service:'Nhổ răng khôn x2', amount:6000000, method:'Tiền mặt'},
+    {id:8, date:'08/12/2024', patient:'Ngô Thị Lan', service:'Veneer x4', amount:28000000, method:'Trả góp'}
+];
+
+function renderRevenue() {
+    // Stats
+    var totalRevenue = revenueData.reduce(function(a,r){return a+r.revenue;},0);
+    var totalAppt = revenueData.reduce(function(a,r){return a+r.appointments;},0);
+    var lastMonth = revenueData[revenueData.length-1].revenue;
+    var prevMonth = revenueData[revenueData.length-2].revenue;
+    var growth = Math.round((lastMonth-prevMonth)/prevMonth*100);
+
+    document.getElementById('revTotalYear').innerText = formatRevenue(totalRevenue);
+    document.getElementById('revLastMonth').innerText = formatRevenue(lastMonth);
+    document.getElementById('revGrowth').innerText = (growth>0?'+':'')+growth+'%';
+    document.getElementById('revTotalAppt').innerText = totalAppt;
+
+    // Chart bars
+    var maxRev = Math.max.apply(null, revenueData.map(function(r){return r.revenue;}));
+    var chart = document.getElementById('revenueChart');
+    chart.innerHTML = revenueData.map(function(r) {
+        var pct = Math.round(r.revenue/maxRev*100);
+        return '<div class="rev-bar-group">' +
+            '<div class="rev-bar-wrap">' +
+                '<div class="rev-bar-label-top">' + formatRevenue(r.revenue) + '</div>' +
+                '<div class="rev-bar" style="height:' + pct + '%"></div>' +
+            '</div>' +
+            '<div class="rev-bar-month">' + r.month + '</div>' +
+        '</div>';
+    }).join('');
+
+    // Table
+    var tbody = document.getElementById('revTableBody');
+    tbody.innerHTML = revenueDetails.map(function(r) {
+        var methodClass = r.method==='Tiền mặt'?'method-cash':r.method==='Chuyển khoản'?'method-transfer':'method-card';
+        return '<tr>' +
+            '<td>#'+r.id+'</td>' +
+            '<td>'+r.date+'</td>' +
+            '<td style="font-weight:600">'+r.patient+'</td>' +
+            '<td>'+r.service+'</td>' +
+            '<td><span class="payment-badge '+methodClass+'">'+r.method+'</span></td>' +
+            '<td style="font-weight:700;color:var(--success)">'+r.amount.toLocaleString('vi-VN')+'đ</td>' +
+        '</tr>';
+    }).join('');
+}
+
+function formatRevenue(n) {
+    if (n >= 1000000000) return (n/1000000000).toFixed(1)+'Tỷ';
+    if (n >= 1000000) return (n/1000000).toFixed(0)+'Tr';
+    return (n/1000).toFixed(0)+'K';
+}
+
 // ==================== ĐÓNG MODAL KHI CLICK NGOÀI ====================
 window.onclick = function(e) {
     if (e.target === document.getElementById('serviceModal')) closeServiceModal();
@@ -534,6 +587,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderServices();
     renderStaff();
     renderAccounts();
+    renderRevenue();
 
     // Filter dịch vụ
     document.querySelectorAll('[data-svc-filter]').forEach(function(btn) {
