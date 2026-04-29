@@ -100,7 +100,7 @@
             </div>
             <% } %>
 
-            <div class="reviews-list">
+            <div class="reviews-list" id="reviewsList">
                 <div class="review-card fade-in">
                     <div class="review-header"><div class="review-avatar">NA</div><div class="review-info"><div class="review-name">Nguyễn An</div><div class="review-date">15/03/2024</div></div><div class="review-stars">★★★★★</div></div>
                     <p class="review-text">Phòng khám rất sạch sẽ, bác sĩ tư vấn nhiệt tình. Mình cạo vôi và trám răng rất nhanh gọn, không đau. Sẽ quay lại!</p>
@@ -118,6 +118,7 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
+    <script>window.LOGGED_USER = '<%= loggedInUser != null ? loggedInUser : "" %>';</script>
     <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
     <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
 </body>
