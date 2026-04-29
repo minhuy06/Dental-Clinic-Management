@@ -19,8 +19,8 @@
                 </div>
                 <form id="loginForm" onsubmit="return handleLogin(event)">
                     <div class="form-group" id="accountGroup">
-                        <label>Số điện thoại / Email / Tên người dùng <span style="color:#e74c3c">*</span></label>
-                        <input type="text" class="form-control" id="loginAccount" placeholder="Nhập SĐT, email hoặc tên đăng nhập">
+                        <label>Số điện thoại <span style="color:#e74c3c">*</span></label>
+                        <input type="text" class="form-control" id="loginAccount" placeholder="Nhập số điện thoại">
                         <div class="form-error">Vui lòng nhập thông tin đăng nhập</div>
                     </div>
                     <div class="form-group" id="passGroup">
