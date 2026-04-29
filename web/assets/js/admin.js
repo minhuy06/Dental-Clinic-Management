@@ -1,3 +1,5 @@
+// ==================== DỮ LIỆU MẪU ====================
+
 var services = [
     {id:1, name:'Khám tổng quát', desc:'Kiểm tra răng miệng toàn diện', time:'20 phút', price:100000, cat:'kham', perUnit:false, unit:'', status:'active'},
     {id:2, name:'Cạo vôi răng', desc:'Loại bỏ mảng bám, vôi răng', time:'30 phút', price:200000, cat:'kham', perUnit:false, unit:'', status:'active'},
@@ -22,14 +24,12 @@ var services = [
 ];
 
 var staffList = [
-    {id:1, name:'BS. Nguyễn Hải', role:'doctor', specialty:'Răng tổng quát', degree:'CKI', phone:'0901234561', email:'nguyen.hai@5ae.com', startDate:'2020-01-10', status:'active', notes:''},
-    {id:2, name:'BS. Trần Tâm', role:'doctor', specialty:'Chỉnh nha', degree:'Thạc sĩ', phone:'0901234562', email:'tran.tam@5ae.com', startDate:'2019-06-01', status:'active', notes:''},
-    {id:3, name:'BS. Lê Quang', role:'doctor', specialty:'Phục hình', degree:'Tiến sĩ', phone:'0901234563', email:'le.quang@5ae.com', startDate:'2018-03-15', status:'active', notes:''},
-    {id:4, name:'BS. Phạm Hương', role:'doctor', specialty:'Thẩm mỹ nha', degree:'CKI', phone:'0901234564', email:'pham.huong@5ae.com', startDate:'2021-09-01', status:'active', notes:''},
-    {id:5, name:'BS. Hoàng Quân', role:'doctor', specialty:'Phẫu thuật miệng', degree:'CKII', phone:'0901234565', email:'hoang.quan@5ae.com', startDate:'2017-11-20', status:'active', notes:''},
-    {id:6, name:'Nguyễn Thị Lan', role:'nurse', specialty:'Hỗ trợ điều trị', degree:'', phone:'0912345601', email:'lan.nv@5ae.com', startDate:'2022-01-05', status:'active', notes:''},
-    {id:7, name:'Trần Văn Hùng', role:'receptionist', specialty:'Tiếp nhận bệnh nhân', degree:'', phone:'0912345602', email:'hung.tv@5ae.com', startDate:'2022-04-10', status:'active', notes:''},
-    {id:8, name:'Lê Thị Mai', role:'nurse', specialty:'Hỗ trợ phẫu thuật', degree:'', phone:'0912345603', email:'mai.lt@5ae.com', startDate:'2021-07-15', status:'leave', notes:'Đang nghỉ thai sản'}
+    {id:1, name:'BS. Nguyễn Hải', role:'doctor', specialty:'Răng tổng quát', degree:'CKI', phone:'0901234561', startDate:'2020-01-10', status:'active'},
+    {id:2, name:'BS. Trần Tâm', role:'doctor', specialty:'Chỉnh nha', degree:'Thạc sĩ', phone:'0901234562', startDate:'2019-06-01', status:'active'},
+    {id:3, name:'BS. Lê Quang', role:'doctor', specialty:'Phục hình', degree:'Tiến sĩ', phone:'0901234563', startDate:'2018-03-15', status:'active'},
+    {id:4, name:'BS. Phạm Hương', role:'doctor', specialty:'Thẩm mỹ nha', degree:'CKI', phone:'0901234564', startDate:'2021-09-01', status:'active'},
+    {id:5, name:'BS. Hoàng Quân', role:'doctor', specialty:'Phẫu thuật miệng', degree:'CKII', phone:'0901234565', startDate:'2017-11-20', status:'active'},
+    {id:6, name:'Trần Văn Hùng', role:'receptionist', specialty:'Tiếp nhận bệnh nhân', degree:'', phone:'0912345602', startDate:'2022-04-10', status:'active'}
 ];
 
 var accounts = [
@@ -39,12 +39,12 @@ var accounts = [
     {id:4, name:'BS. Lê Quang', username:'bs.lequang', role:'doctor', phone:'0901234563', email:'le.quang@5ae.com', createdDate:'2018-03-15', status:'active'},
     {id:5, name:'BS. Phạm Hương', username:'bs.phamhuong', role:'doctor', phone:'0901234564', email:'pham.huong@5ae.com', createdDate:'2021-09-01', status:'active'},
     {id:6, name:'BS. Hoàng Quân', username:'bs.hoangquan', role:'doctor', phone:'0901234565', email:'hoang.quan@5ae.com', createdDate:'2017-11-20', status:'active'},
-    {id:7, name:'Nguyễn Thị Lan', username:'nv.lan', role:'staff', phone:'0912345601', email:'lan.nv@5ae.com', createdDate:'2022-01-05', status:'active'},
-    {id:8, name:'Trần Văn Hùng', username:'nv.hung', role:'staff', phone:'0912345602', email:'hung.tv@5ae.com', createdDate:'2022-04-10', status:'active'},
-    {id:9, name:'Nguyễn Văn Hiển', username:'0908123456', role:'customer', phone:'0908123456', email:'', createdDate:'2024-01-10', status:'active'},
-    {id:10, name:'Trần Thị Thảo', username:'0918765432', role:'customer', phone:'0918765432', email:'', createdDate:'2024-02-15', status:'active'},
-    {id:11, name:'Lê Anh Nam', username:'0987654321', role:'customer', phone:'0987654321', email:'', createdDate:'2023-11-20', status:'inactive'},
-    {id:12, name:'Phạm Thu Hà', username:'0978123456', role:'customer', phone:'0978123456', email:'', createdDate:'2024-03-05', status:'active'}
+    {id:7, name:'Trần Văn Hùng', username:'nv.hung', role:'staff', phone:'0912345602', email:'hung.tv@5ae.com', createdDate:'2022-04-10', status:'active'},
+    {id:8, name:'Nguyễn Thị Bích', username:'nv.bich', role:'staff', phone:'0912345605', email:'bich.nt@5ae.com', createdDate:'2023-02-01', status:'active'},
+    {id:9, name:'Nguyễn Văn Hiển', username:'0908123456', role:'customer', phone:'0908123456', email:'', createdDate:'2025-06-12', status:'active'},
+    {id:10, name:'Trần Thị Thảo', username:'0918765432', role:'customer', phone:'0918765432', email:'', createdDate:'2025-09-20', status:'active'},
+    {id:11, name:'Lê Anh Nam', username:'0987654321', role:'customer', phone:'0987654321', email:'', createdDate:'2025-03-08', status:'inactive'},
+    {id:12, name:'Phạm Thu Hà', username:'0978123456', role:'customer', phone:'0978123456', email:'', createdDate:'2026-01-15', status:'active'}
 ];
 
 // ==================== BIẾN TOÀN CỤC ====================
@@ -93,18 +93,45 @@ function renderPagination(containerId, total, perPage, currentPage, onClickFn) {
 
 // ==================== TAB SWITCHING ====================
 function switchTab(tab, el) {
-    // Ẩn tất cả panel
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
-    // Bỏ active tất cả nav link
     document.querySelectorAll('.nav-menu a').forEach(function(a) { a.classList.remove('active'); });
-    // Hiện panel được chọn
     document.getElementById('panel-' + tab).classList.add('active');
-    // Active đúng link trên nav
     if (el) el.classList.add('active');
+    // Re-render khi switch tab để đảm bảo dữ liệu hiển thị đúng
+    if (tab === 'services')  renderServices();
+    if (tab === 'staff')     renderStaff();
+    if (tab === 'accounts')  renderAccounts();
+    if (tab === 'revenue')   renderRevenue();
     return false;
 }
 
-// ==================== DỊCH VỤ ====================
+// ==================== FILTER HELPERS (dùng cho onclick inline) ====================
+function setSvcFilter(val, btn) {
+    svcFilter = val; svcPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(function(b){
+        if(b.closest('#panel-services')) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    renderServices();
+}
+function setStaffFilter(val, btn) {
+    staffFilter = val; staffPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(function(b){
+        if(b.closest('#panel-staff')) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    renderStaff();
+}
+function setAccFilter(val, btn) {
+    accFilter = val; accPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(function(b){
+        if(b.closest('#panel-accounts')) b.classList.remove('active');
+    });
+    btn.classList.add('active');
+    renderAccounts();
+}
+
+
 var catConfig = {
     'kham':      {label:'Khám & Chẩn đoán', color:'#2563eb', bg:'#dbeafe', icon:'fa-stethoscope'},
     'tham-my':   {label:'Thẩm mỹ',          color:'#ec4899', bg:'#fce7f3', icon:'fa-star'},
@@ -168,7 +195,7 @@ function updateSvcStats() {
 
 function goSvcPage(p) { svcPage = p; renderServices(); }
 
-function openServiceModal(id) {
+function openServiceModal() {
     editingSvcId = null;
     document.getElementById('serviceModalTitle').innerText = 'Thêm dịch vụ mới';
     document.getElementById('svcId').value = '';
@@ -262,7 +289,7 @@ function renderStaff() {
     var search = document.getElementById('staffSearch').value.toLowerCase();
     var filtered = staffList.filter(function(s) {
         return (staffFilter === 'all' || s.role === staffFilter) &&
-               (!search || s.name.toLowerCase().indexOf(search) > -1 || s.phone.indexOf(search) > -1 || s.email.toLowerCase().indexOf(search) > -1);
+               (!search || s.name.toLowerCase().indexOf(search) > -1 || s.phone.indexOf(search) > -1);
     });
 
     var total = filtered.length;
@@ -271,7 +298,7 @@ function renderStaff() {
 
     var tbody = document.getElementById('staffTableBody');
     if (paged.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-sub)">Không có dữ liệu nhân sự</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-sub)">Không có dữ liệu nhân sự</td></tr>';
     } else {
         tbody.innerHTML = paged.map(function(s) {
             var rc = roleConfig[s.role] || {label:s.role, badge:'badge-staff', icon:'fa-user'};
@@ -282,7 +309,6 @@ function renderStaff() {
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
                 '<td>' + (s.specialty ? escapeHtml(s.specialty) : '<span style="color:var(--text-sub)">—</span>') + (s.degree ? ' <small style="color:var(--text-sub)">(' + escapeHtml(s.degree) + ')</small>' : '') + '</td>' +
                 '<td>' + s.phone + '</td>' +
-                '<td style="color:var(--text-sub);font-size:0.82rem">' + (s.email || '—') + '</td>' +
                 '<td><span class="badge ' + sc.badge + '">' + sc.label + '</span></td>' +
                 '<td><div class="action-btns">' +
                     '<button class="btn-action btn-edit" onclick="editStaff(' + s.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
@@ -299,7 +325,7 @@ function renderStaff() {
 function updateStaffStats() {
     document.getElementById('statTotalStaff').innerText = staffList.length;
     document.getElementById('statDoctors').innerText = staffList.filter(function(s){return s.role==='doctor';}).length;
-    document.getElementById('statNurses').innerText = staffList.filter(function(s){return s.role==='nurse'||s.role==='receptionist'||s.role==='technician';}).length;
+    document.getElementById('statNurses').innerText = staffList.filter(function(s){return s.role==='receptionist';}).length;
     document.getElementById('statActiveStaff').innerText = staffList.filter(function(s){return s.status==='active';}).length;
 }
 
@@ -344,7 +370,7 @@ function saveStaff() {
 
     var data = {
         name: name, role: document.getElementById('staffRole').value,
-        specialty: document.getElementById('staffSpecialty').value,
+        specialty: document.getElementById('staffSpecialty').value.trim(),
         degree: document.getElementById('staffDegree').value.trim(),
         phone: phone,
         startDate: document.getElementById('staffStartDate').value,
@@ -393,7 +419,7 @@ function renderAccounts() {
 
     var tbody = document.getElementById('accTableBody');
     if (paged.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-sub)">Không có tài khoản nào</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-sub)">Không có tài khoản nào</td></tr>';
     } else {
         tbody.innerHTML = paged.map(function(a) {
             var rc = accRoleConfig[a.role] || {label:a.role, badge:'badge-staff'};
@@ -403,8 +429,9 @@ function renderAccounts() {
             return '<tr>' +
                 '<td><span style="font-weight:700;color:var(--primary-color)">#' + a.id + '</span></td>' +
                 '<td style="font-weight:600">' + escapeHtml(a.name) + '</td>' +
-                '<td>' + (a.phone || '—') + '</td>' +
+                '<td style="font-family:monospace;color:var(--text-sub)">' + escapeHtml(a.username) + '</td>' +
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
+                '<td>' + (a.phone || '—') + '</td>' +
                 '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
                 '<td><div class="action-btns">' +
@@ -466,12 +493,15 @@ function saveAccount() {
     if (!editingAccId && !document.getElementById('accPassword').value) {
         showToast('Vui lòng nhập mật khẩu!', 'error'); return;
     }
+
     var data = {
         name: name,
+        username: document.getElementById('accPhone').value.trim() || name.toLowerCase().replace(/\s+/g,'.'),
         role: document.getElementById('accRole').value,
-        phone: phone,
+        phone: document.getElementById('accPhone').value.trim(),
         status: document.getElementById('accStatus').value
     };
+
     if (editingAccId) {
         var idx = accounts.findIndex(function(a){return a.id===editingAccId;});
         if (idx > -1) { accounts[idx] = Object.assign({}, accounts[idx], data); showToast('Đã cập nhật tài khoản'); }
@@ -501,78 +531,368 @@ function deleteAccount(id) {
 }
 
 // ==================== DOANH THU ====================
-var revenueData = [
-    {month:'T1/2024', revenue:48500000, appointments:42, services:68},
-    {month:'T2/2024', revenue:52300000, appointments:47, services:74},
-    {month:'T3/2024', revenue:61200000, appointments:55, services:89},
-    {month:'T4/2024', revenue:58700000, appointments:51, services:82},
-    {month:'T5/2024', revenue:73400000, appointments:64, services:103},
-    {month:'T6/2024', revenue:69800000, appointments:60, services:97},
-    {month:'T7/2024', revenue:81200000, appointments:72, services:116},
-    {month:'T8/2024', revenue:76500000, appointments:68, services:109},
-    {month:'T9/2024', revenue:88900000, appointments:79, services:128},
-    {month:'T10/2024', revenue:92100000, appointments:83, services:134},
-    {month:'T11/2024', revenue:105600000, appointments:94, services:152},
-    {month:'T12/2024', revenue:118300000, appointments:106, services:171}
+
+// Dữ liệu tháng năm 2026 (tháng 4 là tháng hiện tại)
+var revenueMonths = [
+    {month:'T1', revenue:125400000, appointments:112},
+    {month:'T2', revenue:118700000, appointments:105},
+    {month:'T3', revenue:138900000, appointments:124},
+    {month:'T4', revenue:142600000, appointments:128},
+    {month:'T5', revenue:0,         appointments:0},
+    {month:'T6', revenue:0,         appointments:0},
+    {month:'T7', revenue:0,         appointments:0},
+    {month:'T8', revenue:0,         appointments:0},
+    {month:'T9', revenue:0,         appointments:0},
+    {month:'T10', revenue:0,        appointments:0},
+    {month:'T11', revenue:0,        appointments:0},
+    {month:'T12', revenue:0,        appointments:0}
 ];
 
-var revenueDetails = [
-    {id:1, date:'15/12/2024', patient:'Nguyễn Văn Hiển', service:'Bọc sứ Zirconia x2', amount:12000000, method:'Chuyển khoản'},
-    {id:2, date:'14/12/2024', patient:'Trần Thị Thảo', service:'Niềng răng Invisalign', amount:80000000, method:'Trả góp'},
-    {id:3, date:'13/12/2024', patient:'Lê Anh Nam', service:'Implant cao cấp x1', amount:30000000, method:'Tiền mặt'},
-    {id:4, date:'12/12/2024', patient:'Phạm Thu Hà', service:'Tẩy trắng Laser', amount:2500000, method:'Chuyển khoản'},
-    {id:5, date:'11/12/2024', patient:'Hoàng Văn Tuấn', service:'Khám + Cạo vôi', amount:300000, method:'Tiền mặt'},
-    {id:6, date:'10/12/2024', patient:'Đặng Thị Hoa', service:'Bọc sứ Cercon x3', amount:15000000, method:'Chuyển khoản'},
-    {id:7, date:'09/12/2024', patient:'Bùi Minh Quân', service:'Nhổ răng khôn x2', amount:6000000, method:'Tiền mặt'},
-    {id:8, date:'08/12/2024', patient:'Ngô Thị Lan', service:'Veneer x4', amount:28000000, method:'Trả góp'}
+var revenueByCat = [
+    {name:'Chỉnh nha',        color:'#2563eb', revenue:198000000},
+    {name:'Phục hình',        color:'#8b5cf6', revenue:156000000},
+    {name:'Phẫu thuật',       color:'#ef4444', revenue:112000000},
+    {name:'Thẩm mỹ',          color:'#f59e0b', revenue:89000000},
+    {name:'Khám & Điều trị',  color:'#10b981', revenue:70600000}
 ];
+
+var revenueTopServices = [
+    {name:'Niềng răng Invisalign',    cat:'Chỉnh nha',  amount:112000000},
+    {name:'Cấy ghép Implant cao cấp', cat:'Phẫu thuật', amount:90000000},
+    {name:'Bọc sứ Zirconia',          cat:'Phục hình',  amount:72000000},
+    {name:'Niềng mắc cài sứ',         cat:'Chỉnh nha',  amount:56000000},
+    {name:'Mặt dán sứ Veneer',        cat:'Thẩm mỹ',    amount:42000000}
+];
+
+var revenuePayments = [
+    {method:'Chuyển khoản', icon:'fa-building-columns', color:'#2563eb', bg:'#dbeafe', pct:50, amount:313300000},
+    {method:'Tiền mặt',     icon:'fa-money-bills',      color:'#10b981', bg:'#d1fae5', pct:28, amount:175448000},
+    {method:'Trả góp',      icon:'fa-calendar-days',    color:'#f59e0b', bg:'#fef3c7', pct:16, amount:100256000},
+    {method:'Thẻ ngân hàng',icon:'fa-credit-card',      color:'#8b5cf6', bg:'#ede9fe', pct:6,  amount:37593000}
+];
+
+var revenueTxns = [
+    {id:'GD001', date:'25/04/2026', patient:'Nguyễn Văn Hiển',  service:'Bọc sứ Zirconia x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000},
+    {id:'GD002', date:'23/04/2026', patient:'Trần Thị Thảo',    service:'Niềng Invisalign',        doctor:'BS. Trần Tâm',   method:'installment', amount:80000000},
+    {id:'GD003', date:'21/04/2026', patient:'Lê Anh Nam',        service:'Implant cao cấp x1',     doctor:'BS. Hoàng Quân', method:'cash',        amount:30000000},
+    {id:'GD004', date:'19/04/2026', patient:'Phạm Thu Hà',       service:'Tẩy trắng Laser',        doctor:'BS. Phạm Hương', method:'transfer',    amount:2500000},
+    {id:'GD005', date:'17/04/2026', patient:'Hoàng Văn Tuấn',    service:'Khám + Cạo vôi',         doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000},
+    {id:'GD006', date:'15/04/2026', patient:'Đặng Thị Hoa',      service:'Bọc sứ Cercon x3',       doctor:'BS. Lê Quang',   method:'transfer',    amount:15000000},
+    {id:'GD007', date:'12/04/2026', patient:'Bùi Minh Quân',     service:'Nhổ răng khôn x2',       doctor:'BS. Hoàng Quân', method:'cash',        amount:6000000},
+    {id:'GD008', date:'10/04/2026', patient:'Ngô Thị Lan',       service:'Veneer x4',              doctor:'BS. Phạm Hương', method:'installment', amount:28000000},
+    {id:'GD009', date:'08/04/2026', patient:'Vũ Minh Đức',       service:'Niềng kim loại',         doctor:'BS. Trần Tâm',   method:'transfer',    amount:25000000},
+    {id:'GD010', date:'05/04/2026', patient:'Đinh Bảo Ngọc',     service:'Lấy tủy x3 răng',       doctor:'BS. Nguyễn Hải', method:'card',        amount:4500000}
+];
+
+// ==================== DỮ LIỆU GIAO DỊCH THEO NGÀY (demo - năm 2025 & 2026) ====================
+var allTxns = [
+    // ===== NĂM 2026 =====
+    // Tháng 4/2026
+    {id:'GD001',date:'2026-04-25',patient:'Nguyễn Văn Hiển',  service:'Bọc sứ Zirconia x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000, appointments:1},
+    {id:'GD002',date:'2026-04-23',patient:'Trần Thị Thảo',    service:'Niềng Invisalign',        doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
+    {id:'GD003',date:'2026-04-21',patient:'Lê Anh Nam',        service:'Implant cao cấp x1',     doctor:'BS. Hoàng Quân', method:'cash',        amount:30000000, appointments:1},
+    {id:'GD004',date:'2026-04-19',patient:'Phạm Thu Hà',       service:'Tẩy trắng Laser',        doctor:'BS. Phạm Hương', method:'transfer',    amount:2500000,  appointments:1},
+    {id:'GD005',date:'2026-04-17',patient:'Hoàng Văn Tuấn',    service:'Khám + Cạo vôi',         doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
+    {id:'GD006',date:'2026-04-15',patient:'Đặng Thị Hoa',      service:'Bọc sứ Cercon x3',       doctor:'BS. Lê Quang',   method:'transfer',    amount:15000000, appointments:1},
+    {id:'GD007',date:'2026-04-12',patient:'Bùi Minh Quân',     service:'Nhổ răng khôn x2',       doctor:'BS. Hoàng Quân', method:'cash',        amount:6000000,  appointments:1},
+    {id:'GD008',date:'2026-04-10',patient:'Ngô Thị Lan',       service:'Veneer x4',              doctor:'BS. Phạm Hương', method:'installment', amount:28000000, appointments:1},
+    {id:'GD009',date:'2026-04-08',patient:'Vũ Minh Đức',       service:'Niềng kim loại',         doctor:'BS. Trần Tâm',   method:'transfer',    amount:25000000, appointments:1},
+    {id:'GD010',date:'2026-04-05',patient:'Đinh Bảo Ngọc',     service:'Lấy tủy x3 răng',       doctor:'BS. Nguyễn Hải', method:'card',        amount:4500000,  appointments:1},
+    {id:'GD011',date:'2026-04-03',patient:'Trương Quốc Bảo',   service:'Implant TC x1',          doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
+    {id:'GD012',date:'2026-04-01',patient:'Lý Thị Nhung',      service:'Tẩy trắng tại nhà',     doctor:'BS. Phạm Hương', method:'cash',        amount:1500000,  appointments:1},
+    // Tháng 3/2026
+    {id:'GD013',date:'2026-03-28',patient:'Cao Minh Khoa',     service:'Niềng Invisalign',       doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
+    {id:'GD014',date:'2026-03-25',patient:'Phan Thị Kiều',     service:'Bọc sứ Zirconia x3',    doctor:'BS. Lê Quang',   method:'transfer',    amount:18000000, appointments:1},
+    {id:'GD015',date:'2026-03-20',patient:'Nguyễn Thành Long', service:'Veneer x5',              doctor:'BS. Phạm Hương', method:'installment', amount:35000000, appointments:1},
+    {id:'GD016',date:'2026-03-18',patient:'Trần Khánh Ly',     service:'Implant cao cấp x2',    doctor:'BS. Hoàng Quân', method:'transfer',    amount:60000000, appointments:1},
+    {id:'GD017',date:'2026-03-15',patient:'Lê Văn Sơn',        service:'Niềng mắc cài sứ',      doctor:'BS. Trần Tâm',   method:'installment', amount:35000000, appointments:1},
+    {id:'GD018',date:'2026-03-10',patient:'Hoàng Thu Hà',      service:'Tẩy trắng Laser',       doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
+    {id:'GD019',date:'2026-03-05',patient:'Phạm Bình An',      service:'Lấy tủy x2',            doctor:'BS. Nguyễn Hải', method:'transfer',    amount:1600000,  appointments:1},
+    {id:'GD020',date:'2026-03-02',patient:'Đỗ Thị Minh',       service:'Cạo vôi + Khám',        doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
+    // Tháng 2/2026
+    {id:'GD021',date:'2026-02-25',patient:'Võ Minh Tuấn',      service:'Implant TC x1',          doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
+    {id:'GD022',date:'2026-02-20',patient:'Bùi Thị Nga',       service:'Bọc sứ Cercon x4',      doctor:'BS. Lê Quang',   method:'transfer',    amount:20000000, appointments:1},
+    {id:'GD023',date:'2026-02-15',patient:'Nguyễn Anh Dũng',   service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
+    {id:'GD024',date:'2026-02-10',patient:'Trần Thị Bích',     service:'Veneer x3',             doctor:'BS. Phạm Hương', method:'card',        amount:21000000, appointments:1},
+    {id:'GD025',date:'2026-02-05',patient:'Lê Quốc Huy',       service:'Tẩy trắng tại nhà',    doctor:'BS. Phạm Hương', method:'cash',        amount:1500000,  appointments:1},
+    // Tháng 1/2026
+    {id:'GD026',date:'2026-01-28',patient:'Phạm Lan Anh',      service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
+    {id:'GD027',date:'2026-01-20',patient:'Hoàng Văn Nam',     service:'Niềng mắc cài kim loại',doctor:'BS. Trần Tâm',   method:'installment', amount:25000000, appointments:1},
+    {id:'GD028',date:'2026-01-15',patient:'Đặng Thu Trang',    service:'Bọc sứ Zirconia x2',   doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000, appointments:1},
+    {id:'GD029',date:'2026-01-10',patient:'Nguyễn Minh Châu',  service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
+    {id:'GD030',date:'2026-01-05',patient:'Trần Hải Đăng',     service:'Lấy tủy + Trám x2',   doctor:'BS. Nguyễn Hải', method:'card',        amount:1500000,  appointments:1},
+    // ===== NĂM 2025 =====
+    // Tháng 12/2025
+    {id:'GD031',date:'2025-12-22',patient:'Lê Thị Thu',        service:'Implant TC x2',         doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
+    {id:'GD032',date:'2025-12-18',patient:'Nguyễn Quang Vinh', service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
+    {id:'GD033',date:'2025-12-12',patient:'Phạm Thị Hồng',     service:'Veneer x4',             doctor:'BS. Phạm Hương', method:'transfer',    amount:28000000, appointments:1},
+    {id:'GD034',date:'2025-12-08',patient:'Trương Minh Hiếu',  service:'Bọc sứ Zirconia x3',   doctor:'BS. Lê Quang',   method:'card',        amount:18000000, appointments:1},
+    {id:'GD035',date:'2025-12-03',patient:'Bùi Thanh Tú',      service:'Khám + Cạo vôi',       doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
+    // Tháng 11/2025
+    {id:'GD036',date:'2025-11-25',patient:'Cao Thị Lan',        service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
+    {id:'GD037',date:'2025-11-18',patient:'Đỗ Văn Mạnh',       service:'Niềng mắc cài sứ',     doctor:'BS. Trần Tâm',   method:'installment', amount:35000000, appointments:1},
+    {id:'GD038',date:'2025-11-10',patient:'Vũ Thị Ngọc',       service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
+    // Tháng 9/2025
+    {id:'GD039',date:'2025-09-20',patient:'Lý Văn Đức',        service:'Bọc sứ Cercon x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:10000000, appointments:1},
+    {id:'GD040',date:'2025-09-10',patient:'Phan Thị Mai',      service:'Veneer x3',             doctor:'BS. Phạm Hương', method:'installment', amount:21000000, appointments:1},
+    // Tháng 6/2025
+    {id:'GD041',date:'2025-06-18',patient:'Ngô Văn Hùng',      service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
+    {id:'GD042',date:'2025-06-05',patient:'Đinh Thị Phương',   service:'Implant TC x1',         doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
+    // Tháng 3/2025
+    {id:'GD043',date:'2025-03-22',patient:'Trần Văn Khoa',     service:'Bọc sứ Zirconia x4',   doctor:'BS. Lê Quang',   method:'transfer',    amount:24000000, appointments:1},
+    {id:'GD044',date:'2025-03-10',patient:'Nguyễn Thị Hằng',  service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'card',        amount:2500000,  appointments:1},
+    // Tháng 1/2025
+    {id:'GD045',date:'2025-01-15',patient:'Lê Minh Quân',      service:'Niềng mắc cài kim loại',doctor:'BS. Trần Tâm',   method:'installment', amount:25000000, appointments:1},
+    {id:'GD046',date:'2025-01-08',patient:'Phạm Hoàng Anh',    service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1}
+];
+
+// ==================== CHẾ ĐỘ LỌC ====================
+var revMode = 'day';
+
+function setRevMode(mode) {
+    revMode = mode;
+    document.querySelectorAll('.rev-mode-btn').forEach(function(b){b.classList.remove('active');});
+    document.getElementById('revMode' + mode.charAt(0).toUpperCase() + mode.slice(1)).classList.add('active');
+    document.getElementById('revInputDay').style.display   = mode === 'day'   ? 'flex' : 'none';
+    document.getElementById('revInputMonth').style.display = mode === 'month' ? 'flex' : 'none';
+    document.getElementById('revInputYear').style.display  = mode === 'year'  ? 'flex' : 'none';
+}
+
+function applyRevFilter() {
+    var filtered = [];
+    var label = '';
+
+    if (revMode === 'day') {
+        var from = document.getElementById('revDateFrom').value; // yyyy-mm-dd
+        var to   = document.getElementById('revDateTo').value;
+        if (!from || !to) { showToast('Vui lòng chọn đủ ngày bắt đầu và kết thúc!', 'error'); return; }
+        if (from > to) { showToast('Ngày bắt đầu phải nhỏ hơn ngày kết thúc!', 'error'); return; }
+        filtered = allTxns.filter(function(t){ return t.date >= from && t.date <= to; });
+        label = '<i class="fas fa-calendar-day"></i> Thống kê từ ' + formatDate(from) + ' đến ' + formatDate(to);
+    } else if (revMode === 'month') {
+        var mon  = parseInt(document.getElementById('revMonthSel').value);
+        var yr   = parseInt(document.getElementById('revMonthYear').value);
+        filtered = allTxns.filter(function(t){
+            var d = new Date(t.date);
+            return d.getFullYear() === yr && (d.getMonth()+1) === mon;
+        });
+        label = '<i class="fas fa-calendar-alt"></i> Thống kê Tháng ' + mon + ' / ' + yr;
+    } else {
+        var yr2 = parseInt(document.getElementById('revYearSel').value);
+        filtered = allTxns.filter(function(t){ return t.date.startsWith(yr2 + ''); });
+        label = '<i class="fas fa-calendar"></i> Thống kê Năm ' + yr2;
+    }
+
+    // Tính kết quả
+    var totalRev  = filtered.reduce(function(a,t){return a+t.amount;},0);
+    var totalAppt = filtered.reduce(function(a,t){return a+t.appointments;},0);
+    var avgRev    = filtered.length ? Math.round(totalRev / filtered.length) : 0;
+
+    document.getElementById('revFilterResult').style.display = 'block';
+    document.getElementById('revFilterLabel').innerHTML = label;
+    document.getElementById('revFrTotal').innerText = fmtRev(totalRev);
+    document.getElementById('revFrTxns').innerText  = filtered.length;
+    document.getElementById('revFrAppts').innerText = totalAppt;
+    document.getElementById('revFrAvg').innerText   = fmtRev(avgRev);
+
+    // --- Mini bar chart ---
+    var chartData = buildChartData(filtered, revMode);
+    var maxC = Math.max.apply(null, chartData.map(function(c){return c.val;})) || 1;
+    document.getElementById('revFrChart').innerHTML = chartData.length === 0
+        ? '<div style="margin:auto;color:var(--text-sub);font-size:0.85rem">Không có dữ liệu</div>'
+        : chartData.map(function(c) {
+            var h = Math.max(4, Math.round(c.val / maxC * 90));
+            return '<div class="rev-fr-col" title="' + c.lbl + ': ' + c.val.toLocaleString('vi-VN') + 'đ">' +
+                '<div class="rev-fr-col-val">' + (c.val > 0 ? fmtRev(c.val) : '') + '</div>' +
+                '<div class="rev-fr-col-bar" style="height:' + h + 'px"></div>' +
+                '<div class="rev-fr-col-lbl">' + c.lbl + '</div>' +
+            '</div>';
+        }).join('');
+
+    // --- Bảng giao dịch ---
+    var methodMap = {cash:{label:'Tiền mặt',cls:'rev-cash'}, transfer:{label:'Chuyển khoản',cls:'rev-transfer'}, installment:{label:'Trả góp',cls:'rev-installment'}, card:{label:'Thẻ NH',cls:'rev-card'}};
+    document.getElementById('revFrTableBody').innerHTML = filtered.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-sub)">Không có giao dịch nào trong khoảng thời gian này</td></tr>'
+        : filtered.sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(t) {
+            var m = methodMap[t.method] || {label:t.method, cls:'rev-cash'};
+            return '<tr>' +
+                '<td><span class="rev-txn-id">#'+t.id+'</span></td>' +
+                '<td style="color:var(--text-sub)">'+formatDate(t.date)+'</td>' +
+                '<td style="font-weight:600">'+t.patient+'</td>' +
+                '<td style="color:var(--text-sub);font-size:0.8rem">'+t.service+'</td>' +
+                '<td style="color:var(--text-sub);font-size:0.8rem">'+t.doctor+'</td>' +
+                '<td><span class="rev-method-badge '+m.cls+'">'+m.label+'</span></td>' +
+                '<td class="rev-txn-amt">'+t.amount.toLocaleString('vi-VN')+'đ</td>' +
+            '</tr>';
+        }).join('');
+
+    // Scroll đến kết quả
+    document.getElementById('revFilterResult').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function buildChartData(txns, mode) {
+    if (txns.length === 0) return [];
+    var map = {};
+    txns.forEach(function(t) {
+        var d = new Date(t.date);
+        var key, lbl;
+        if (mode === 'day') {
+            key = t.date;
+            lbl = d.getDate() + '/' + (d.getMonth()+1);
+        } else if (mode === 'month') {
+            key = t.date.substr(0,7);
+            lbl = 'T' + (d.getDate());
+        } else {
+            key = 'T' + (d.getMonth()+1);
+            lbl = key;
+        }
+        map[key] = (map[key] || {lbl:lbl, val:0});
+        map[key].val += t.amount;
+    });
+    var keys = Object.keys(map).sort();
+    return keys.map(function(k){return map[k];});
+}
+
+
+function fmtRev(n) {
+    if (n >= 1000000000) return (n/1000000000).toFixed(1) + ' Tỷ';
+    if (n >= 1000000)    return (n/1000000).toFixed(0) + ' Tr';
+    return (n/1000).toFixed(0) + 'K';
+}
 
 function renderRevenue() {
-    // Stats
-    var totalRevenue = revenueData.reduce(function(a,r){return a+r.revenue;},0);
-    var totalAppt = revenueData.reduce(function(a,r){return a+r.appointments;},0);
-    var lastMonth = revenueData[revenueData.length-1].revenue;
-    var prevMonth = revenueData[revenueData.length-2].revenue;
-    var growth = Math.round((lastMonth-prevMonth)/prevMonth*100);
+    var activeMonths = revenueMonths.filter(function(r){return r.revenue > 0;});
+    var totalYear  = activeMonths.reduce(function(a,r){return a+r.revenue;}, 0);
+    var totalAppt  = activeMonths.reduce(function(a,r){return a+r.appointments;}, 0);
 
-    document.getElementById('revTotalYear').innerText = formatRevenue(totalRevenue);
-    document.getElementById('revLastMonth').innerText = formatRevenue(lastMonth);
-    document.getElementById('revGrowth').innerText = (growth>0?'+':'')+growth+'%';
-    document.getElementById('revTotalAppt').innerText = totalAppt;
+    // Tháng gần nhất có dữ liệu
+    var lastMon = activeMonths.length > 0 ? activeMonths[activeMonths.length-1] : {revenue:0, appointments:0};
+    var prevMon = activeMonths.length > 1 ? activeMonths[activeMonths.length-2] : null;
+    var growth = (prevMon && prevMon.revenue > 0) ? Math.round((lastMon.revenue - prevMon.revenue) / prevMon.revenue * 100) : 0;
 
-    // Chart bars
-    var maxRev = Math.max.apply(null, revenueData.map(function(r){return r.revenue;}));
-    var chart = document.getElementById('revenueChart');
-    chart.innerHTML = revenueData.map(function(r) {
-        var pct = Math.round(r.revenue/maxRev*100);
-        return '<div class="rev-bar-group">' +
-            '<div class="rev-bar-wrap">' +
-                '<div class="rev-bar-label-top">' + formatRevenue(r.revenue) + '</div>' +
-                '<div class="rev-bar" style="height:' + pct + '%"></div>' +
-            '</div>' +
-            '<div class="rev-bar-month">' + r.month + '</div>' +
+    document.getElementById('revTotalYear').innerText  = fmtRev(totalYear);
+    document.getElementById('revLastMonth').innerText  = fmtRev(lastMon.revenue);
+    document.getElementById('revGrowth').innerText     = (growth > 0 ? '+' : '') + growth + '%';
+    document.getElementById('revTotalAppt').innerText  = totalAppt;
+
+    // --- Bar chart: luôn hiển thị đủ 12 tháng ---
+    var maxRev = Math.max.apply(null, revenueMonths.map(function(r){return r.revenue;})) || 1;
+    document.getElementById('revenueBarChart').innerHTML = revenueMonths.map(function(r) {
+        var hasData = r.revenue > 0;
+        var pct = hasData ? Math.max(4, Math.round(r.revenue / maxRev * 100)) : 3;
+        var valM = hasData ? (r.revenue/1000000).toFixed(0) + 'Tr' : '';
+        var barColor = hasData ? 'var(--primary-color)' : 'var(--border-color)';
+        return '<div class="rev-bc-col" title="' + r.month + '/2026: ' + (hasData ? r.revenue.toLocaleString('vi-VN') + 'đ' : 'Chưa có dữ liệu') + '">' +
+            '<div class="rev-bc-val">' + valM + '</div>' +
+            '<div class="rev-bc-bar" style="height:' + pct + '%;background:' + barColor + '"></div>' +
+            '<div class="rev-bc-month">' + r.month + '</div>' +
         '</div>';
     }).join('');
 
-    // Table
-    var tbody = document.getElementById('revTableBody');
-    tbody.innerHTML = revenueDetails.map(function(r) {
-        var methodClass = r.method==='Tiền mặt'?'method-cash':r.method==='Chuyển khoản'?'method-transfer':'method-card';
+    // --- Donut chart ---
+    var catTotal = revenueByCat.reduce(function(a,c){return a+c.revenue;},0);
+    var cx=60, cy=60, r=50, stroke=14, dashTotal=2*Math.PI*r;
+    var offset=0;
+    var paths = revenueByCat.map(function(c) {
+        var pct   = c.revenue/catTotal;
+        var dash  = pct * dashTotal;
+        var gap   = dashTotal - dash;
+        var path  = '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'"' +
+            ' fill="none" stroke="'+c.color+'" stroke-width="'+stroke+'"' +
+            ' stroke-dasharray="'+dash.toFixed(2)+' '+gap.toFixed(2)+'"' +
+            ' stroke-dashoffset="'+(-offset).toFixed(2)+'"' +
+            ' transform="rotate(-90 '+cx+' '+cy+')">' +
+            '<title>'+c.name+': '+fmtRev(c.revenue)+'</title></circle>';
+        offset += dash;
+        return path;
+    }).join('');
+    document.getElementById('donutSvg').innerHTML = paths;
+    document.getElementById('donutTotal').innerText = fmtRev(catTotal);
+
+    document.getElementById('donutLegend').innerHTML = revenueByCat.map(function(c) {
+        var pct = Math.round(c.revenue/catTotal*100);
+        return '<div class="rev-dl-item">' +
+            '<div class="rev-dl-left">' +
+                '<span class="rev-dl-dot" style="background:'+c.color+'"></span>' +
+                '<span class="rev-dl-name">'+c.name+'</span>' +
+            '</div>' +
+            '<div class="rev-dl-bar-wrap"><div class="rev-dl-bar-fill" style="width:'+pct+'%;background:'+c.color+'"></div></div>' +
+            '<span class="rev-dl-pct">'+pct+'%</span>' +
+        '</div>';
+    }).join('');
+
+    // --- Top services ---
+    var rankClasses = ['gold','silver','bronze','',''];
+    document.getElementById('revTopServices').innerHTML = revenueTopServices.map(function(s,i) {
+        return '<div class="rev-top-item">' +
+            '<div class="rev-top-rank '+(rankClasses[i]||'')+'">'+(i+1)+'</div>' +
+            '<div class="rev-top-info">' +
+                '<div class="rev-top-name">'+s.name+'</div>' +
+                '<div class="rev-top-cat">'+s.cat+'</div>' +
+            '</div>' +
+            '<div class="rev-top-amt">'+fmtRev(s.amount)+'</div>' +
+        '</div>';
+    }).join('');
+
+    // --- Payment methods ---
+    document.getElementById('revPaymentMethods').innerHTML = revenuePayments.map(function(p) {
+        return '<div class="rev-pay-item">' +
+            '<div class="rev-pay-row">' +
+                '<div class="rev-pay-left">' +
+                    '<div class="rev-pay-icon" style="background:'+p.bg+';color:'+p.color+'"><i class="fas '+p.icon+'"></i></div>' +
+                    p.method +
+                '</div>' +
+                '<div style="text-align:right">' +
+                    '<div class="rev-pay-pct">'+p.pct+'%</div>' +
+                    '<div class="rev-pay-sub">'+fmtRev(p.amount)+'</div>' +
+                '</div>' +
+            '</div>' +
+            '<div class="rev-pay-track"><div class="rev-pay-fill" style="width:'+p.pct+'%;background:'+p.color+'"></div></div>' +
+        '</div>';
+    }).join('');
+
+    // --- Quarters ---
+    var quarters = [
+        {label:'Quý I (T1–T3)',  months:[0,1,2]},
+        {label:'Quý II (T4–T6)', months:[3,4,5]},
+        {label:'Quý III (T7–T9)',months:[6,7,8]},
+        {label:'Quý IV (T10–T12)',months:[9,10,11]}
+    ];
+    var maxQ = 0;
+    var qAmts = quarters.map(function(q) {
+        var amt = q.months.reduce(function(a,i){return a+revenueMonths[i].revenue;},0);
+        if (amt>maxQ) maxQ=amt;
+        return amt;
+    });
+    document.getElementById('revQuarters').innerHTML = quarters.map(function(q,i) {
+        var pct = Math.round(qAmts[i]/maxQ*100);
+        var appts = q.months.reduce(function(a,m){return a+revenueMonths[m].appointments;},0);
+        return '<div class="rev-q-item">' +
+            '<div class="rev-q-header"><span class="rev-q-label">'+q.label+'</span><span class="rev-q-amt">'+fmtRev(qAmts[i])+'</span></div>' +
+            '<div class="rev-q-track"><div class="rev-q-fill" style="width:'+pct+'%"></div></div>' +
+            '<div class="rev-q-sub">'+appts+' lượt khám &nbsp;·&nbsp; Trung bình '+fmtRev(Math.round(qAmts[i]/3))+'/tháng</div>' +
+        '</div>';
+    }).join('');
+
+    // --- Transactions table ---
+    var methodMap = {
+        'cash':        {label:'Tiền mặt',      cls:'rev-cash'},
+        'transfer':    {label:'Chuyển khoản',   cls:'rev-transfer'},
+        'installment': {label:'Trả góp',         cls:'rev-installment'},
+        'card':        {label:'Thẻ ngân hàng',  cls:'rev-card'}
+    };
+    document.getElementById('revTableBody').innerHTML = revenueTxns.map(function(t) {
+        var m = methodMap[t.method] || {label:t.method, cls:'rev-cash'};
         return '<tr>' +
-            '<td>#'+r.id+'</td>' +
-            '<td>'+r.date+'</td>' +
-            '<td style="font-weight:600">'+r.patient+'</td>' +
-            '<td>'+r.service+'</td>' +
-            '<td><span class="payment-badge '+methodClass+'">'+r.method+'</span></td>' +
-            '<td style="font-weight:700;color:var(--success)">'+r.amount.toLocaleString('vi-VN')+'đ</td>' +
+            '<td><span class="rev-txn-id">#'+t.id+'</span></td>' +
+            '<td style="color:var(--text-sub)">'+t.date+'</td>' +
+            '<td style="font-weight:600">'+t.patient+'</td>' +
+            '<td style="color:var(--text-sub);font-size:0.8rem">'+t.service+'</td>' +
+            '<td style="color:var(--text-sub);font-size:0.8rem">'+t.doctor+'</td>' +
+            '<td><span class="rev-method-badge '+m.cls+'">'+m.label+'</span></td>' +
+            '<td class="rev-txn-amt">'+t.amount.toLocaleString('vi-VN')+'đ</td>' +
         '</tr>';
     }).join('');
-}
-
-function formatRevenue(n) {
-    if (n >= 1000000000) return (n/1000000000).toFixed(1)+'Tỷ';
-    if (n >= 1000000) return (n/1000000).toFixed(0)+'Tr';
-    return (n/1000).toFixed(0)+'K';
 }
 
 // ==================== ĐÓNG MODAL KHI CLICK NGOÀI ====================
@@ -588,43 +908,4 @@ document.addEventListener('DOMContentLoaded', function() {
     renderStaff();
     renderAccounts();
     renderRevenue();
-
-    // Filter dịch vụ
-    document.querySelectorAll('[data-svc-filter]').forEach(function(btn) {
-        btn.onclick = function() {
-            svcFilter = this.getAttribute('data-svc-filter');
-            svcPage = 1;
-            document.querySelectorAll('[data-svc-filter]').forEach(function(b){b.classList.remove('active');});
-            this.classList.add('active');
-            renderServices();
-        };
-    });
-
-    document.getElementById('svcSearch').oninput = function() { svcPage = 1; renderServices(); };
-
-    // Filter nhân sự
-    document.querySelectorAll('[data-staff-filter]').forEach(function(btn) {
-        btn.onclick = function() {
-            staffFilter = this.getAttribute('data-staff-filter');
-            staffPage = 1;
-            document.querySelectorAll('[data-staff-filter]').forEach(function(b){b.classList.remove('active');});
-            this.classList.add('active');
-            renderStaff();
-        };
-    });
-
-    document.getElementById('staffSearch').oninput = function() { staffPage = 1; renderStaff(); };
-
-    // Filter tài khoản
-    document.querySelectorAll('[data-acc-filter]').forEach(function(btn) {
-        btn.onclick = function() {
-            accFilter = this.getAttribute('data-acc-filter');
-            accPage = 1;
-            document.querySelectorAll('[data-acc-filter]').forEach(function(b){b.classList.remove('active');});
-            this.classList.add('active');
-            renderAccounts();
-        };
-    });
-
-    document.getElementById('accSearch').oninput = function() { accPage = 1; renderAccounts(); };
 });
