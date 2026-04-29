@@ -288,6 +288,7 @@ function renderEditSelected() {
         html += '<div class="nb-svc-item">';
         html += '<button type="button" class="nb-svc-remove" onclick="removeEditItem(\'' + s.id + '\')" title="Xóa">✕</button>';
         html += '<span class="nb-svc-name">🦷 ' + s.name + '</span>';
+        html += '<span class="nb-svc-time">⏱ ' + s.time + '</span>';
         if (s.perUnit) {
             html += '<div class="nb-qty-row">';
             html += '<button type="button" class="nb-qty-btn" onclick="changeEditQty(\'' + s.id + '\',-1)">-</button>';
