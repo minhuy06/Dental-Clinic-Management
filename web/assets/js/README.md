@@ -1,0 +1,1 @@
+# Chỉ chứa các file mã lệnh JavaScript chạy trên trình duyệt
