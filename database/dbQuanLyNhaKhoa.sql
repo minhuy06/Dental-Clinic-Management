@@ -1116,3 +1116,51 @@ alter table PhieuKham
     drop column TrangThai
 alter table PhieuKham
     drop column TrieuChung
+go
+
+-- Sửa thuộc tính ViTriRang trong ChiTietDichVu thành kiểu int
+alter table ChiTietDichVu
+    drop column ViTriRang
+alter table ChiTietDichVu
+    add ViTriRang int
+
+-- Cập nhật răng hàm trên bên phải (11-15)
+UPDATE ChiTietDichVu SET ViTriRang = 11 WHERE ChiTietDichVu_ID = 1;
+UPDATE ChiTietDichVu SET ViTriRang = 12 WHERE ChiTietDichVu_ID = 2;
+UPDATE ChiTietDichVu SET ViTriRang = 13 WHERE ChiTietDichVu_ID = 3;
+UPDATE ChiTietDichVu SET ViTriRang = 14 WHERE ChiTietDichVu_ID = 4;
+UPDATE ChiTietDichVu SET ViTriRang = 15 WHERE ChiTietDichVu_ID = 5;
+
+-- Cập nhật răng hàm trên bên trái (21-25)
+UPDATE ChiTietDichVu SET ViTriRang = 21 WHERE ChiTietDichVu_ID = 6;
+UPDATE ChiTietDichVu SET ViTriRang = 22 WHERE ChiTietDichVu_ID = 7;
+UPDATE ChiTietDichVu SET ViTriRang = 23 WHERE ChiTietDichVu_ID = 8;
+UPDATE ChiTietDichVu SET ViTriRang = 24 WHERE ChiTietDichVu_ID = 9;
+UPDATE ChiTietDichVu SET ViTriRang = 25 WHERE ChiTietDichVu_ID = 10;
+
+-- Cập nhật răng hàm dưới bên trái (31-35)
+UPDATE ChiTietDichVu SET ViTriRang = 31 WHERE ChiTietDichVu_ID = 11;
+UPDATE ChiTietDichVu SET ViTriRang = 32 WHERE ChiTietDichVu_ID = 12;
+UPDATE ChiTietDichVu SET ViTriRang = 33 WHERE ChiTietDichVu_ID = 13;
+UPDATE ChiTietDichVu SET ViTriRang = 34 WHERE ChiTietDichVu_ID = 14;
+UPDATE ChiTietDichVu SET ViTriRang = 35 WHERE ChiTietDichVu_ID = 15;
+
+-- Cập nhật răng hàm dưới bên phải (41-45)
+UPDATE ChiTietDichVu SET ViTriRang = 41 WHERE ChiTietDichVu_ID = 16;
+UPDATE ChiTietDichVu SET ViTriRang = 42 WHERE ChiTietDichVu_ID = 17;
+UPDATE ChiTietDichVu SET ViTriRang = 43 WHERE ChiTietDichVu_ID = 18;
+UPDATE ChiTietDichVu SET ViTriRang = 44 WHERE ChiTietDichVu_ID = 19;
+UPDATE ChiTietDichVu SET ViTriRang = 45 WHERE ChiTietDichVu_ID = 20;
+
+-- Thêm thuộc tính SoLuong trong bảng ChiTietDichVu
+ALTER TABLE ChiTietDichVu 
+ADD SoLuong INT NULL;
+GO
+
+UPDATE ChiTietDichVu 
+SET SoLuong = 1, ViTriRang = NULL 
+WHERE DichVu_ID IN (1, 2, 7, 8, 17, 18, 19, 20);
+
+UPDATE ChiTietDichVu 
+SET SoLuong = 1 
+WHERE DichVu_ID IN (3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16);
