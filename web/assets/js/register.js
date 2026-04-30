@@ -57,29 +57,16 @@ function handleRegister(e) {
     } else {
         document.getElementById('nameGroup').classList.remove('error');
     }
-
-    // Kiem tra SDT + Email (phai co it nhat 1)
+    
+    // Kiem tra SDT (bat buoc)
     var phone = document.getElementById('regPhone').value.trim();
-    var email = document.getElementById('regEmail').value.trim();
-    var hasContact = false;
     document.getElementById('phoneGroup').classList.remove('error');
-    document.getElementById('emailGroup').classList.remove('error');
-    document.getElementById('contactError').style.display = 'none';
 
-    if (phone) {
-        if (!/^(0[0-9]{9})$/.test(phone)) {
-            document.getElementById('phoneGroup').classList.add('error');
-            ok = false;
-        } else hasContact = true;
-    }
-    if (email) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            document.getElementById('emailGroup').classList.add('error');
-            ok = false;
-        } else hasContact = true;
-    }
-    if (!hasContact) {
-        document.getElementById('contactError').style.display = 'block';
+    if (!phone) {
+        document.getElementById('phoneGroup').classList.add('error');
+        ok = false;
+    } else if (!/^(0[0-9]{9})$/.test(phone)) {
+        document.getElementById('phoneGroup').classList.add('error');
         ok = false;
     }
 

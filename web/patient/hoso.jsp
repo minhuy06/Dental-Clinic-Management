@@ -27,7 +27,7 @@
                     </div>
                     <div class="sidebar-menu">
                         <div class="sidebar-menu-item <%= "info".equals(activeTab)?"active":"" %>" onclick="switchTab('info',this)"><span class="menu-icon">📋</span> Thông tin cá nhân</div>
-                        <div class="sidebar-menu-item <%= "history".equals(activeTab)?"active":"" %>" onclick="switchTab('history',this)"><span class="menu-icon">📅</span> Quản lý lịch hẹn</div>
+                        <div class="sidebar-menu-item <%= "history".equals(activeTab)?"active":"" %>" onclick="switchTab('history',this)"><span class="menu-icon">📅</span> Lịch hẹn của tôi</div>
                         <div class="sidebar-menu-item <%= "password".equals(activeTab)?"active":"" %>" onclick="switchTab('password',this)"><span class="menu-icon">🔒</span> Đổi mật khẩu</div>
                         <div class="sidebar-menu-item logout" onclick="if(confirm('Bạn có chắc muốn đăng xuất?'))window.location.href=window.CONTEXT_PATH+'/index.jsp?logout=true'"><span class="menu-icon">🚪</span> Đăng xuất</div>
                     </div>
@@ -44,10 +44,7 @@
                                 <div class="info-field"><span class="field-label">Số điện thoại</span><span class="field-value" id="dispPhone">0901000001</span></div>
                             </div>
                             <div class="info-row-display">
-                                <div class="info-field"><span class="field-label">Email</span><span class="field-value" id="dispEmail">nguyenvanan@gmail.com</span></div>
                                 <div class="info-field"><span class="field-label">Ngày sinh</span><span class="field-value" id="dispDob">15/05/1990</span></div>
-                            </div>
-                            <div class="info-row-display">
                                 <div class="info-field"><span class="field-label">Giới tính</span><span class="field-value" id="dispGender">Nam</span></div>
                             </div>
                         </div>
@@ -102,12 +99,9 @@
                 <div class="form-group"><label>Họ và tên</label><input type="text" class="form-control" id="editName" value="Nguyễn Văn An" disabled style="background:#f0f4f8;color:#8c8c9a;"></div>
                 <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group"><label>Số điện thoại</label><input type="tel" class="form-control" id="editPhone" value="0901000001"></div>
-                    <div class="form-group"><label>Email</label><input type="email" class="form-control" id="editEmail" value="nguyenvanan@gmail.com"></div>
-                </div>
-                <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="editDob" value="1990-05-15"></div>
-                    <div class="form-group"><label>Giới tính</label><select class="form-control" id="editGender"><option value="Nam" selected>Nam</option><option value="Nữ">Nữ</option></select></div>
                 </div>
+                <div class="form-group"><label>Giới tính</label><select class="form-control" id="editGender"><option value="Nam" selected>Nam</option><option value="Nữ">Nữ</option></select></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeEditModal()">Hủy</button>
