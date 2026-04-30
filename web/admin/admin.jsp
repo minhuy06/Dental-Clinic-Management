@@ -19,7 +19,7 @@
         </div>
         <ul class="nav-menu">
             <li><a href="#" class="active" onclick="switchTab('services',this);return false;"><i class="fas fa-tooth"></i> Quản lý dịch vụ</a></li>
-            <li><a href="#" onclick="switchTab('staff',this);return false;"><i class="fas fa-user-md"></i> Quản lý nhân sự</a></li>
+            <li><a href="#" onclick="switchTab('schedule',this);return false;"><i class="fas fa-calendar-alt"></i> Lịch làm việc</a></li>
             <li><a href="#" onclick="switchTab('accounts',this);return false;"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
             <li><a href="#" onclick="switchTab('revenue',this);return false;"><i class="fas fa-chart-line"></i> Quản lý doanh thu</a></li>
         </ul>
@@ -40,19 +40,19 @@
                     <div class="stat-change"><i class="fas fa-chart-line"></i> Tất cả dịch vụ</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Đang hoạt động</h3><div class="stat-icon green"><i class="fas fa-check-circle"></i></div></div>
-                    <div class="stat-number" id="statActiveServices">0</div>
-                    <div class="stat-change"><i class="fas fa-check"></i> Khả dụng</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-header"><h3>Danh mục</h3><div class="stat-icon purple"><i class="fas fa-tags"></i></div></div>
+                    <div class="stat-header"><h3>Danh mục</h3><div class="stat-icon green"><i class="fas fa-tags"></i></div></div>
                     <div class="stat-number" id="statCategories">5</div>
                     <div class="stat-change"><i class="fas fa-layer-group"></i> Loại dịch vụ</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Tạm ngưng</h3><div class="stat-icon red"><i class="fas fa-pause-circle"></i></div></div>
-                    <div class="stat-number" id="statSuspended">0</div>
-                    <div class="stat-change" style="color:var(--danger)"><i class="fas fa-exclamation-circle"></i> Không khả dụng</div>
+                    <div class="stat-header"><h3>Giá trung bình</h3><div class="stat-icon purple"><i class="fas fa-calculator"></i></div></div>
+                    <div class="stat-number" id="statAvgPrice">0</div>
+                    <div class="stat-change"><i class="fas fa-coins"></i> Trên toàn bộ dịch vụ</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header"><h3>Dịch vụ cao nhất</h3><div class="stat-icon orange"><i class="fas fa-crown"></i></div></div>
+                    <div class="stat-number" id="statMaxPrice">0</div>
+                    <div class="stat-change"><i class="fas fa-star"></i> Giá cao nhất</div>
                 </div>
             </div>
             <div class="toolbar">
@@ -70,46 +70,57 @@
             <div class="pagination" id="svcPagination"></div>
         </div>
 
-        <!-- ==================== TAB: NHÂN SỰ ==================== -->
-        <div class="tab-panel" id="panel-staff">
+        <!-- ==================== TAB: LỊCH LÀM VIỆC ==================== -->
+        <div class="tab-panel" id="panel-schedule">
+            <!-- Stats -->
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Tổng nhân sự</h3><div class="stat-icon"><i class="fas fa-users"></i></div></div>
-                    <div class="stat-number" id="statTotalStaff">0</div>
-                    <div class="stat-change"><i class="fas fa-chart-line"></i> Tất cả</div>
+                    <div class="stat-header"><h3>Tổng nhân viên</h3><div class="stat-icon"><i class="fas fa-users"></i></div></div>
+                    <div class="stat-number" id="schStatTotal">0</div>
+                    <div class="stat-change"><i class="fas fa-id-badge"></i> Đang hoạt động</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Bác sĩ</h3><div class="stat-icon green"><i class="fas fa-user-md"></i></div></div>
-                    <div class="stat-number" id="statDoctors">0</div>
-                    <div class="stat-change"><i class="fas fa-stethoscope"></i> Bác sĩ điều trị</div>
+                    <div class="stat-header"><h3>Ca hôm nay</h3><div class="stat-icon green"><i class="fas fa-clock"></i></div></div>
+                    <div class="stat-number" id="schStatToday">0</div>
+                    <div class="stat-change"><i class="fas fa-calendar-day"></i> Lượt phân công</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Nhân viên</h3><div class="stat-icon purple"><i class="fas fa-user-nurse"></i></div></div>
-                    <div class="stat-number" id="statNurses">0</div>
-                    <div class="stat-change"><i class="fas fa-hospital-user"></i> Hỗ trợ điều trị</div>
+                    <div class="stat-header"><h3>Ca tháng này</h3><div class="stat-icon purple"><i class="fas fa-calendar-alt"></i></div></div>
+                    <div class="stat-number" id="schStatWeek">0</div>
+                    <div class="stat-change"><i class="fas fa-list-check"></i> Tổng ca đã xếp</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header"><h3>Đang làm việc</h3><div class="stat-icon orange"><i class="fas fa-circle"></i></div></div>
-                    <div class="stat-number" id="statActiveStaff">0</div>
-                    <div class="stat-change"><i class="fas fa-check"></i> Đang hoạt động</div>
+                    <div class="stat-header"><h3>Ngày trống</h3><div class="stat-icon orange"><i class="fas fa-exclamation-circle"></i></div></div>
+                    <div class="stat-number" id="schStatUnassigned">0</div>
+                    <div class="stat-change"><i class="fas fa-user-clock"></i> Chưa phân công</div>
                 </div>
             </div>
-            <div class="toolbar">
-                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="staffSearch" placeholder="Tìm kiếm nhân sự..." oninput="staffPage=1;renderStaff()"></div>
-                <div class="filter-buttons">
-                    <button class="filter-btn active" onclick="setStaffFilter('all',this)">Tất cả</button>
-                    <button class="filter-btn" onclick="setStaffFilter('doctor',this)">Bác sĩ</button>
-                    <button class="filter-btn" onclick="setStaffFilter('receptionist',this)">Lễ tân</button>
+
+            <!-- Toolbar -->
+            <div class="sch-toolbar">
+                <div class="sch-nav">
+                    <button class="sch-nav-btn" onclick="schNavigate(-1)"><i class="fas fa-chevron-left"></i></button>
+                    <span class="sch-nav-label" id="schNavLabel"></span>
+                    <button class="sch-nav-btn" onclick="schNavigate(1)"><i class="fas fa-chevron-right"></i></button>
+                    <button class="sch-today-btn" onclick="schGoToday()">Tháng này</button>
                 </div>
-                <button class="btn-add" onclick="openStaffModal()"><i class="fas fa-plus"></i> Thêm nhân sự</button>
+                <div class="sch-legend">
+                    <span class="sch-legend-item" style="background:#dbeafe;color:#2563eb"><i class="fas fa-briefcase-medical"></i> T2–T7: 8:00–17:00</span>
+                    <span class="sch-legend-item" style="background:#fef3c7;color:#d97706"><i class="fas fa-sun"></i> CN: 8:00–12:00</span>
+                </div>
+                <button class="btn-add" onclick="openShiftModal()"><i class="fas fa-plus"></i> Thêm ca</button>
             </div>
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Mã NS</th><th>Họ tên</th><th>Chức vụ</th><th>Chuyên khoa / Học vị</th><th>Điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
-                    <tbody id="staffTableBody"></tbody>
-                </table>
+
+            <!-- Month calendar -->
+            <div class="sch-month-view">
+                <div class="sch-month-header">
+                    <div class="sch-month-dow sch-dow-sun">CN</div>
+                    <div class="sch-month-dow">T2</div><div class="sch-month-dow">T3</div>
+                    <div class="sch-month-dow">T4</div><div class="sch-month-dow">T5</div>
+                    <div class="sch-month-dow">T6</div><div class="sch-month-dow">T7</div>
+                </div>
+                <div class="sch-month-grid" id="schMonthGrid"></div>
             </div>
-            <div class="pagination" id="staffPagination"></div>
         </div>
 
         <!-- ==================== TAB: TÀI KHOẢN ==================== -->
@@ -149,7 +160,7 @@
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>ID</th><th>Họ tên</th><th>Tên đăng nhập</th><th>Loại TK</th><th>Số điện thoại</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Họ tên</th><th>Loại TK</th><th>Chuyên khoa</th><th>Số điện thoại</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
                     <tbody id="accTableBody"></tbody>
                 </table>
             </div>
@@ -348,22 +359,18 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group"><label>Mô tả</label><textarea id="svcDesc" rows="2" placeholder="Mô tả ngắn về dịch vụ..."></textarea></div>
                 <div class="form-row">
-                    <div class="form-group"><label>Đơn giá (VNĐ) *</label><input type="number" id="svcPrice" placeholder="VD: 300000" min="0"></div>
-                    <div class="form-group"><label>Thời gian thực hiện</label><input type="text" id="svcTime" placeholder="VD: 30 phút"></div>
+                    <div class="form-group"><label>Đơn giá (VNĐ) *</label><input type="number" id="svcPrice" placeholder="300000" min="0"></div>
+                    <div class="form-group"><label>Thời gian thực hiện</label><input type="text" id="svcTime" placeholder="30 phút"></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Tính theo đơn vị?</label>
-                        <select id="svcPerUnit">
+                        <select id="svcPerUnit" onchange="toggleSvcUnit()">
                             <option value="false">Không (tính theo lần)</option>
                             <option value="true">Có (tính theo răng/trụ...)</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Đơn vị (nếu có)</label><input type="text" id="svcUnit" placeholder="VD: răng, trụ"></div>
-                </div>
-                <div class="form-group"><label>Trạng thái</label>
-                    <select id="svcStatus"><option value="active">Đang hoạt động</option><option value="inactive">Tạm ngưng</option></select>
+                    <div class="form-group" id="svcUnitGroup" style="display:none"><label>Đơn vị</label><input type="text" id="svcUnit" placeholder="răng, trụ"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -373,54 +380,45 @@
         </div>
     </div>
 
-    <!-- MODAL: NHÂN SỰ -->
-    <div id="staffModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header"><h3 id="staffModalTitle">Thêm nhân sự mới</h3><span class="close" onclick="closeStaffModal()">&times;</span></div>
+    <!-- MODAL: CA LÀM VIỆC -->
+    <div id="shiftModal" class="modal">
+        <div class="modal-content" style="max-width:460px">
+            <div class="modal-header"><h3 id="shiftModalTitle">Phân công ca làm</h3><span class="close" onclick="closeShiftModal()">&times;</span></div>
             <div class="modal-body">
-                <input type="hidden" id="staffId">
+                <input type="hidden" id="shiftId">
                 <div class="form-row">
-                    <div class="form-group"><label>Họ và tên *</label><input type="text" id="staffName" placeholder="Nhập họ tên"></div>
-                    <div class="form-group"><label>Chức vụ *</label>
-                        <select id="staffRole">
-                            <option value="doctor">Bác sĩ</option>
-                            <option value="receptionist">Lễ tân</option>
+                    <div class="form-group"><label>Ngày làm việc *</label>
+                        <input type="date" id="shiftDate" onchange="updateShiftTypeOptions()">
+                    </div>
+                    <div class="form-group"><label>Ca làm *</label>
+                        <select id="shiftType">
+                            <option value="morning">Ca Sáng (8:00 – 12:00)</option>
+                            <option value="afternoon">Ca Chiều (12:00 – 17:00)</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Chuyên khoa</label>
-                        <select id="staffSpecialty">
-                            <option value="">-- Chọn chuyên khoa --</option>
-                            <option value="Răng tổng quát">Răng tổng quát</option>
-                            <option value="Chỉnh nha">Chỉnh nha</option>
-                            <option value="Phục hình">Phục hình</option>
-                            <option value="Thẩm mỹ nha">Thẩm mỹ nha</option>
-                            <option value="Phẫu thuật miệng">Phẫu thuật miệng</option>
-                            <option value="Nha chu">Nha chu</option>
-                            <option value="Răng trẻ em">Răng trẻ em</option>
-                            <option value="Tiếp nhận bệnh nhân">Tiếp nhận bệnh nhân</option>
-                            <option value="Kỹ thuật phục hình">Kỹ thuật phục hình</option>
-                            <option value="Kỹ thuật chỉnh nha">Kỹ thuật chỉnh nha</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Bằng cấp / Học vị</label><input type="text" id="staffDegree" placeholder="VD: CKI, Thạc sĩ, Tiến sĩ"></div>
+                <div class="form-group"><label>Nhân viên *</label>
+                    <select id="shiftStaff"></select>
                 </div>
-                <div class="form-row">
-                    <div class="form-group"><label>Số điện thoại *</label><input type="tel" id="staffPhone" placeholder="Nhập số điện thoại"></div>
-                    <div class="form-group"><label>Ngày bắt đầu làm</label><input type="date" id="staffStartDate"></div>
-                </div>
-                <div class="form-group"><label>Trạng thái</label>
-                    <select id="staffStatus">
-                        <option value="active">Đang làm việc</option>
-                        <option value="inactive">Nghỉ việc</option>
-                        <option value="leave">Nghỉ phép</option>
-                    </select>
+                <div class="form-group"><label>Ghi chú</label>
+                    <input type="text" id="shiftNote" placeholder="Ghi chú thêm (nếu có)">
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="closeStaffModal()">Hủy</button>
-                <button class="btn-save" onclick="saveStaff()">Lưu nhân sự</button>
+                <button class="btn-cancel" onclick="closeShiftModal()">Hủy</button>
+                <button class="btn-save" onclick="saveShift()">Lưu phân công</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: THÔNG TIN NHÂN SỰ (popup khi bấm tên) -->
+    <div id="staffInfoModal" class="modal">
+        <div class="modal-content" style="max-width:500px">
+            <div class="modal-header"><h3>Thông tin nhân sự</h3><span class="close" onclick="closeStaffInfoModal()">&times;</span></div>
+            <div class="modal-body" id="staffInfoBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeStaffInfoModal()">Đóng</button>
+                <button class="btn-save" onclick="editAccountFromInfo()">Sửa thông tin</button>
             </div>
         </div>
     </div>
@@ -434,8 +432,7 @@
                 <div class="form-row">
                     <div class="form-group"><label>Họ và tên *</label><input type="text" id="accName" placeholder="Nhập họ tên"></div>
                     <div class="form-group"><label>Loại tài khoản *</label>
-                        <select id="accRole">
-                            <option value="customer">Khách hàng</option>
+                        <select id="accRole" onchange="onAccRoleChange()">
                             <option value="doctor">Bác sĩ</option>
                             <option value="staff">Nhân viên</option>
                             <option value="admin">Admin</option>
@@ -443,10 +440,36 @@
                     </div>
                 </div>
                 <div class="form-row">
+                    <div class="form-group"><label>Ngày sinh</label><input type="date" id="accDob"></div>
+                    <div class="form-group"><label>Giới tính</label>
+                        <select id="accGender">
+                            <option value="">-- Chọn --</option>
+                            <option value="male">Nam</option>
+                            <option value="female">Nữ</option>
+                            <option value="other">Khác</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group" id="accSpecialtyGroup"><label>Chuyên khoa</label>
+                        <select id="accSpecialty">
+                            <option value="">-- Chọn chuyên khoa --</option>
+                            <option value="Răng tổng quát">Răng tổng quát</option>
+                            <option value="Chỉnh nha">Chỉnh nha</option>
+                            <option value="Phục hình">Phục hình</option>
+                            <option value="Thẩm mỹ nha">Thẩm mỹ nha</option>
+                            <option value="Phẫu thuật miệng">Phẫu thuật miệng</option>
+                            <option value="Nha chu">Nha chu</option>
+                            <option value="Răng trẻ em">Răng trẻ em</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Bằng cấp / Học vị</label><input type="text" id="accDegree" placeholder="CKI, Thạc sĩ, Tiến sĩ"></div>
+                </div>
+                <div class="form-row">
                     <div class="form-group"><label>Số điện thoại *</label><input type="tel" id="accPhone" placeholder="Nhập số điện thoại"></div>
                     <div class="form-group"><label>Mật khẩu *</label><input type="password" id="accPassword" placeholder="Nhập mật khẩu"></div>
                 </div>
-                <div class="form-group"><label>Trạng thái</label>
+                <div class="form-group" id="accStatusGroup"><label>Trạng thái</label>
                     <select id="accStatus"><option value="active">Đang hoạt động</option><option value="inactive">Bị khóa</option></select>
                 </div>
             </div>
