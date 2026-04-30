@@ -116,6 +116,6 @@
 
 <div id="toastMessage" class="toast-message"></div>
 
-<script src="${pageContext.request.contextPath}/js/hoso.js"></script>
+<script src="${pageContext.request.contextPath}/doctor/js/hoso.js"></script>
 </body>
 </html>
