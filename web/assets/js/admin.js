@@ -1,3 +1,7 @@
+/**
+ * ==================== NHA KHOA 5AE - ADMIN.JS ====================
+ */
+
 // ==================== DỮ LIỆU MẪU ====================
 
 var services = [
@@ -33,24 +37,73 @@ var staffList = [
 ];
 
 var accounts = [
-    {id:1, name:'Admin Hệ Thống', username:'admin', role:'admin', phone:'0900000001', email:'admin@5ae.com', createdDate:'2020-01-01', status:'active'},
-    {id:2, name:'BS. Nguyễn Hải', username:'bs.nguyenhai', role:'doctor', phone:'0901234561', email:'nguyen.hai@5ae.com', createdDate:'2020-01-10', status:'active'},
-    {id:3, name:'BS. Trần Tâm', username:'bs.trantam', role:'doctor', phone:'0901234562', email:'tran.tam@5ae.com', createdDate:'2019-06-01', status:'active'},
-    {id:4, name:'BS. Lê Quang', username:'bs.lequang', role:'doctor', phone:'0901234563', email:'le.quang@5ae.com', createdDate:'2018-03-15', status:'active'},
-    {id:5, name:'BS. Phạm Hương', username:'bs.phamhuong', role:'doctor', phone:'0901234564', email:'pham.huong@5ae.com', createdDate:'2021-09-01', status:'active'},
-    {id:6, name:'BS. Hoàng Quân', username:'bs.hoangquan', role:'doctor', phone:'0901234565', email:'hoang.quan@5ae.com', createdDate:'2017-11-20', status:'active'},
-    {id:7, name:'Trần Văn Hùng', username:'nv.hung', role:'staff', phone:'0912345602', email:'hung.tv@5ae.com', createdDate:'2022-04-10', status:'active'},
-    {id:8, name:'Nguyễn Thị Bích', username:'nv.bich', role:'staff', phone:'0912345605', email:'bich.nt@5ae.com', createdDate:'2023-02-01', status:'active'},
-    {id:9, name:'Nguyễn Văn Hiển', username:'0908123456', role:'customer', phone:'0908123456', email:'', createdDate:'2025-06-12', status:'active'},
-    {id:10, name:'Trần Thị Thảo', username:'0918765432', role:'customer', phone:'0918765432', email:'', createdDate:'2025-09-20', status:'active'},
-    {id:11, name:'Lê Anh Nam', username:'0987654321', role:'customer', phone:'0987654321', email:'', createdDate:'2025-03-08', status:'inactive'},
-    {id:12, name:'Phạm Thu Hà', username:'0978123456', role:'customer', phone:'0978123456', email:'', createdDate:'2026-01-15', status:'active'}
+    {id:1, name:'Admin Hệ Thống', username:'admin', role:'admin', phone:'0900000001', dob:'1985-03-10', gender:'male', specialty:'', degree:'', createdDate:'2020-01-01', status:'active'},
+    {id:2, name:'BS. Nguyễn Hải', username:'bs.nguyenhai', role:'doctor', phone:'0901234561', dob:'1982-07-15', gender:'male', specialty:'Răng tổng quát', degree:'CKI', createdDate:'2020-01-10', status:'active'},
+    {id:3, name:'BS. Trần Tâm', username:'bs.trantam', role:'doctor', phone:'0901234562', dob:'1985-11-20', gender:'female', specialty:'Chỉnh nha', degree:'Thạc sĩ', createdDate:'2019-06-01', status:'active'},
+    {id:4, name:'BS. Lê Quang', username:'bs.lequang', role:'doctor', phone:'0901234563', dob:'1979-05-08', gender:'male', specialty:'Phục hình', degree:'Tiến sĩ', createdDate:'2018-03-15', status:'active'},
+    {id:5, name:'BS. Phạm Hương', username:'bs.phamhuong', role:'doctor', phone:'0901234564', dob:'1988-02-14', gender:'female', specialty:'Thẩm mỹ nha', degree:'CKI', createdDate:'2021-09-01', status:'active'},
+    {id:6, name:'BS. Hoàng Quân', username:'bs.hoangquan', role:'doctor', phone:'0901234565', dob:'1975-09-30', gender:'male', specialty:'Phẫu thuật miệng', degree:'CKII', createdDate:'2017-11-20', status:'active'},
+    {id:7, name:'Trần Văn Hùng', username:'nv.hung', role:'staff', phone:'0912345602', dob:'1995-04-22', gender:'male', specialty:'', degree:'', createdDate:'2022-04-10', status:'active'},
+    {id:9, name:'Nguyễn Văn Hiển', username:'0908123456', role:'customer', phone:'0908123456', dob:'1990-06-12', gender:'male', specialty:'', degree:'', createdDate:'2025-06-12', status:'active'},
+    {id:10, name:'Trần Thị Thảo', username:'0918765432', role:'customer', phone:'0918765432', dob:'1993-09-20', gender:'female', specialty:'', degree:'', createdDate:'2025-09-20', status:'active'},
+    {id:11, name:'Lê Anh Nam', username:'0987654321', role:'customer', phone:'0987654321', dob:'1988-03-08', gender:'male', specialty:'', degree:'', createdDate:'2025-03-08', status:'inactive'},
+    {id:12, name:'Phạm Thu Hà', username:'0978123456', role:'customer', phone:'0978123456', dob:'1997-01-15', gender:'female', specialty:'', degree:'', createdDate:'2026-01-15', status:'active'}
+];
+
+// Ca làm việc demo - Tháng 4 & 5/2026
+var shifts = [
+    // ---- Tuần 20–25/4 ----
+    {id:1,  staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-04-20', note:''},
+    {id:2,  staffId:5, staffName:'BS. Phạm Hương',  shiftType:'morning',   date:'2026-04-20', note:''},
+    {id:3,  staffId:3, staffName:'BS. Trần Tâm',    shiftType:'afternoon', date:'2026-04-20', note:''},
+    {id:4,  staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-04-20', note:''},
+    {id:5,  staffId:4, staffName:'BS. Lê Quang',    shiftType:'afternoon', date:'2026-04-21', note:''},
+    {id:6,  staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'afternoon', date:'2026-04-21', note:''},
+    {id:7,  staffId:6, staffName:'BS. Hoàng Quân',  shiftType:'morning',   date:'2026-04-21', note:'Phẫu thuật'},
+    {id:8,  staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-04-21', note:''},
+    {id:9,  staffId:5, staffName:'BS. Phạm Hương',  shiftType:'morning',   date:'2026-04-22', note:''},
+    {id:10, staffId:3, staffName:'BS. Trần Tâm',    shiftType:'morning',   date:'2026-04-22', note:''},
+    {id:11, staffId:4, staffName:'BS. Lê Quang',    shiftType:'morning',   date:'2026-04-22', note:''},
+    {id:12, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'afternoon', date:'2026-04-22', note:''},
+    {id:13, staffId:6, staffName:'BS. Hoàng Quân',  shiftType:'afternoon', date:'2026-04-23', note:''},
+    {id:14, staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-04-23', note:''},
+    {id:15, staffId:5, staffName:'BS. Phạm Hương',  shiftType:'afternoon', date:'2026-04-23', note:''},
+    // CN 26/4 - chỉ sáng
+    {id:16, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-04-26', note:''},
+    {id:17, staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-04-26', note:''},
+    // ---- Tuần 27–30/4 ----
+    {id:18, staffId:4, staffName:'BS. Lê Quang',    shiftType:'morning',   date:'2026-04-27', note:''},
+    {id:19, staffId:5, staffName:'BS. Phạm Hương',  shiftType:'morning',   date:'2026-04-27', note:''},
+    {id:20, staffId:3, staffName:'BS. Trần Tâm',    shiftType:'afternoon', date:'2026-04-27', note:''},
+    {id:21, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-04-28', note:''},
+    {id:22, staffId:6, staffName:'BS. Hoàng Quân',  shiftType:'morning',   date:'2026-04-28', note:'Phẫu thuật'},
+    {id:23, staffId:3, staffName:'BS. Trần Tâm',    shiftType:'afternoon', date:'2026-04-28', note:''},
+    {id:24, staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-04-28', note:''},
+    {id:25, staffId:5, staffName:'BS. Phạm Hương',  shiftType:'morning',   date:'2026-04-29', note:''},
+    {id:26, staffId:4, staffName:'BS. Lê Quang',    shiftType:'afternoon', date:'2026-04-29', note:''},
+    {id:27, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'afternoon', date:'2026-04-29', note:''},
+    {id:28, staffId:6, staffName:'BS. Hoàng Quân',  shiftType:'morning',   date:'2026-04-30', note:''},
+    {id:29, staffId:3, staffName:'BS. Trần Tâm',    shiftType:'morning',   date:'2026-04-30', note:''},
+    {id:30, staffId:7, staffName:'Trần Văn Hùng',   shiftType:'afternoon', date:'2026-04-30', note:''},
+    // ---- Tháng 5 ----
+    {id:31, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-05-04', note:''},
+    {id:32, staffId:5, staffName:'BS. Phạm Hương',  shiftType:'afternoon', date:'2026-05-04', note:''},
+    {id:33, staffId:4, staffName:'BS. Lê Quang',    shiftType:'morning',   date:'2026-05-05', note:''},
+    {id:34, staffId:6, staffName:'BS. Hoàng Quân',  shiftType:'morning',   date:'2026-05-05', note:''},
+    {id:35, staffId:3, staffName:'BS. Trần Tâm',    shiftType:'afternoon', date:'2026-05-06', note:''},
+    {id:36, staffId:7, staffName:'Trần Văn Hùng',   shiftType:'morning',   date:'2026-05-06', note:''},
+    {id:37, staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-05-07', note:''},
+    {id:38, staffId:5, staffName:'BS. Phạm Hương',  shiftType:'morning',   date:'2026-05-07', note:''}
 ];
 
 // ==================== BIẾN TOÀN CỤC ====================
 var svcFilter = 'all', svcPage = 1, svcPerPage = 6, editingSvcId = null;
-var staffFilter = 'all', staffPage = 1, staffPerPage = 8, editingStaffId = null;
 var accFilter = 'all', accPage = 1, accPerPage = 8, editingAccId = null;
+var staffInfoCurrentId = null;
+
+// Schedule state
+var schCurrentDate = new Date('2026-04-28');
+var editingShiftId = null;
 
 // ==================== TIỆN ÍCH ====================
 function escapeHtml(t) {
@@ -97,36 +150,23 @@ function switchTab(tab, el) {
     document.querySelectorAll('.nav-menu a').forEach(function(a) { a.classList.remove('active'); });
     document.getElementById('panel-' + tab).classList.add('active');
     if (el) el.classList.add('active');
-    // Re-render khi switch tab để đảm bảo dữ liệu hiển thị đúng
     if (tab === 'services')  renderServices();
-    if (tab === 'staff')     renderStaff();
+    if (tab === 'schedule')  renderSchedule();
     if (tab === 'accounts')  renderAccounts();
     if (tab === 'revenue')   renderRevenue();
     return false;
 }
 
-// ==================== FILTER HELPERS (dùng cho onclick inline) ====================
+// ==================== FILTER HELPERS ====================
 function setSvcFilter(val, btn) {
     svcFilter = val; svcPage = 1;
-    document.querySelectorAll('.filter-btn').forEach(function(b){
-        if(b.closest('#panel-services')) b.classList.remove('active');
-    });
+    document.querySelectorAll('#panel-services .filter-btn').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
     renderServices();
 }
-function setStaffFilter(val, btn) {
-    staffFilter = val; staffPage = 1;
-    document.querySelectorAll('.filter-btn').forEach(function(b){
-        if(b.closest('#panel-staff')) b.classList.remove('active');
-    });
-    btn.classList.add('active');
-    renderStaff();
-}
 function setAccFilter(val, btn) {
     accFilter = val; accPage = 1;
-    document.querySelectorAll('.filter-btn').forEach(function(b){
-        if(b.closest('#panel-accounts')) b.classList.remove('active');
-    });
+    document.querySelectorAll('#panel-accounts .filter-btn').forEach(function(b){b.classList.remove('active');});
     btn.classList.add('active');
     renderAccounts();
 }
@@ -157,17 +197,12 @@ function renderServices() {
     } else {
         grid.innerHTML = paged.map(function(s) {
             var cat = catConfig[s.cat] || {label: s.cat, color:'#6b7280', bg:'#f3f4f6', icon:'fa-tooth'};
-            var statusBadge = s.status === 'active'
-                ? '<span class="badge badge-active"><i class="fas fa-check-circle"></i> Đang dùng</span>'
-                : '<span class="badge badge-inactive"><i class="fas fa-pause-circle"></i> Tạm ngưng</span>';
             return '<div class="service-card">' +
                 '<div class="service-card-header">' +
                     '<div class="service-icon" style="background:' + cat.bg + ';color:' + cat.color + '"><i class="fas ' + cat.icon + '"></i></div>' +
-                    statusBadge +
                 '</div>' +
                 '<span class="service-cat" style="background:' + cat.bg + ';color:' + cat.color + '">' + cat.label + '</span>' +
                 '<div class="service-name">' + escapeHtml(s.name) + '</div>' +
-                '<div class="service-desc">' + escapeHtml(s.desc) + '</div>' +
                 '<div class="service-meta">' +
                     '<div class="service-price">' + formatPrice(s.price) + (s.perUnit ? ' / ' + s.unit : '') + '</div>' +
                     '<div class="service-time"><i class="fas fa-clock"></i> ' + s.time + '</div>' +
@@ -175,9 +210,6 @@ function renderServices() {
                 '<div class="service-actions">' +
                     '<button class="btn-action btn-edit" onclick="editService(' + s.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
                     '<button class="btn-action btn-delete" onclick="deleteService(' + s.id + ')" title="Xóa"><i class="fas fa-trash"></i></button>' +
-                    '<button class="btn-action ' + (s.status==='active' ? 'btn-toggle-active' : 'btn-toggle-inactive') + '" onclick="toggleServiceStatus(' + s.id + ')" title="' + (s.status==='active' ? 'Tạm ngưng' : 'Kích hoạt') + '">' +
-                        '<i class="fas ' + (s.status==='active' ? 'fa-pause' : 'fa-play') + '"></i>' +
-                    '</button>' +
                 '</div>' +
             '</div>';
         }).join('');
@@ -189,11 +221,20 @@ function renderServices() {
 
 function updateSvcStats() {
     document.getElementById('statTotalServices').innerText = services.length;
-    document.getElementById('statActiveServices').innerText = services.filter(function(s){return s.status==='active';}).length;
-    document.getElementById('statSuspended').innerText = services.filter(function(s){return s.status==='inactive';}).length;
+    var total = services.reduce(function(a,s){return a+s.price;}, 0);
+    var avg = services.length ? Math.round(total/services.length) : 0;
+    document.getElementById('statAvgPrice').innerText = formatPrice(avg);
+    var maxPrice = Math.max.apply(null, services.map(function(s){return s.price;}));
+    document.getElementById('statMaxPrice').innerText = formatPrice(maxPrice);
 }
 
 function goSvcPage(p) { svcPage = p; renderServices(); }
+
+function toggleSvcUnit() {
+    var show = document.getElementById('svcPerUnit').value === 'true';
+    document.getElementById('svcUnitGroup').style.display = show ? '' : 'none';
+    if (!show) document.getElementById('svcUnit').value = '';
+}
 
 function openServiceModal() {
     editingSvcId = null;
@@ -201,12 +242,11 @@ function openServiceModal() {
     document.getElementById('svcId').value = '';
     document.getElementById('svcName').value = '';
     document.getElementById('svcCat').value = 'kham';
-    document.getElementById('svcDesc').value = '';
     document.getElementById('svcPrice').value = '';
     document.getElementById('svcTime').value = '';
     document.getElementById('svcPerUnit').value = 'false';
     document.getElementById('svcUnit').value = '';
-    document.getElementById('svcStatus').value = 'active';
+    document.getElementById('svcUnitGroup').style.display = 'none';
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
@@ -218,12 +258,11 @@ function editService(id) {
     document.getElementById('svcId').value = s.id;
     document.getElementById('svcName').value = s.name;
     document.getElementById('svcCat').value = s.cat;
-    document.getElementById('svcDesc').value = s.desc;
     document.getElementById('svcPrice').value = s.price;
     document.getElementById('svcTime').value = s.time;
     document.getElementById('svcPerUnit').value = s.perUnit ? 'true' : 'false';
     document.getElementById('svcUnit').value = s.unit || '';
-    document.getElementById('svcStatus').value = s.status;
+    document.getElementById('svcUnitGroup').style.display = s.perUnit ? '' : 'none';
     document.getElementById('serviceModal').style.display = 'flex';
 }
 
@@ -233,18 +272,17 @@ function saveService() {
     var name = document.getElementById('svcName').value.trim();
     var price = parseInt(document.getElementById('svcPrice').value);
     if (!name || !price) { showToast('Vui lòng điền đầy đủ tên và giá dịch vụ!', 'error'); return; }
-
+    var perUnit = document.getElementById('svcPerUnit').value === 'true';
     var data = {
         name: name,
         cat: document.getElementById('svcCat').value,
-        desc: document.getElementById('svcDesc').value.trim(),
+        desc: '',
         price: price,
         time: document.getElementById('svcTime').value.trim() || 'Liên hệ',
-        perUnit: document.getElementById('svcPerUnit').value === 'true',
-        unit: document.getElementById('svcUnit').value.trim(),
-        status: document.getElementById('svcStatus').value
+        perUnit: perUnit,
+        unit: perUnit ? document.getElementById('svcUnit').value.trim() : '',
+        status: 'active'
     };
-
     if (editingSvcId) {
         var idx = services.findIndex(function(s){return s.id===editingSvcId;});
         if (idx > -1) { services[idx] = Object.assign({}, services[idx], data); showToast('Đã cập nhật dịch vụ'); }
@@ -272,129 +310,232 @@ function toggleServiceStatus(id) {
     showToast(s.status === 'active' ? 'Đã kích hoạt dịch vụ' : 'Đã tạm ngưng dịch vụ');
 }
 
-// ==================== NHÂN SỰ ====================
-var roleConfig = {
-    'doctor':       {label:'Bác sĩ',          badge:'badge-doctor',   icon:'fa-user-md'},
-    'nurse':        {label:'Điều dưỡng',       badge:'badge-staff',    icon:'fa-user-nurse'},
-    'receptionist': {label:'Lễ tân',           badge:'badge-customer', icon:'fa-concierge-bell'},
-    'technician':   {label:'Kỹ thuật viên',    badge:'badge-pending',  icon:'fa-tools'}
-};
-var staffStatusConfig = {
-    'active':   {label:'Đang làm việc', badge:'badge-active'},
-    'inactive': {label:'Nghỉ việc',     badge:'badge-inactive'},
-    'leave':    {label:'Nghỉ phép',     badge:'badge-pending'}
+// ==================== LỊCH LÀM VIỆC ====================
+var shiftConfig = {
+    morning:   {label:'Ca Sáng',  time:'8:00–12:00',  color:'#1d4ed8', bg:'#dbeafe', lightBg:'#eff6ff'},
+    afternoon: {label:'Ca Chiều', time:'12:00–17:00', color:'#047857', bg:'#d1fae5', lightBg:'#f0fdf4'}
 };
 
-function renderStaff() {
-    var search = document.getElementById('staffSearch').value.toLowerCase();
-    var filtered = staffList.filter(function(s) {
-        return (staffFilter === 'all' || s.role === staffFilter) &&
-               (!search || s.name.toLowerCase().indexOf(search) > -1 || s.phone.indexOf(search) > -1);
-    });
+// CN (0) chỉ có Ca Sáng; T2–T7 có cả 2 ca
+function schGetAvailableShifts(dateStr) {
+    var dow = new Date(dateStr + 'T00:00:00').getDay();
+    return dow === 0 ? ['morning'] : ['morning', 'afternoon'];
+}
 
-    var total = filtered.length;
-    var start = (staffPage - 1) * staffPerPage;
-    var paged = filtered.slice(start, start + staffPerPage);
+var SCH_DOW    = ['CN','T2','T3','T4','T5','T6','T7'];
+var SCH_MONTHS = ['Tháng 1','Tháng 2','Tháng 3','Tháng 4','Tháng 5','Tháng 6',
+                  'Tháng 7','Tháng 8','Tháng 9','Tháng 10','Tháng 11','Tháng 12'];
 
-    var tbody = document.getElementById('staffTableBody');
-    if (paged.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-sub)">Không có dữ liệu nhân sự</td></tr>';
-    } else {
-        tbody.innerHTML = paged.map(function(s) {
-            var rc = roleConfig[s.role] || {label:s.role, badge:'badge-staff', icon:'fa-user'};
-            var sc = staffStatusConfig[s.status] || {label:s.status, badge:'badge-active'};
-            return '<tr>' +
-                '<td><span style="font-weight:700;color:var(--primary-color)">#' + s.id + '</span></td>' +
-                '<td style="font-weight:600"><i class="fas ' + rc.icon + '" style="margin-right:8px;color:var(--primary-color)"></i>' + escapeHtml(s.name) + '</td>' +
-                '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
-                '<td>' + (s.specialty ? escapeHtml(s.specialty) : '<span style="color:var(--text-sub)">—</span>') + (s.degree ? ' <small style="color:var(--text-sub)">(' + escapeHtml(s.degree) + ')</small>' : '') + '</td>' +
-                '<td>' + s.phone + '</td>' +
-                '<td><span class="badge ' + sc.badge + '">' + sc.label + '</span></td>' +
-                '<td><div class="action-btns">' +
-                    '<button class="btn-action btn-edit" onclick="editStaff(' + s.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
-                    '<button class="btn-action btn-delete" onclick="deleteStaff(' + s.id + ')" title="Xóa"><i class="fas fa-trash"></i></button>' +
-                '</div></td>' +
-            '</tr>';
-        }).join('');
+function toYMD(d) {
+    var y = d.getFullYear();
+    var m = d.getMonth() + 1;
+    var dd = d.getDate();
+    return y + '-' + (m < 10 ? '0' : '') + m + '-' + (dd < 10 ? '0' : '') + dd;
+}
+
+function renderSchedule() {
+    updateSchStats();
+    renderMonthCalendar();
+}
+
+function updateSchStats() {
+    var staff = accounts.filter(function(a) { return a.role === 'doctor' || a.role === 'staff'; });
+    document.getElementById('schStatTotal').innerText = staff.length;
+
+    var today = toYMD(new Date());
+    document.getElementById('schStatToday').innerText = shifts.filter(function(s) { return s.date === today; }).length;
+
+    var y = schCurrentDate.getFullYear();
+    var m = schCurrentDate.getMonth() + 1;
+    var prefix = y + '-' + (m < 10 ? '0' : '') + m;
+    document.getElementById('schStatWeek').innerText = shifts.filter(function(s) { return s.date.indexOf(prefix) === 0; }).length;
+
+    var daysInMonth = new Date(y, m, 0).getDate();
+    var empty = 0;
+    for (var d = 1; d <= daysInMonth; d++) {
+        var dStr = y + '-' + (m < 10 ? '0' : '') + m + '-' + (d < 10 ? '0' : '') + d;
+        if (!shifts.some(function(s) { return s.date === dStr; })) empty++;
+    }
+    document.getElementById('schStatUnassigned').innerText = empty;
+}
+
+function schNavigate(dir) {
+    var y = schCurrentDate.getFullYear();
+    var m = schCurrentDate.getMonth() + dir;
+    schCurrentDate = new Date(y, m, 1);
+    renderSchedule();
+}
+function schGoToday() { schCurrentDate = new Date(); renderSchedule(); }
+
+function renderMonthCalendar() {
+    var y = schCurrentDate.getFullYear();
+    var m = schCurrentDate.getMonth();
+    document.getElementById('schNavLabel').innerText = SCH_MONTHS[m] + ' ' + y;
+
+    var firstDow    = new Date(y, m, 1).getDay();
+    var daysInMonth = new Date(y, m + 1, 0).getDate();
+    var todayStr    = toYMD(new Date());
+    var html        = '';
+
+    // Ô trống trước ngày 1
+    for (var b = 0; b < firstDow; b++) {
+        html += '<div class="sch-cell sch-cell-blank"></div>';
     }
 
-    renderPagination('staffPagination', total, staffPerPage, staffPage, 'goStaffPage');
-    updateStaffStats();
+    for (var d = 1; d <= daysInMonth; d++) {
+        var mm   = m + 1;
+        var dStr = y + '-' + (mm < 10 ? '0' : '') + mm + '-' + (d < 10 ? '0' : '') + d;
+        var dow  = new Date(y, m, d).getDay();
+        var isSun   = dow === 0;
+        var isToday = dStr === todayStr;
+        var avail   = schGetAvailableShifts(dStr);
+
+        var cellClass = 'sch-cell';
+        if (isToday) cellClass += ' sch-cell-today';
+        if (isSun)   cellClass += ' sch-cell-sun';
+
+        html += '<div class="' + cellClass + '">';
+
+        // Số ngày
+        var dateSpanClass = 'sch-cell-date' + (isToday ? ' sch-cell-date-today' : '') + (isSun ? ' sch-cell-date-sun' : '');
+        html += '<div class="sch-cell-head">';
+        html += '<span class="' + dateSpanClass + '">' + d + '</span>';
+        if (isSun) html += '<span class="sch-sun-tag">CN</span>';
+        html += '</div>';
+
+        // Mỗi ca
+        for (var ci = 0; ci < avail.length; ci++) {
+            var type = avail[ci];
+            var sc   = shiftConfig[type];
+            var typeShifts = shifts.filter(function(s) { return s.date === dStr && s.shiftType === type; });
+
+            html += '<div class="sch-shift-block">';
+            html += '<div class="sch-shift-title" style="color:' + sc.color + ';background:' + sc.bg + '">';
+            html += '<span>' + sc.label + '</span><small>' + sc.time + '</small>';
+            html += '</div>';
+            html += '<div class="sch-shift-body">';
+
+            for (var si = 0; si < typeShifts.length; si++) {
+                var sh = typeShifts[si];
+                // Rút gọn tên: bỏ "BS." prefix và lấy họ + tên đầu
+                var shortName = sh.staffName.replace(/^BS\.\s*/,'').split(' ');
+                var displayName = shortName.length > 1 ? shortName[shortName.length-1] : shortName[0];
+                html += '<div class="sch-chip" style="background:' + sc.bg + ';color:' + sc.color + '" title="' + escapeHtml(sh.staffName) + (sh.note ? ' – ' + sh.note : '') + '">';
+                html += escapeHtml(displayName);
+                html += '<span class="sch-chip-x" onclick="event.stopPropagation();schDeleteShift(' + sh.id + ')">×</span>';
+                html += '</div>';
+            }
+
+            // Nút thêm
+            html += '<span class="sch-add-btn" onclick="schOpenModalFor(\'' + dStr + '\',\'' + type + '\')" title="Thêm nhân viên vào ' + sc.label + '">';
+            html += '<i class="fas fa-plus"></i>';
+            html += '</span>';
+
+            html += '</div></div>'; // shift-body + shift-block
+        }
+
+        html += '</div>'; // cell
+    }
+
+    document.getElementById('schMonthGrid').innerHTML = html;
 }
 
-function updateStaffStats() {
-    document.getElementById('statTotalStaff').innerText = staffList.length;
-    document.getElementById('statDoctors').innerText = staffList.filter(function(s){return s.role==='doctor';}).length;
-    document.getElementById('statNurses').innerText = staffList.filter(function(s){return s.role==='receptionist';}).length;
-    document.getElementById('statActiveStaff').innerText = staffList.filter(function(s){return s.status==='active';}).length;
+// ---- Modal ----
+function schOpenModal() {
+    editingShiftId = null;
+    document.getElementById('shiftModalTitle').innerText = 'Phân công ca làm';
+    document.getElementById('shiftId').value = '';
+    document.getElementById('shiftDate').value = toYMD(new Date());
+    document.getElementById('shiftNote').value = '';
+    schUpdateShiftTypeOptions();
+    schPopulateStaff(null);
+    document.getElementById('shiftModal').style.display = 'flex';
+}
+// Alias để nút "Thêm ca" trên toolbar vẫn hoạt động
+function openShiftModal() { schOpenModal(); }
+
+function schOpenModalFor(date, type) {
+    schOpenModal();
+    document.getElementById('shiftDate').value = date;
+    schUpdateShiftTypeOptions();
+    document.getElementById('shiftType').value = type;
+}
+// Alias
+function openShiftModalFor(date, type) { schOpenModalFor(date, type); }
+
+function updateShiftTypeOptions() { schUpdateShiftTypeOptions(); }
+function schUpdateShiftTypeOptions() {
+    var date  = document.getElementById('shiftDate').value;
+    var avail = date ? schGetAvailableShifts(date) : ['morning', 'afternoon'];
+    var cur   = document.getElementById('shiftType').value;
+    var sel   = document.getElementById('shiftType');
+    sel.innerHTML = avail.map(function(t) {
+        return '<option value="' + t + '"' + (t === cur ? ' selected' : '') + '>' +
+               shiftConfig[t].label + ' (' + shiftConfig[t].time + ')</option>';
+    }).join('');
 }
 
-function goStaffPage(p) { staffPage = p; renderStaff(); }
-
-function openStaffModal() {
-    editingStaffId = null;
-    document.getElementById('staffModalTitle').innerText = 'Thêm nhân sự mới';
-    document.getElementById('staffId').value = '';
-    document.getElementById('staffName').value = '';
-    document.getElementById('staffRole').value = 'doctor';
-    document.getElementById('staffSpecialty').value = '';
-    document.getElementById('staffDegree').value = '';
-    document.getElementById('staffPhone').value = '';
-    document.getElementById('staffStartDate').value = '';
-    document.getElementById('staffStatus').value = 'active';
-    document.getElementById('staffModal').style.display = 'flex';
+function schPopulateStaff(selectedId) {
+    var staff = accounts.filter(function(a) { return a.role === 'doctor' || a.role === 'staff'; });
+    document.getElementById('shiftStaff').innerHTML = staff.map(function(a) {
+        var lbl = a.role === 'doctor' ? 'BS' : 'NV';
+        return '<option value="' + a.id + '"' + (a.id === selectedId ? ' selected' : '') + '>' +
+               escapeHtml(a.name) + ' (' + lbl + ')</option>';
+    }).join('');
 }
+// Alias cũ
+function populateShiftStaff(id) { schPopulateStaff(id); }
 
-function editStaff(id) {
-    var s = staffList.find(function(x){return x.id===id;});
-    if (!s) return;
-    editingStaffId = id;
-    document.getElementById('staffModalTitle').innerText = 'Sửa thông tin nhân sự';
-    document.getElementById('staffId').value = s.id;
-    document.getElementById('staffName').value = s.name;
-    document.getElementById('staffRole').value = s.role;
-    document.getElementById('staffSpecialty').value = s.specialty || '';
-    document.getElementById('staffDegree').value = s.degree || '';
-    document.getElementById('staffPhone').value = s.phone;
-    document.getElementById('staffStartDate').value = s.startDate || '';
-    document.getElementById('staffStatus').value = s.status;
-    document.getElementById('staffModal').style.display = 'flex';
-}
+function closeShiftModal() { document.getElementById('shiftModal').style.display = 'none'; }
 
-function closeStaffModal() { document.getElementById('staffModal').style.display = 'none'; }
+function saveShift() {
+    var staffId  = parseInt(document.getElementById('shiftStaff').value);
+    var date     = document.getElementById('shiftDate').value;
+    var type     = document.getElementById('shiftType').value;
+    var staffAcc = accounts.find(function(a) { return a.id === staffId; });
 
-function saveStaff() {
-    var name = document.getElementById('staffName').value.trim();
-    var phone = document.getElementById('staffPhone').value.trim();
-    if (!name || !phone) { showToast('Vui lòng điền đủ họ tên và số điện thoại!', 'error'); return; }
+    if (!staffAcc || !date) { showToast('Vui lòng chọn đủ thông tin!', 'error'); return; }
+
+    // CN không có ca chiều
+    var avail = schGetAvailableShifts(date);
+    var typeOk = false;
+    for (var i = 0; i < avail.length; i++) { if (avail[i] === type) { typeOk = true; break; } }
+    if (!typeOk) { showToast('Chủ nhật không có ca chiều!', 'error'); return; }
+
+    // Trùng ca
+    var dup = shifts.find(function(s) {
+        return s.staffId === staffId && s.date === date && s.shiftType === type && s.id !== editingShiftId;
+    });
+    if (dup) { showToast('Nhân viên này đã có ca này trong ngày!', 'error'); return; }
 
     var data = {
-        name: name, role: document.getElementById('staffRole').value,
-        specialty: document.getElementById('staffSpecialty').value.trim(),
-        degree: document.getElementById('staffDegree').value.trim(),
-        phone: phone,
-        startDate: document.getElementById('staffStartDate').value,
-        status: document.getElementById('staffStatus').value
+        staffId:   staffId,
+        staffName: staffAcc.name,
+        shiftType: type,
+        date:      date,
+        note:      document.getElementById('shiftNote').value.trim()
     };
 
-    if (editingStaffId) {
-        var idx = staffList.findIndex(function(s){return s.id===editingStaffId;});
-        if (idx > -1) { staffList[idx] = Object.assign({}, staffList[idx], data); showToast('Đã cập nhật thông tin nhân sự'); }
+    if (editingShiftId) {
+        var idx = shifts.findIndex(function(s) { return s.id === editingShiftId; });
+        if (idx > -1) { shifts[idx] = Object.assign({}, shifts[idx], data); showToast('Đã cập nhật ca làm'); }
     } else {
-        var newId = Math.max.apply(null, staffList.map(function(s){return s.id;})) + 1;
-        staffList.push(Object.assign({id: newId}, data));
-        showToast('Đã thêm nhân sự mới');
+        var newId = shifts.length > 0 ? Math.max.apply(null, shifts.map(function(s) { return s.id; })) + 1 : 1;
+        shifts.push(Object.assign({ id: newId }, data));
+        showToast('Đã phân công ca làm');
     }
-    closeStaffModal();
-    renderStaff();
+    closeShiftModal();
+    renderSchedule();
 }
 
-function deleteStaff(id) {
-    if (!confirm('Bạn có chắc muốn xóa nhân sự này?')) return;
-    staffList = staffList.filter(function(s){return s.id!==id;});
-    renderStaff();
-    showToast('Đã xóa nhân sự');
+function schDeleteShift(id) {
+    if (!confirm('Xóa ca làm này?')) return;
+    shifts = shifts.filter(function(s) { return s.id !== id; });
+    renderSchedule();
+    showToast('Đã xóa ca làm');
 }
+// Alias cũ
+function deleteShift(id) { schDeleteShift(id); }
 
 // ==================== TÀI KHOẢN ====================
 var accRoleConfig = {
@@ -403,14 +544,13 @@ var accRoleConfig = {
     'staff':    {label:'Nhân viên',  badge:'badge-staff'},
     'admin':    {label:'Admin',      badge:'badge-admin'}
 };
+var genderMap = {male:'Nam', female:'Nữ', other:'Khác'};
 
 function renderAccounts() {
     var search = document.getElementById('accSearch').value.toLowerCase();
     var filtered = accounts.filter(function(a) {
         return (accFilter === 'all' || a.role === accFilter) &&
-               (!search || a.name.toLowerCase().indexOf(search) > -1 ||
-                a.username.toLowerCase().indexOf(search) > -1 ||
-                a.phone.indexOf(search) > -1);
+               (!search || a.name.toLowerCase().indexOf(search) > -1 || a.phone.indexOf(search) > -1);
     });
 
     var total = filtered.length;
@@ -419,18 +559,19 @@ function renderAccounts() {
 
     var tbody = document.getElementById('accTableBody');
     if (paged.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-sub)">Không có tài khoản nào</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text-sub)">Không có tài khoản nào</td></tr>';
     } else {
         tbody.innerHTML = paged.map(function(a) {
             var rc = accRoleConfig[a.role] || {label:a.role, badge:'badge-staff'};
             var statusBadge = a.status === 'active'
                 ? '<span class="badge badge-active"><i class="fas fa-circle"></i> Hoạt động</span>'
                 : '<span class="badge badge-inactive"><i class="fas fa-ban"></i> Bị khóa</span>';
+            var specialty = (a.role==='doctor' && a.specialty) ? escapeHtml(a.specialty) : '<span style="color:var(--text-sub)">—</span>';
             return '<tr>' +
                 '<td><span style="font-weight:700;color:var(--primary-color)">#' + a.id + '</span></td>' +
-                '<td style="font-weight:600">' + escapeHtml(a.name) + '</td>' +
-                '<td style="font-family:monospace;color:var(--text-sub)">' + escapeHtml(a.username) + '</td>' +
+                '<td><span class="acc-name-link" onclick="showStaffInfo(' + a.id + ')" style="font-weight:600;color:var(--primary-color);cursor:pointer;text-decoration:underline dotted">' + escapeHtml(a.name) + '</span></td>' +
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
+                '<td style="font-size:0.82rem">' + specialty + '</td>' +
                 '<td>' + (a.phone || '—') + '</td>' +
                 '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
@@ -458,15 +599,31 @@ function updateAccStats() {
 
 function goAccPage(p) { accPage = p; renderAccounts(); }
 
+function onAccRoleChange() {
+    var role = document.getElementById('accRole').value;
+    var sg = document.getElementById('accSpecialtyGroup');
+    if (role === 'doctor') {
+        sg.style.opacity = '1'; sg.querySelector('select').disabled = false;
+    } else {
+        sg.style.opacity = '0.4'; sg.querySelector('select').disabled = true;
+        sg.querySelector('select').value = '';
+    }
+}
+
 function openAccountModal() {
     editingAccId = null;
     document.getElementById('accModalTitle').innerText = 'Thêm tài khoản mới';
     document.getElementById('accId').value = '';
     document.getElementById('accName').value = '';
-    document.getElementById('accRole').value = 'customer';
-    document.getElementById('accPassword').value = '';
+    document.getElementById('accRole').value = 'doctor';
+    document.getElementById('accDob').value = '';
+    document.getElementById('accGender').value = '';
+    document.getElementById('accSpecialty').value = '';
+    document.getElementById('accDegree').value = '';
     document.getElementById('accPhone').value = '';
-    document.getElementById('accStatus').value = 'active';
+    document.getElementById('accPassword').value = '';
+    document.getElementById('accStatusGroup').style.display = 'none';
+    onAccRoleChange();
     document.getElementById('accountModal').style.display = 'flex';
 }
 
@@ -478,9 +635,15 @@ function editAccount(id) {
     document.getElementById('accId').value = a.id;
     document.getElementById('accName').value = a.name;
     document.getElementById('accRole').value = a.role;
-    document.getElementById('accPassword').value = '';
+    document.getElementById('accDob').value = a.dob || '';
+    document.getElementById('accGender').value = a.gender || '';
+    document.getElementById('accSpecialty').value = a.specialty || '';
+    document.getElementById('accDegree').value = a.degree || '';
     document.getElementById('accPhone').value = a.phone || '';
+    document.getElementById('accPassword').value = '';
     document.getElementById('accStatus').value = a.status;
+    document.getElementById('accStatusGroup').style.display = '';
+    onAccRoleChange();
     document.getElementById('accountModal').style.display = 'flex';
 }
 
@@ -493,15 +656,15 @@ function saveAccount() {
     if (!editingAccId && !document.getElementById('accPassword').value) {
         showToast('Vui lòng nhập mật khẩu!', 'error'); return;
     }
-
+    var role = document.getElementById('accRole').value;
     var data = {
-        name: name,
-        username: document.getElementById('accPhone').value.trim() || name.toLowerCase().replace(/\s+/g,'.'),
-        role: document.getElementById('accRole').value,
-        phone: document.getElementById('accPhone').value.trim(),
-        status: document.getElementById('accStatus').value
+        name: name, role: role, phone: phone, username: phone,
+        dob: document.getElementById('accDob').value,
+        gender: document.getElementById('accGender').value,
+        specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
+        degree: document.getElementById('accDegree').value.trim(),
+        status: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
-
     if (editingAccId) {
         var idx = accounts.findIndex(function(a){return a.id===editingAccId;});
         if (idx > -1) { accounts[idx] = Object.assign({}, accounts[idx], data); showToast('Đã cập nhật tài khoản'); }
@@ -514,6 +677,40 @@ function saveAccount() {
     closeAccountModal();
     renderAccounts();
 }
+
+// ===== POPUP THÔNG TIN NHÂN SỰ =====
+function showStaffInfo(id) {
+    var a = accounts.find(function(x){return x.id===id;});
+    if (!a) return;
+    staffInfoCurrentId = id;
+    var rc = accRoleConfig[a.role] || {label:a.role, badge:'badge-staff'};
+    var iconMap = {doctor:'fa-user-md', staff:'fa-user-tie', admin:'fa-user-shield', customer:'fa-user'};
+    var icon = iconMap[a.role] || 'fa-user';
+    var dobStr = a.dob ? formatDate(a.dob) + (a.dob ? ' (' + (new Date().getFullYear()-new Date(a.dob).getFullYear()) + ' tuổi)' : '') : '—';
+    var weekStart = getWeekStart(new Date()); var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
+    var weekShifts = shifts.filter(function(s){ return s.staffId===id && s.date>=toYMD(weekStart) && s.date<=toYMD(weekEnd); });
+    var shiftsHtml = weekShifts.length > 0
+        ? weekShifts.map(function(s){ var sc=shiftConfig[s.shiftType]; return '<span class="sch-staff-chip" style="background:'+sc.bg+';color:'+sc.color+';margin:2px">'+formatDate(s.date)+' – '+sc.label+'</span>'; }).join('')
+        : '<span style="color:var(--text-sub);font-size:0.85rem">Chưa có ca tuần này</span>';
+    document.getElementById('staffInfoBody').innerHTML =
+        '<div class="staff-info-header">' +
+            '<div class="staff-info-avatar"><i class="fas '+icon+'"></i></div>' +
+            '<div><div class="staff-info-name">'+escapeHtml(a.name)+'</div><span class="badge '+rc.badge+'">'+rc.label+'</span></div>' +
+        '</div>' +
+        '<div class="staff-info-grid">' +
+            '<div class="staff-info-item"><i class="fas fa-phone"></i><span>'+escapeHtml(a.phone||'—')+'</span></div>' +
+            '<div class="staff-info-item"><i class="fas fa-birthday-cake"></i><span>'+dobStr+'</span></div>' +
+            '<div class="staff-info-item"><i class="fas fa-venus-mars"></i><span>'+(genderMap[a.gender]||'—')+'</span></div>' +
+            '<div class="staff-info-item"><i class="fas fa-graduation-cap"></i><span>'+escapeHtml(a.degree||'—')+'</span></div>' +
+            (a.role==='doctor'?'<div class="staff-info-item" style="grid-column:1/-1"><i class="fas fa-stethoscope"></i><span>'+escapeHtml(a.specialty||'—')+'</span></div>':'') +
+        '</div>' +
+        '<div class="staff-info-section"><div class="staff-info-sec-title"><i class="fas fa-calendar-week"></i> Ca làm việc tuần này</div><div class="staff-info-shifts" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+shiftsHtml+'</div></div>';
+    document.getElementById('staffInfoModal').style.display = 'flex';
+}
+function closeStaffInfoModal() { document.getElementById('staffInfoModal').style.display = 'none'; }
+function editAccountFromInfo() { closeStaffInfoModal(); if (staffInfoCurrentId) editAccount(staffInfoCurrentId); }
+
+
 
 function toggleAccStatus(id) {
     var a = accounts.find(function(x){return x.id===id;});
@@ -898,14 +1095,15 @@ function renderRevenue() {
 // ==================== ĐÓNG MODAL KHI CLICK NGOÀI ====================
 window.onclick = function(e) {
     if (e.target === document.getElementById('serviceModal')) closeServiceModal();
-    if (e.target === document.getElementById('staffModal')) closeStaffModal();
+    if (e.target === document.getElementById('shiftModal')) closeShiftModal();
     if (e.target === document.getElementById('accountModal')) closeAccountModal();
+    if (e.target === document.getElementById('staffInfoModal')) closeStaffInfoModal();
 };
 
 // ==================== KHỞI TẠO ====================
 document.addEventListener('DOMContentLoaded', function() {
     renderServices();
-    renderStaff();
+    renderSchedule();
     renderAccounts();
     renderRevenue();
 });
