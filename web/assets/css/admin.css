@@ -676,3 +676,125 @@ tr:hover { background: #f8fafc; }
     .rev-fr-stats { grid-template-columns: repeat(2, 1fr); }
     .rev-filter-bar { flex-direction: column; align-items: flex-start; }
 }
+
+/* ==================== POPUP THÔNG TIN NHÂN SỰ ==================== */
+.staff-info-header { display:flex; align-items:center; gap:1rem; padding-bottom:1rem; border-bottom:1px solid var(--border-color); margin-bottom:1rem; }
+.staff-info-avatar { width:56px; height:56px; border-radius:50%; background:var(--primary-color); display:flex; align-items:center; justify-content:center; color:#fff; font-size:1.4rem; flex-shrink:0; }
+.staff-info-name { font-size:1.1rem; font-weight:800; color:var(--text-main); margin-bottom:.3rem; }
+.staff-info-grid { display:grid; grid-template-columns:1fr 1fr; gap:.6rem; margin-bottom:1rem; }
+.staff-info-item { display:flex; align-items:center; gap:.5rem; font-size:.84rem; color:var(--text-main); }
+.staff-info-item i { color:var(--primary-color); width:16px; flex-shrink:0; }
+.staff-info-section { background:var(--bg-gray); border-radius:10px; padding:.7rem 1rem; }
+.staff-info-sec-title { font-size:.82rem; font-weight:700; color:var(--text-sub); margin-bottom:.5rem; display:flex; align-items:center; gap:.4rem; }
+
+
+/* ==================== LỊCH LÀM VIỆC ==================== */
+.sch-toolbar {
+    display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
+    background: var(--bg-white); border-radius: 14px; padding: .9rem 1.3rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,.07); margin-bottom: 1.2rem;
+}
+.sch-nav { display: flex; align-items: center; gap: .5rem; flex: 1; min-width: 240px; }
+.sch-nav-btn {
+    background: var(--bg-gray); border: none; border-radius: 8px;
+    width: 34px; height: 34px; cursor: pointer; font-size: .9rem;
+    color: var(--text-sub); transition: all .18s; display:flex; align-items:center; justify-content:center;
+}
+.sch-nav-btn:hover { background: #dbeafe; color: var(--primary-color); }
+.sch-nav-label { font-weight: 700; color: var(--text-main); font-size: 1rem; flex: 1; text-align: center; }
+.sch-today-btn {
+    background: var(--primary-color); color: #fff; border: none; border-radius: 8px;
+    padding: .4rem 1rem; font-size: .82rem; font-weight: 700; cursor: pointer;
+    font-family: 'Inter', sans-serif; transition: opacity .18s;
+}
+.sch-today-btn:hover { opacity: .88; }
+.sch-legend { display: flex; gap: .5rem; flex-wrap: wrap; }
+.sch-legend-item {
+    font-size: .76rem; font-weight: 600; padding: .3rem .75rem;
+    border-radius: 20px; display: flex; align-items: center; gap: .35rem;
+}
+
+/* ---- Calendar container ---- */
+.sch-month-view {
+    background: var(--bg-white); border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08); overflow: hidden;
+}
+.sch-month-header {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    background: linear-gradient(135deg, #1e40af, #2563eb);
+}
+.sch-month-dow {
+    text-align: center; padding: .6rem .3rem;
+    font-size: .78rem; font-weight: 700; color: #fff; letter-spacing: .04em;
+}
+.sch-month-dow:first-child { color: #fbbf24; }
+.sch-month-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+}
+
+/* ---- Each day cell ---- */
+.sch-cell {
+    border: 1px solid #e5e7eb;
+    min-height: 110px;
+    padding: .35rem .3rem .4rem;
+    display: flex; flex-direction: column; gap: 3px;
+    transition: background .15s;
+    position: relative;
+}
+.sch-cell:hover { background: #f8faff; }
+.sch-cell-blank { background: #f9fafb; border: 1px solid #f0f0f0; min-height: 110px; }
+.sch-cell-today { background: #eff6ff !important; outline: 2px solid #2563eb; outline-offset: -2px; z-index:1; }
+.sch-cell-sun   { background: #fffbeb; }
+
+/* Date number */
+.sch-cell-head { display: flex; align-items: center; gap: 4px; margin-bottom: 3px; }
+.sch-cell-date {
+    font-size: .85rem; font-weight: 700; color: var(--text-main);
+    width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+}
+.sch-cell-date-today { background: #2563eb; color: #fff; }
+.sch-cell-date-sun   { color: #d97706; }
+.sch-sun-tag {
+    font-size: .58rem; font-weight: 800; color: #d97706;
+    background: #fef3c7; padding: .05rem .3rem; border-radius: 3px; letter-spacing: .03em;
+}
+
+/* ---- Shift block ---- */
+.sch-shift-block {
+    display: flex; flex-direction: column; gap: 2px;
+    border-radius: 6px; overflow: hidden;
+    border: 1px solid rgba(0,0,0,.06);
+    flex: 1;
+}
+.sch-shift-title {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .15rem .4rem; font-size: .62rem; font-weight: 700;
+    line-height: 1.3;
+}
+.sch-shift-title small { font-weight: 500; opacity: .85; font-size: .58rem; }
+.sch-shift-body {
+    background: #fff; padding: .2rem .3rem;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 2px; min-height: 22px;
+}
+
+/* ---- Staff chips ---- */
+.sch-chip {
+    font-size: .63rem; font-weight: 600; padding: .1rem .35rem;
+    border-radius: 10px; display: inline-flex; align-items: center; gap: 2px;
+    cursor: default; max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.sch-chip-x {
+    cursor: pointer; opacity: .5; font-size: .85rem; line-height: 1;
+    flex-shrink: 0; margin-left: 1px;
+}
+.sch-chip-x:hover { opacity: 1; }
+.sch-add-btn {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 1.5px dashed #9ca3af; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: .6rem; color: #9ca3af; flex-shrink: 0;
+    transition: all .15s;
+}
+.sch-add-btn:hover { background: #dbeafe; border-color: #2563eb; color: #2563eb; }
