@@ -11,11 +11,9 @@ public class PhieuKham {
     private int phongID;          // Khớp cột Phong_ID (FK)
     
     private String lyDoKham;      // Khớp cột LyDoKham
-    private String trieuChung;    // Khớp cột TrieuChung
     private String chanDoan;      // Khớp cột ChanDoan
     private String ghiChu;        // Khớp cột GhiChu
     private Timestamp ngayTao;    // Khớp cột NgayTao (Nên dùng Timestamp để lấy cả giờ, phút, giây)
-    private String trangThai;     // Khớp cột TrangThai (VD: Đang khám, Chờ xét nghiệm, Hoàn thành)
 
     // --- Các đối tượng quan hệ (Phục vụ lấy thông tin liên kết hiển thị lên UI) ---
     private LichHen lichHen;      // Để từ Phiếu Khám lấy ngược ra Tên Bệnh Nhân
@@ -28,18 +26,16 @@ public class PhieuKham {
     public PhieuKham() {}
 
     // Constructor tham số cơ bản (Dành cho INSERT)
-    public PhieuKham(int phieuKhamID, int lichHenID, int bacSiID, int phongID, String lyDoKham, 
-                     String trieuChung, String chanDoan, String ghiChu, Timestamp ngayTao, String trangThai) {
+    public PhieuKham(int phieuKhamID, int lichHenID, int bacSiID, int phongID, String lyDoKham
+                     , String chanDoan, String ghiChu, Timestamp ngayTao) {
         this.phieuKhamID = phieuKhamID;
         this.lichHenID = lichHenID;
         this.bacSiID = bacSiID;
         this.phongID = phongID;
         this.lyDoKham = lyDoKham;
-        this.trieuChung = trieuChung;
         this.chanDoan = chanDoan;
         this.ghiChu = ghiChu;
         this.ngayTao = ngayTao;
-        this.trangThai = trangThai;
     }
 
     // ================= GETTERS VÀ SETTERS =================
@@ -59,9 +55,6 @@ public class PhieuKham {
     public String getLyDoKham() { return lyDoKham; }
     public void setLyDoKham(String lyDoKham) { this.lyDoKham = lyDoKham; }
 
-    public String getTrieuChung() { return trieuChung; }
-    public void setTrieuChung(String trieuChung) { this.trieuChung = trieuChung; }
-
     public String getChanDoan() { return chanDoan; }
     public void setChanDoan(String chanDoan) { this.chanDoan = chanDoan; }
 
@@ -70,9 +63,6 @@ public class PhieuKham {
 
     public Timestamp getNgayTao() { return ngayTao; }
     public void setNgayTao(Timestamp ngayTao) { this.ngayTao = ngayTao; }
-
-    public String getTrangThai() { return trangThai; }
-    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
     // --- Getters / Setters cho Đối tượng quan hệ ---
     
