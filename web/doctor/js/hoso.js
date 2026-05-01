@@ -281,142 +281,164 @@ function init() {
 // === LOGIC DÀNH RIÊNG CHO MÀN HÌNH KHÁM LÂM SÀNG (LƯU DATABASE THỰC TẾ) ===
 // =========================================================================
 
-// 1. CÁC BIẾN TRẠNG THÁI (STATE)
-let danhSachDichVuTuDB = svcList20; // Tạm thời vẫn lấy từ list cũ của bạn, sau này có API thì gán lại
-let clinicalSelectedServices = [];  // Danh sách dịch vụ chốt lưu vào DB
-let currentSelectedTeeth = [];      // Các răng đang được click chọn trên sơ đồ (VD: [11, 46])
+// =========================================================================
+// === LOGIC DÀNH RIÊNG CHO MÀN HÌNH KHÁM LÂM SÀNG (LƯU DATABASE THỰC TẾ) ===
+// =========================================================================
 
-// 2. TƯƠNG TÁC SƠ ĐỒ RĂNG (ODONTOGRAM)
+let danhSachDichVuTuDB = svcList20; // Tạm thời dùng list ảo, sau này gọi API gán lại
+let clinicalSelectedServices = [];  
+let currentSelectedTeeth = [];      
+
+// Khi trang vừa load xong, tiến hành gắn sự kiện an toàn (tránh lỗi null)
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Gắn sự kiện click cho các răng trên sơ đồ Odontogram
+    const teethElements = document.querySelectorAll('.tooth');
+    if(teethElements.length > 0) {
+        teethElements.forEach(el => {
+            el.addEventListener('click', function() {
+                // Không cho click vào răng đã có class 'issue' (nếu muốn)
+                if(!this.classList.contains('issue')) {
+                    const tNum = parseInt(this.getAttribute('data-tooth'));
+                    toggleToothSelection(tNum);
+                }
+            });
+        });
+    }
+
+    // 2. Gắn sự kiện cho nút "Hoàn tất & Lưu"
+    const saveBtn = document.getElementById('saveBtn');
+    if(saveBtn) {
+        saveBtn.addEventListener('click', function() {
+            // Tạm thời truyền cứng ID lịch hẹn (1), ID bác sĩ (1), ID phòng (1) để test. 
+            // Sau này bạn lấy từ URL parameters hoặc Session
+            luuPhieuKhamLamSang(1, 1, 1); 
+        });
+    }
+
+    // 3. (SỬA LỖI ĐƠ MÀN HÌNH): Bọc các sự kiện cũ lại để kiểm tra null
+    var editDateEl = document.getElementById('editDate');
+    if (editDateEl) {
+        editDateEl.addEventListener('change', function() {
+            var day = new Date(this.value).getDay();
+            buildEditTimeOptions(day === 0 ? sundayTimesE : weekdayTimesE, '');
+            document.getElementById('editDateGroup').classList.remove('error');
+        });
+    }
+    // Bạn nhớ bọc tương tự cho editTimeSelect, oldPassword, newPassword... nhé!
+});
+
+// --- CÁC HÀM XỬ LÝ LÂM SÀNG ---
+
 function toggleToothSelection(toothNumber) {
     const index = currentSelectedTeeth.indexOf(toothNumber);
     if (index > -1) {
-        currentSelectedTeeth.splice(index, 1); // Đã chọn rồi thì bỏ chọn
+        currentSelectedTeeth.splice(index, 1); 
     } else {
-        currentSelectedTeeth.push(toothNumber); // Chưa chọn thì thêm vào mảng
+        currentSelectedTeeth.push(toothNumber); 
     }
     updateOdontogramUI();
 }
 
 function updateOdontogramUI() {
-    // Giả sử các thẻ biểu diễn răng trên HTML có class là "tooth-item" và data-tooth="11"
-    document.querySelectorAll('.tooth-item').forEach(el => {
+    document.querySelectorAll('.tooth').forEach(el => {
         const tNum = parseInt(el.getAttribute('data-tooth'));
+        // Giữ nguyên class gốc (như 'issue'), chỉ toggle class 'selected'
         if (currentSelectedTeeth.includes(tNum)) {
-            el.classList.add('selected'); // CSS đổi màu xanh khi được chọn
+            el.classList.add('selected');
         } else {
             el.classList.remove('selected');
         }
     });
 }
 
-// 3. THÊM DỊCH VỤ VÀO BẢNG "CHỈ ĐỊNH ĐIỀU TRỊ"
+// Hàm này bạn sẽ gọi khi bác sĩ chọn dịch vụ từ Dropdown (Bạn tự làm 1 cái dropdown nhé, hoặc gắn tạm vào nút Add)
 function addClinicalService(serviceId) {
     const svc = danhSachDichVuTuDB.find(s => s.id == serviceId);
     if (!svc) return;
 
     if (svc.perUnit) { 
-        // A. Các dịch vụ tính theo răng (Trám, Nhổ...)
         if (currentSelectedTeeth.length === 0) {
             alert('Vui lòng click chọn ít nhất 1 răng trên sơ đồ trước khi thêm dịch vụ này!');
             return;
         }
-        
-        // Tách mỗi răng thành 1 dòng dữ liệu riêng để lưu vào CSDL
         currentSelectedTeeth.forEach(tooth => {
             clinicalSelectedServices.push({
-                dichVu_ID: parseInt(svc.id), // Tên biến phải khớp với Java Model ChiTietDichVu
+                dichVu_ID: parseInt(svc.id), 
                 viTriRang: tooth,
                 soLuong: 1,
                 donGia: svc.price,
-                name: svc.name // Chỉ dùng để hiển thị trên UI
+                name: svc.name 
             });
         });
-        
-        currentSelectedTeeth = []; // Reset sơ đồ răng
+        currentSelectedTeeth = []; 
         updateOdontogramUI();
-
     } else { 
-        // B. Dịch vụ toàn hàm (Cạo vôi, Tẩy trắng...)
         clinicalSelectedServices.push({
             dichVu_ID: parseInt(svc.id), 
-            viTriRang: null, // Toàn hàm nên răng = null
+            viTriRang: null, 
             soLuong: 1,      
             donGia: svc.price,
             name: svc.name 
         });
     }
-
     renderClinicalTable();
 }
 
-// 4. XÓA VÀ CẬP NHẬT GIAO DIỆN BẢNG DỊCH VỤ
 function removeClinicalService(index) {
     clinicalSelectedServices.splice(index, 1);
     renderClinicalTable();
 }
 
 function renderClinicalTable() {
-    // Lưu ý: Đổi '#tableChiDinh tbody' thành ID tbody thực tế trên HTML của bạn
-    const tbody = document.querySelector('#tableChiDinh tbody'); 
+    const tbody = document.getElementById('treatmentBody'); // ĐÃ CẬP NHẬT ID KHỚP VỚI JSP
     if(!tbody) return; 
 
     let html = '';
-    let total = 0;
-
     clinicalSelectedServices.forEach((item, index) => {
         let thanhTien = item.donGia * item.soLuong;
-        total += thanhTien;
-        
         html += `
             <tr>
                 <td>${item.name}</td>
                 <td>${item.viTriRang ? item.viTriRang : 'Toàn hàm'}</td>
-                <td><input type="number" value="${item.soLuong}" min="1" onchange="clinicalSelectedServices[${index}].soLuong = this.value; renderClinicalTable();"></td>
+                <td><input type="number" style="width: 60px" value="${item.soLuong}" min="1" onchange="clinicalSelectedServices[${index}].soLuong = this.value; renderClinicalTable();"></td>
                 <td>${item.donGia.toLocaleString('vi-VN')} đ</td>
                 <td>${thanhTien.toLocaleString('vi-VN')} đ</td>
-                <td><button type="button" class="btn-danger" onclick="removeClinicalService(${index})">Xóa</button></td>
+                <td><input type="text" placeholder="Ghi chú..." style="width: 100%"></td>
+                <td><button type="button" class="btn btn-danger" style="padding: 5px 10px;" onclick="removeClinicalService(${index})"><i class="fa-solid fa-trash"></i></button></td>
             </tr>
         `;
     });
-    
     tbody.innerHTML = html;
-    
-    // Cập nhật tổng tiền (Giả sử có element id="tongTienChiDinh")
-    const elTongTien = document.getElementById('tongTienChiDinh');
-    if(elTongTien) elTongTien.innerText = total.toLocaleString('vi-VN') + ' đ';
 }
 
-// 5. GỬI DỮ LIỆU LÊN JAVA SERVLET
 async function luuPhieuKhamLamSang(lichHenId, bacSiId, phongId) {
     if (clinicalSelectedServices.length === 0) {
-        alert("Vui lòng thêm ít nhất 1 dịch vụ chỉ định điều trị!");
+        alert("Vui lòng chỉ định ít nhất 1 dịch vụ!");
         return;
     }
 
-    // ĐÓNG GÓI JSON: Các key phải KHỚP CHÍNH XÁC với class PhieuKham.java
+    // ĐÃ CẬP NHẬT CÁC ID KHỚP CHÍNH XÁC VỚI JSP CỦA BẠN
     const payload = {
         lichHenID: parseInt(lichHenId), 
         bacSiID: parseInt(bacSiId),     
         phongID: parseInt(phongId),     
-        lyDoKham: document.getElementById('lyDoKhamInput')?.value || '', // Sửa lại ID Input cho đúng HTML
-        chanDoan: document.getElementById('chanDoanInput')?.value || '',
-        ghiChu: document.getElementById('donThuocInput')?.value || '', // Lấy từ ô đơn thuốc/dặn dò
-        danhSachDichVu: clinicalSelectedServices // Mảng chi tiết dịch vụ
+        lyDoKham: document.getElementById('symptoms')?.value || '', 
+        chanDoan: document.getElementById('diagnosis')?.value || '',
+        ghiChu: document.getElementById('prescription')?.value || '', 
+        danhSachDichVu: clinicalSelectedServices 
     };
 
     try {
-        const btnSave = document.getElementById('btnHoanTatLuu');
+        const btnSave = document.getElementById('saveBtn');
         if(btnSave) {
             btnSave.disabled = true;
-            btnSave.innerText = "Đang lưu...";
+            btnSave.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG LƯU...';
         }
 
-        // Gọi API lên Servlet
         const response = await fetch('/api/doctor/save-examination', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
@@ -424,7 +446,7 @@ async function luuPhieuKhamLamSang(lichHenId, bacSiId, phongId) {
             const result = await response.json();
             if (result.success) {
                 alert('✅ Hoàn tất khám & Lưu dữ liệu thành công!');
-                window.location.href = '/danh-sach-kham'; // Chuyển hướng về trang danh sách
+                window.location.href = 'index.jsp'; // Quay lại danh sách lịch hẹn
             } else {
                 alert('Lưu thất bại: ' + result.message);
             }
@@ -435,10 +457,10 @@ async function luuPhieuKhamLamSang(lichHenId, bacSiId, phongId) {
         console.error("Lỗi khi call API: ", error);
         alert('Không thể kết nối đến hệ thống!');
     } finally {
-        const btnSave = document.getElementById('btnHoanTatLuu');
+        const btnSave = document.getElementById('saveBtn');
         if(btnSave) {
             btnSave.disabled = false;
-            btnSave.innerText = "Hoàn tất & Lưu";
+            btnSave.innerHTML = '<i class="fa-solid fa-check-double"></i> HOÀN TẤT & LƯU';
         }
     }
 }
