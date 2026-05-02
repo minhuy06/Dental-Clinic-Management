@@ -15,7 +15,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nha Khoa Kvone - Kiến Tạo Nụ Cười</title>
+    <title>Nha Khoa 5AE - Kiến Tạo Nụ Cười</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/home.css">
 </head>
@@ -52,7 +52,7 @@
             <div class="about-content fade-in">
                 <div class="subtitle">Về chúng tôi</div>
                 <h2>Hệ thống nha khoa đạt chuẩn quốc tế</h2>
-                <p>Nha Khoa Kvone tự hào là hệ thống nha khoa tiêu chuẩn quốc tế tại Đà Nẵng, phục vụ hơn 10,000 khách hàng.</p>
+                <p>Nha Khoa 5AE tự hào là hệ thống nha khoa tiêu chuẩn quốc tế tại Đà Nẵng, phục vụ hơn 10,000 khách hàng.</p>
                 <div class="about-features">
                     <div class="about-feature"><span class="check">✓</span> Bác sĩ chuyên khoa hàng đầu</div>
                     <div class="about-feature"><span class="check">✓</span> Công nghệ hiện đại nhất</div>
@@ -91,7 +91,7 @@
                     <span class="star-input" onclick="setRating(4)">☆</span>
                     <span class="star-input" onclick="setRating(5)">☆</span>
                 </div>
-                <textarea class="form-control" id="reviewText" placeholder="Chia sẻ trải nghiệm của bạn tại Nha Khoa Kvone..." rows="3"></textarea>
+                <textarea class="form-control" id="reviewText" placeholder="Chia sẻ trải nghiệm của bạn tại Nha Khoa 5AE..." rows="3"></textarea>
                 <button class="btn btn-primary" onclick="submitReview()" style="margin-top:10px;">Gửi đánh giá</button>
             </div>
             <% } else { %>

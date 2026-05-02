@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa Kvone</title>
+    <title>Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa 5AE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/datlich.css">
 </head>
