@@ -4,8 +4,8 @@
     <div class="container">
         <div class="footer-grid">
             <div class="footer-brand">
-                <div class="footer-logo">Nha Khoa <span>Kvone</span></div>
-                <p>Hệ thống Nha khoa Kvone - Nơi kiến tạo nụ cười rạng rỡ. Đội ngũ bác sĩ giàu kinh nghiệm, trang thiết bị hiện đại.</p>
+                <div class="footer-logo">Nha Khoa <span>5AE</span></div>
+                <p>Hệ thống Nha khoa 5AE - Nơi kiến tạo nụ cười rạng rỡ. Đội ngũ bác sĩ giàu kinh nghiệm, trang thiết bị hiện đại.</p>
                 <div class="footer-social">
                     <a href="javascript:void(0)" onclick="showSystemModal()" title="Facebook"><img src="${pageContext.request.contextPath}/assets/img/icons/facebook.svg" alt="Facebook"></a>
                     <a href="javascript:void(0)" onclick="showSystemModal()" title="Zalo" style="font-weight:700;color:rgba(255,255,255,0.6);">Z</a>
@@ -37,11 +37,11 @@
                 <ul class="footer-contact">
                     <li><span class="icon">📍</span><span>48 Cao Thắng, Hải Châu,<br>TP. Đà Nẵng</span></li>
                     <li><span class="icon">📞</span><span>1900 1533</span></li>
-                    <li><span class="icon">✉️</span><span>info@nhakhoakvone.vn</span></li>
+                    <li><span class="icon">✉️</span><span>info@nhakhoa5AE.vn</span></li>
                     <li><span class="icon">🕐</span><span>T2 - T7: 8:00 - 17:00<br>CN: 8:00 - 12:00</span></li>
                 </ul>
             </div>
         </div>
-        <div class="footer-bottom">&copy; 2026 Nha Khoa Kvone. All rights reserved. | ĐH SPKT Đà Nẵng.</div>
+        <div class="footer-bottom">&copy; 2026 Nha Khoa 5AE. All rights reserved. | ĐH SPKT Đà Nẵng.</div>
     </div>
 </footer>
