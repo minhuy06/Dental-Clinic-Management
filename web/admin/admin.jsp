@@ -471,7 +471,6 @@
                         <select id="accRole" onchange="onAccRoleChange()">
                             <option value="doctor">Bác sĩ</option>
                             <option value="staff">Nhân viên</option>
-                            <option value="admin">Admin</option>
                         </select>
                     </div>
                 </div>
@@ -522,42 +521,23 @@
         <p><i class="fas fa-tooth"></i> NHA KHOA 5AE - Chất lượng tạo niềm tin &nbsp;|&nbsp; © 2026 Hệ thống quản trị Admin</p>
     </div>
 
-    <%-- ================================================================
-         DATA INJECTION — Backend đặt các attribute vào request scope:
-
-         Dịch vụ:    request.setAttribute("adminServicesJson", jsonArray);
-         Tài khoản:  request.setAttribute("adminAccountsJson", jsonArray);
-         Ca làm:     request.setAttribute("adminShiftsJson",   jsonArray);
-         Doanh thu:  request.setAttribute("adminRevenueJson",  jsonObject);
-
-         Mỗi object cần đúng field như comment trong từng block bên dưới.
-         Nếu tên field DB khác → map lại trong Servlet/Controller, KHÔNG sửa JS.
-    ================================================================= --%>
     <script>
     (function() {
         var ctx = '${pageContext.request.contextPath}';
 
         // ── DỊCH VỤ ──────────────────────────────────────────────────
-        // Fields: id, name, cat, price, time, perUnit(bool), unit, status('active')
         var svcJson = '${not empty adminServicesJson ? adminServicesJson : ""}';
         if (svcJson) { try { window.__ADMIN_SERVICES__ = JSON.parse(svcJson); } catch(e) { console.warn('adminServicesJson parse error', e); } }
 
         // ── TÀI KHOẢN ────────────────────────────────────────────────
-        // Fields: id, name, role('doctor'|'staff'|'admin'|'customer'),
-        //         phone, dob('YYYY-MM-DD'), gender('male'|'female'|'other'),
-        //         specialty, degree, avatar(url), createdDate('YYYY-MM-DD'), status('active'|'inactive')
         var accJson = '${not empty adminAccountsJson ? adminAccountsJson : ""}';
         if (accJson) { try { window.__ADMIN_ACCOUNTS__ = JSON.parse(accJson); } catch(e) { console.warn('adminAccountsJson parse error', e); } }
 
         // ── CA LÀM VIỆC ──────────────────────────────────────────────
-        // Fields: id, staffId, staffName, shiftType('morning'|'afternoon'),
-        //         date('YYYY-MM-DD'), room
         var shiftJson = '${not empty adminShiftsJson ? adminShiftsJson : ""}';
         if (shiftJson) { try { window.__ADMIN_SHIFTS__ = JSON.parse(shiftJson); } catch(e) { console.warn('adminShiftsJson parse error', e); } }
 
         // ── DOANH THU ────────────────────────────────────────────────
-        // Object: { months:[{month,revenue,appointments}x12], byCat:[{name,revenue,color}],
-        //           topServices:[...], payments:[...], txns:[...] }
         var revJson = '${not empty adminRevenueJson ? adminRevenueJson : ""}';
         if (revJson) { try { window.__ADMIN_REVENUE__ = JSON.parse(revJson); } catch(e) { console.warn('adminRevenueJson parse error', e); } }
     })();
