@@ -1,7 +1,3 @@
-/**
- * ==================== NHA KHOA 5AE - ADMIN.JS ====================
- */
-
 // ==================== DỮ LIỆU MẪU ====================
 
 var services = [
@@ -375,69 +371,93 @@ function renderMonthCalendar() {
     var firstDow    = new Date(y, m, 1).getDay();
     var daysInMonth = new Date(y, m + 1, 0).getDate();
     var todayStr    = toYMD(new Date());
-    var html        = '';
+    var cells       = [];
 
-    // Ô trống trước ngày 1
     for (var b = 0; b < firstDow; b++) {
-        html += '<div class="sch-cell sch-cell-blank"></div>';
+        cells.push('<div class="sch-cell sch-cell-blank"></div>');
     }
 
     for (var d = 1; d <= daysInMonth; d++) {
-        var mm   = m + 1;
-        var dStr = y + '-' + (mm < 10 ? '0' : '') + mm + '-' + (d < 10 ? '0' : '') + d;
-        var dow  = new Date(y, m, d).getDay();
-        var isSun   = dow === 0;
-        var isToday = dStr === todayStr;
-        var avail   = schGetAvailableShifts(dStr);
+        cells.push((function(day) {
+            var mm      = m + 1;
+            var dStr    = y + '-' + (mm < 10 ? '0' : '') + mm + '-' + (day < 10 ? '0' : '') + day;
+            var dow     = new Date(y, m, day).getDay();
+            var isSun   = dow === 0;
+            var isToday = dStr === todayStr;
+            var isPast  = dStr < todayStr;
+            var avail   = schGetAvailableShifts(dStr);
 
-        var cellClass = 'sch-cell';
-        if (isToday) cellClass += ' sch-cell-today';
-        if (isSun)   cellClass += ' sch-cell-sun';
+            var cls = 'sch-cell' + (isToday ? ' sch-cell-today' : '') + (isSun ? ' sch-cell-sun' : '') + (isPast ? ' sch-cell-past' : '');
+            var html = '<div class="' + cls + '">';
 
-        html += '<div class="' + cellClass + '">';
-
-        // Số ngày
-        var dateSpanClass = 'sch-cell-date' + (isToday ? ' sch-cell-date-today' : '') + (isSun ? ' sch-cell-date-sun' : '');
-        html += '<div class="sch-cell-head">';
-        html += '<span class="' + dateSpanClass + '">' + d + '</span>';
-        if (isSun) html += '<span class="sch-sun-tag">CN</span>';
-        html += '</div>';
-
-        // Mỗi ca
-        for (var ci = 0; ci < avail.length; ci++) {
-            var type = avail[ci];
-            var sc   = shiftConfig[type];
-            var typeShifts = shifts.filter(function(s) { return s.date === dStr && s.shiftType === type; });
-
-            html += '<div class="sch-shift-block">';
-            html += '<div class="sch-shift-title" style="color:' + sc.color + ';background:' + sc.bg + '">';
-            html += '<span>' + sc.label + '</span><small>' + sc.time + '</small>';
+            // Header
+            html += '<div class="sch-cell-head">';
+            html += '<span class="sch-cell-date' + (isToday ? ' sch-cell-date-today' : '') + (isSun ? ' sch-cell-date-sun' : '') + '">' + day + '</span>';
+            if (isSun)   html += '<span class="sch-sun-tag">CN</span>';
+            if (isToday) html += '<span class="sch-today-tag">Hôm nay</span>';
             html += '</div>';
-            html += '<div class="sch-shift-body">';
 
-            for (var si = 0; si < typeShifts.length; si++) {
-                var sh = typeShifts[si];
-                // Rút gọn tên: bỏ "BS." prefix và lấy họ + tên đầu
-                var shortName = sh.staffName.replace(/^BS\.\s*/,'').split(' ');
-                var displayName = shortName.length > 1 ? shortName[shortName.length-1] : shortName[0];
-                html += '<div class="sch-chip" style="background:' + sc.bg + ';color:' + sc.color + '" title="' + escapeHtml(sh.staffName) + (sh.note ? ' – ' + sh.note : '') + '">';
-                html += escapeHtml(displayName);
-                html += '<span class="sch-chip-x" onclick="event.stopPropagation();schDeleteShift(' + sh.id + ')">×</span>';
+            // Từng ca dùng vòng for thường (không dùng forEach để tránh closure)
+            for (var ci = 0; ci < avail.length; ci++) {
+                var type = avail[ci];
+                var sc   = shiftConfig[type];
+
+                // Thu thập ca của ngày này (không dùng filter/closure)
+                var typeShifts = [];
+                for (var si = 0; si < shifts.length; si++) {
+                    if (shifts[si].date === dStr && shifts[si].shiftType === type) {
+                        typeShifts.push(shifts[si]);
+                    }
+                }
+
+                html += '<div class="sch-shift-block">';
+                html += '<div class="sch-shift-title" style="background:' + sc.bg + ';color:' + sc.color + '">';
+                html += sc.label + '<small> ' + sc.time + '</small>';
                 html += '</div>';
+                html += '<div class="sch-shift-body">';
+
+                for (var ki = 0; ki < typeShifts.length; ki++) {
+                    var sh = typeShifts[ki];
+                    // Tên hiển thị: "BS. Hải" hoặc "Hùng"
+                    var nameParts = sh.staffName.split(' ');
+                    var shortName = nameParts[nameParts.length - 1];
+                    var isDoc = sh.staffName.indexOf('BS.') === 0;
+                    var displayName = (isDoc ? 'BS. ' : '') + shortName;
+                    var roomTip = sh.room ? ' · ' + sh.room : '';
+
+                    // Chip click → detail popup (encode shiftId)
+                    html += '<div class="sch-chip" style="background:' + sc.bg + ';border:1px solid ' + sc.color + '20;color:' + sc.color + '"'
+                          + ' onclick="event.stopPropagation();showShiftDetail(' + sh.id + ')"'
+                          + ' title="' + escapeHtml(sh.staffName) + roomTip + ' — click để xem chi tiết">'
+                          + '<span class="sch-chip-name">' + escapeHtml(displayName) + '</span>'
+                          + (sh.room ? '<span class="sch-chip-room">' + escapeHtml(sh.room.replace('Phòng ', 'P')) + '</span>' : '')
+                          + '</div>';
+                }
+
+                // Nút + thêm (chỉ tương lai)
+                if (!isPast) {
+                    html += '<span class="sch-add-btn"'
+                          + ' onclick="event.stopPropagation();schOpenModalFor(\'' + dStr + '\',\'' + type + '\')"'
+                          + ' title="Thêm ' + sc.label + '"><i class="fas fa-plus"></i></span>';
+                }
+                html += '</div></div>';
             }
 
-            // Nút thêm
-            html += '<span class="sch-add-btn" onclick="schOpenModalFor(\'' + dStr + '\',\'' + type + '\')" title="Thêm nhân viên vào ' + sc.label + '">';
-            html += '<i class="fas fa-plus"></i>';
-            html += '</span>';
+            // Tổng ca trong ngày
+            var dayTotal = 0;
+            for (var ti = 0; ti < shifts.length; ti++) {
+                if (shifts[ti].date === dStr) dayTotal++;
+            }
+            if (dayTotal > 0) {
+                html += '<div class="sch-day-count">' + dayTotal + ' ca</div>';
+            }
 
-            html += '</div></div>'; // shift-body + shift-block
-        }
-
-        html += '</div>'; // cell
+            html += '</div>';
+            return html;
+        })(d));
     }
 
-    document.getElementById('schMonthGrid').innerHTML = html;
+    document.getElementById('schMonthGrid').innerHTML = cells.join('');
 }
 
 // ---- Modal ----
@@ -445,8 +465,12 @@ function schOpenModal() {
     editingShiftId = null;
     document.getElementById('shiftModalTitle').innerText = 'Phân công ca làm';
     document.getElementById('shiftId').value = '';
-    document.getElementById('shiftDate').value = toYMD(new Date());
-    document.getElementById('shiftNote').value = '';
+    // Đặt min date = hôm nay để chặn quá khứ
+    var todayStr = toYMD(new Date());
+    var dateInput = document.getElementById('shiftDate');
+    dateInput.min = todayStr;
+    dateInput.value = todayStr;
+    document.getElementById('shiftRoom').value = 'Phòng 1';
     schUpdateShiftTypeOptions();
     schPopulateStaff(null);
     document.getElementById('shiftModal').style.display = 'flex';
@@ -455,12 +479,25 @@ function schOpenModal() {
 function openShiftModal() { schOpenModal(); }
 
 function schOpenModalFor(date, type) {
-    schOpenModal();
-    document.getElementById('shiftDate').value = date;
+    var todayStr = toYMD(new Date());
+    if (date < todayStr) {
+        showToast('Chỉ có thể phân công cho ngày hôm nay trở đi!', 'error');
+        return;
+    }
+    // Mở modal SAU KHI biết date hợp lệ
+    editingShiftId = null;
+    document.getElementById('shiftModalTitle').innerText = 'Phân công ca làm';
+    document.getElementById('shiftId').value = '';
+    var dateInput = document.getElementById('shiftDate');
+    dateInput.min = todayStr;
+    dateInput.value = date;
+    document.getElementById('shiftRoom').value = 'Phòng 1';
     schUpdateShiftTypeOptions();
+    // Set đúng ca sau khi update options
     document.getElementById('shiftType').value = type;
+    schPopulateStaff(null);
+    document.getElementById('shiftModal').style.display = 'flex';
 }
-// Alias
 function openShiftModalFor(date, type) { schOpenModalFor(date, type); }
 
 function updateShiftTypeOptions() { schUpdateShiftTypeOptions(); }
@@ -492,9 +529,13 @@ function saveShift() {
     var staffId  = parseInt(document.getElementById('shiftStaff').value);
     var date     = document.getElementById('shiftDate').value;
     var type     = document.getElementById('shiftType').value;
+    var room     = document.getElementById('shiftRoom').value;
     var staffAcc = accounts.find(function(a) { return a.id === staffId; });
 
     if (!staffAcc || !date) { showToast('Vui lòng chọn đủ thông tin!', 'error'); return; }
+
+    // Chặn ngày quá khứ
+    if (date < toYMD(new Date())) { showToast('Chỉ được phân công cho ngày hôm nay trở đi!', 'error'); return; }
 
     // CN không có ca chiều
     var avail = schGetAvailableShifts(date);
@@ -502,19 +543,17 @@ function saveShift() {
     for (var i = 0; i < avail.length; i++) { if (avail[i] === type) { typeOk = true; break; } }
     if (!typeOk) { showToast('Chủ nhật không có ca chiều!', 'error'); return; }
 
-    // Trùng ca
-    var dup = shifts.find(function(s) {
-        return s.staffId === staffId && s.date === date && s.shiftType === type && s.id !== editingShiftId;
-    });
-    if (dup) { showToast('Nhân viên này đã có ca này trong ngày!', 'error'); return; }
+    // Trùng ca: cùng nhân viên + ngày + ca (không cho trùng đúng 3 cái này)
+    var dup = null;
+    for (var di = 0; di < shifts.length; di++) {
+        var s = shifts[di];
+        if (s.staffId === staffId && s.date === date && s.shiftType === type && s.id !== editingShiftId) {
+            dup = s; break;
+        }
+    }
+    if (dup) { showToast(staffAcc.name + ' đã có ' + shiftConfig[type].label + ' ngày này rồi!', 'error'); return; }
 
-    var data = {
-        staffId:   staffId,
-        staffName: staffAcc.name,
-        shiftType: type,
-        date:      date,
-        note:      document.getElementById('shiftNote').value.trim()
-    };
+    var data = { staffId: staffId, staffName: staffAcc.name, shiftType: type, date: date, room: room, note: '' };
 
     if (editingShiftId) {
         var idx = shifts.findIndex(function(s) { return s.id === editingShiftId; });
@@ -528,14 +567,98 @@ function saveShift() {
     renderSchedule();
 }
 
-function schDeleteShift(id) {
+// ===== CHI TIẾT CA LÀM =====
+var viewingShiftId = null;
+
+function showShiftDetail(id) {
+    var sh = null;
+    for (var i = 0; i < shifts.length; i++) {
+        if (shifts[i].id === id) { sh = shifts[i]; break; }
+    }
+    if (!sh) return;
+    viewingShiftId = id;
+    var sc = shiftConfig[sh.shiftType] || shiftConfig.morning;
+    var acc = accounts.find(function(a) { return a.id === sh.staffId; });
+    var roleLabel = acc ? (accRoleConfig[acc.role] || {label:''}).label : '';
+    var isPast = sh.date < toYMD(new Date());
+
+    var html = '<div class="shift-detail-wrap">';
+    // Avatar + tên
+    html += '<div class="shift-detail-header" style="border-left:4px solid ' + sc.color + '">';
+    if (acc && acc.avatar) {
+        html += '<img src="' + acc.avatar + '" class="shift-detail-avatar">';
+    } else {
+        html += '<div class="shift-detail-avatar-icon" style="background:' + sc.bg + ';color:' + sc.color + '"><i class="fas fa-user-md"></i></div>';
+    }
+    html += '<div>';
+    html += '<div class="shift-detail-name">' + escapeHtml(sh.staffName) + '</div>';
+    html += '<span class="badge ' + (acc ? (accRoleConfig[acc.role]||{badge:'badge-staff'}).badge : 'badge-staff') + '">' + roleLabel + '</span>';
+    html += '</div></div>';
+
+    // Thông tin ca
+    html += '<div class="shift-detail-grid">';
+    html += '<div class="shift-detail-item"><i class="fas fa-calendar" style="color:' + sc.color + '"></i><div><div class="sdi-label">Ngày</div><div class="sdi-val">' + formatDate(sh.date) + (isPast ? ' <span class="sch-past-tag">Đã qua</span>' : '') + '</div></div></div>';
+    html += '<div class="shift-detail-item"><i class="fas fa-clock" style="color:' + sc.color + '"></i><div><div class="sdi-label">Ca làm</div><div class="sdi-val" style="color:' + sc.color + ';font-weight:700">' + sc.label + ' · ' + sc.time + '</div></div></div>';
+    html += '<div class="shift-detail-item"><i class="fas fa-door-open" style="color:' + sc.color + '"></i><div><div class="sdi-label">Phòng</div><div class="sdi-val">' + escapeHtml(sh.room || '—') + '</div></div></div>';
+    if (acc && acc.specialty) {
+        html += '<div class="shift-detail-item"><i class="fas fa-stethoscope" style="color:' + sc.color + '"></i><div><div class="sdi-label">Chuyên khoa</div><div class="sdi-val">' + escapeHtml(acc.specialty) + '</div></div></div>';
+    }
+    html += '</div>';
+
+    // Cảnh báo nếu ngày đã qua
+    if (isPast) {
+        html += '<div class="shift-detail-warning"><i class="fas fa-info-circle"></i> Ca này đã qua, không thể sửa hoặc xóa.</div>';
+    }
+    html += '</div>';
+
+    document.getElementById('shiftDetailBody').innerHTML = html;
+    document.getElementById('shiftDetailTitle').innerHTML = '<span style="color:' + sc.color + '">' + sc.label + '</span> — ' + formatDate(sh.date);
+
+    // Ẩn/hiện nút sửa xóa nếu đã qua
+    var btnDel = document.querySelector('#shiftDetailModal .btn-danger');
+    var btnEdit = document.querySelector('#shiftDetailModal .btn-save');
+    if (btnDel)  btnDel.style.display  = isPast ? 'none' : '';
+    if (btnEdit) btnEdit.style.display = isPast ? 'none' : '';
+
+    document.getElementById('shiftDetailModal').style.display = 'flex';
+}
+
+function closeShiftDetailModal() {
+    document.getElementById('shiftDetailModal').style.display = 'none';
+    viewingShiftId = null;
+}
+
+function deleteShiftFromDetail() {
+    if (!viewingShiftId) return;
     if (!confirm('Xóa ca làm này?')) return;
-    shifts = shifts.filter(function(s) { return s.id !== id; });
+    shifts = shifts.filter(function(s) { return s.id !== viewingShiftId; });
+    closeShiftDetailModal();
     renderSchedule();
     showToast('Đã xóa ca làm');
 }
-// Alias cũ
-function deleteShift(id) { schDeleteShift(id); }
+
+function editShiftFromDetail() {
+    if (!viewingShiftId) return;
+    var sh = null;
+    for (var i = 0; i < shifts.length; i++) {
+        if (shifts[i].id === viewingShiftId) { sh = shifts[i]; break; }
+    }
+    if (!sh) return;
+    closeShiftDetailModal();
+    // Mở modal sửa với dữ liệu ca
+    editingShiftId = sh.id;
+    document.getElementById('shiftModalTitle').innerText = 'Sửa ca làm';
+    document.getElementById('shiftId').value = sh.id;
+    var todayStr = toYMD(new Date());
+    var dateInput = document.getElementById('shiftDate');
+    dateInput.min = todayStr;
+    dateInput.value = sh.date;
+    schUpdateShiftTypeOptions();
+    document.getElementById('shiftType').value = sh.shiftType;
+    schPopulateStaff(sh.staffId);
+    document.getElementById('shiftRoom').value = sh.room || 'Phòng 1';
+    document.getElementById('shiftModal').style.display = 'flex';
+}
 
 // ==================== TÀI KHOẢN ====================
 var accRoleConfig = {
@@ -567,15 +690,15 @@ function renderAccounts() {
                 ? '<span class="badge badge-active"><i class="fas fa-circle"></i> Hoạt động</span>'
                 : '<span class="badge badge-inactive"><i class="fas fa-ban"></i> Bị khóa</span>';
             var specialty = (a.role==='doctor' && a.specialty) ? escapeHtml(a.specialty) : '<span style="color:var(--text-sub)">—</span>';
-            return '<tr>' +
+            return '<tr class="acc-row-clickable" onclick="showStaffInfo(' + a.id + ')" title="Xem thông tin">' +
                 '<td><span style="font-weight:700;color:var(--primary-color)">#' + a.id + '</span></td>' +
-                '<td><span class="acc-name-link" onclick="showStaffInfo(' + a.id + ')" style="font-weight:600;color:var(--primary-color);cursor:pointer;text-decoration:underline dotted">' + escapeHtml(a.name) + '</span></td>' +
+                '<td><span style="font-weight:600">' + escapeHtml(a.name) + '</span></td>' +
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
                 '<td style="font-size:0.82rem">' + specialty + '</td>' +
                 '<td>' + (a.phone || '—') + '</td>' +
                 '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
-                '<td><div class="action-btns">' +
+                '<td onclick="event.stopPropagation()"><div class="action-btns">' +
                     '<button class="btn-action btn-edit" onclick="editAccount(' + a.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
                     '<button class="btn-action ' + (a.status==='active' ? 'btn-toggle-active' : 'btn-toggle-inactive') + '" onclick="toggleAccStatus(' + a.id + ')" title="' + (a.status==='active' ? 'Khóa' : 'Mở khóa') + '">' +
                         '<i class="fas ' + (a.status==='active' ? 'fa-lock' : 'fa-unlock') + '"></i>' +
@@ -601,13 +724,17 @@ function goAccPage(p) { accPage = p; renderAccounts(); }
 
 function onAccRoleChange() {
     var role = document.getElementById('accRole').value;
-    var sg = document.getElementById('accSpecialtyGroup');
-    if (role === 'doctor') {
-        sg.style.opacity = '1'; sg.querySelector('select').disabled = false;
-    } else {
-        sg.style.opacity = '0.4'; sg.querySelector('select').disabled = true;
-        sg.querySelector('select').value = '';
-    }
+    var sg  = document.getElementById('accSpecialtyGroup');
+    var dg  = document.getElementById('accDegreeGroup');
+    var isDoc = role === 'doctor';
+    sg.style.opacity  = isDoc ? '1'   : '0.35';
+    sg.style.pointerEvents = isDoc ? '' : 'none';
+    sg.querySelector('select').disabled = !isDoc;
+    if (!isDoc) sg.querySelector('select').value = '';
+    dg.style.opacity  = isDoc ? '1'   : '0.35';
+    dg.style.pointerEvents = isDoc ? '' : 'none';
+    dg.querySelector('input').disabled = !isDoc;
+    if (!isDoc) dg.querySelector('input').value = '';
 }
 
 function openAccountModal() {
@@ -622,6 +749,9 @@ function openAccountModal() {
     document.getElementById('accDegree').value = '';
     document.getElementById('accPhone').value = '';
     document.getElementById('accPassword').value = '';
+    document.getElementById('accAvatarFile').value = '';
+    document.getElementById('accAvatarPreview').style.display = 'none';
+    document.getElementById('accAvatarPreview').src = '';
     document.getElementById('accStatusGroup').style.display = 'none';
     onAccRoleChange();
     document.getElementById('accountModal').style.display = 'flex';
@@ -641,10 +771,26 @@ function editAccount(id) {
     document.getElementById('accDegree').value = a.degree || '';
     document.getElementById('accPhone').value = a.phone || '';
     document.getElementById('accPassword').value = '';
+    document.getElementById('accAvatarFile').value = '';
+    var prev = document.getElementById('accAvatarPreview');
+    if (a.avatar) { prev.src = a.avatar; prev.style.display = 'block'; }
+    else { prev.src = ''; prev.style.display = 'none'; }
     document.getElementById('accStatus').value = a.status;
     document.getElementById('accStatusGroup').style.display = '';
     onAccRoleChange();
     document.getElementById('accountModal').style.display = 'flex';
+}
+
+function onAvatarChange(input) {
+    var file = input.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        var prev = document.getElementById('accAvatarPreview');
+        prev.src = e.target.result;
+        prev.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
 }
 
 function closeAccountModal() { document.getElementById('accountModal').style.display = 'none'; }
@@ -657,12 +803,15 @@ function saveAccount() {
         showToast('Vui lòng nhập mật khẩu!', 'error'); return;
     }
     var role = document.getElementById('accRole').value;
+    var prevSrc = document.getElementById('accAvatarPreview').src;
+    var avatar = (prevSrc && prevSrc.indexOf('data:') === 0) ? prevSrc : (editingAccId ? (accounts.find(function(a){return a.id===editingAccId;})||{}).avatar||'' : '');
     var data = {
         name: name, role: role, phone: phone, username: phone,
         dob: document.getElementById('accDob').value,
         gender: document.getElementById('accGender').value,
         specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
-        degree: document.getElementById('accDegree').value.trim(),
+        degree: role === 'doctor' ? document.getElementById('accDegree').value.trim() : '',
+        avatar: avatar,
         status: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
     if (editingAccId) {
@@ -686,15 +835,32 @@ function showStaffInfo(id) {
     var rc = accRoleConfig[a.role] || {label:a.role, badge:'badge-staff'};
     var iconMap = {doctor:'fa-user-md', staff:'fa-user-tie', admin:'fa-user-shield', customer:'fa-user'};
     var icon = iconMap[a.role] || 'fa-user';
-    var dobStr = a.dob ? formatDate(a.dob) + (a.dob ? ' (' + (new Date().getFullYear()-new Date(a.dob).getFullYear()) + ' tuổi)' : '') : '—';
-    var weekStart = getWeekStart(new Date()); var weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate()+6);
-    var weekShifts = shifts.filter(function(s){ return s.staffId===id && s.date>=toYMD(weekStart) && s.date<=toYMD(weekEnd); });
+    var dobStr = '—';
+    if (a.dob) {
+        var age = new Date().getFullYear() - new Date(a.dob + 'T00:00:00').getFullYear();
+        dobStr = formatDate(a.dob) + ' (' + age + ' tuổi)';
+    }
+    // Tính tuần hiện tại không cần getWeekStart
+    var now = new Date();
+    var dow = now.getDay();
+    var wsDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
+    var weDate = new Date(wsDate.getFullYear(), wsDate.getMonth(), wsDate.getDate() + 6);
+    var wsStr = toYMD(wsDate), weStr = toYMD(weDate);
+    var weekShifts = shifts.filter(function(s) {
+        return s.staffId === id && s.date >= wsStr && s.date <= weStr;
+    });
     var shiftsHtml = weekShifts.length > 0
-        ? weekShifts.map(function(s){ var sc=shiftConfig[s.shiftType]; return '<span class="sch-staff-chip" style="background:'+sc.bg+';color:'+sc.color+';margin:2px">'+formatDate(s.date)+' – '+sc.label+'</span>'; }).join('')
+        ? weekShifts.map(function(s) {
+            var sc = shiftConfig[s.shiftType] || shiftConfig.morning;
+            return '<span class="sch-chip" style="background:'+sc.bg+';color:'+sc.color+'">'+formatDate(s.date)+' – '+sc.label+'</span>';
+          }).join('')
         : '<span style="color:var(--text-sub);font-size:0.85rem">Chưa có ca tuần này</span>';
+    var avatarHtml = a.avatar
+        ? '<img src="'+a.avatar+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover">'
+        : '<div class="staff-info-avatar"><i class="fas '+icon+'"></i></div>';
     document.getElementById('staffInfoBody').innerHTML =
         '<div class="staff-info-header">' +
-            '<div class="staff-info-avatar"><i class="fas '+icon+'"></i></div>' +
+            avatarHtml +
             '<div><div class="staff-info-name">'+escapeHtml(a.name)+'</div><span class="badge '+rc.badge+'">'+rc.label+'</span></div>' +
         '</div>' +
         '<div class="staff-info-grid">' +
@@ -702,9 +868,12 @@ function showStaffInfo(id) {
             '<div class="staff-info-item"><i class="fas fa-birthday-cake"></i><span>'+dobStr+'</span></div>' +
             '<div class="staff-info-item"><i class="fas fa-venus-mars"></i><span>'+(genderMap[a.gender]||'—')+'</span></div>' +
             '<div class="staff-info-item"><i class="fas fa-graduation-cap"></i><span>'+escapeHtml(a.degree||'—')+'</span></div>' +
-            (a.role==='doctor'?'<div class="staff-info-item" style="grid-column:1/-1"><i class="fas fa-stethoscope"></i><span>'+escapeHtml(a.specialty||'—')+'</span></div>':'') +
+            (a.role==='doctor' ? '<div class="staff-info-item" style="grid-column:1/-1"><i class="fas fa-stethoscope"></i><span>'+escapeHtml(a.specialty||'—')+'</span></div>' : '') +
         '</div>' +
-        '<div class="staff-info-section"><div class="staff-info-sec-title"><i class="fas fa-calendar-week"></i> Ca làm việc tuần này</div><div class="staff-info-shifts" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+shiftsHtml+'</div></div>';
+        '<div class="staff-info-section">' +
+            '<div class="staff-info-sec-title"><i class="fas fa-calendar-week"></i> Ca làm việc tuần này</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+shiftsHtml+'</div>' +
+        '</div>';
     document.getElementById('staffInfoModal').style.display = 'flex';
 }
 function closeStaffInfoModal() { document.getElementById('staffInfoModal').style.display = 'none'; }
@@ -1096,6 +1265,7 @@ function renderRevenue() {
 window.onclick = function(e) {
     if (e.target === document.getElementById('serviceModal')) closeServiceModal();
     if (e.target === document.getElementById('shiftModal')) closeShiftModal();
+    if (e.target === document.getElementById('shiftDetailModal')) closeShiftDetailModal();
     if (e.target === document.getElementById('accountModal')) closeAccountModal();
     if (e.target === document.getElementById('staffInfoModal')) closeStaffInfoModal();
 };
