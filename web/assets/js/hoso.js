@@ -1,4 +1,4 @@
-var svcList20 = [
+var FALLBACK_SERVICES_HOSO = [
     {id:'1', name:'Khám tổng quát', time:'20 phút', price:100000, perUnit:false, unit:''},
     {id:'2', name:'Cạo vôi răng', time:'30 phút', price:200000, perUnit:false, unit:''},
     {id:'3', name:'Trám răng Composite', time:'30 phút', price:300000, perUnit:true, unit:'răng'},
@@ -21,11 +21,36 @@ var svcList20 = [
     {id:'20', name:'Điều trị viêm nha chu', time:'30 phút', price:500000, perUnit:false, unit:''}
 ];
 
-// === DATA LICH HEN ===
-var appointmentDetails = {
-    1: {
-        status:'paid', statusText:'Đã khám', date:'01/03/2024', time:'08:00',
-        customerNote:'Muốn cạo vôi định kỳ.',
+// ── FALLBACK: Thông tin user ──────────────────────────────────────
+var FALLBACK_USER = {
+    name: 'Nguyễn Văn An', phone: '0901000001',
+    dob: '1990-05-15', gender: 'Nam', avatar: null
+};
+
+// ── FALLBACK: Lịch hẹn mẫu ───────────────────────────────────────
+var FALLBACK_APPOINTMENTS = [
+    {
+        id: 3, status:'pending', statusText:'Chờ xác nhận',
+        date:'20/05/2024', time:'14:00', customerNote:'Muốn bọc sứ 2 răng cửa và tẩy trắng.',
+        doctorName:null, doctorSpec:null, doctorDegree:null, doctorAvatar:null,
+        room:null, diagnosis:null, doctorNote:null,
+        services:[
+            {id:'13', name:'Bọc răng sứ Zirconia', price:6000000, time:'45 phút/răng', qty:2, perUnit:true, unit:'răng'},
+            {id:'7',  name:'Tẩy trắng răng Laser',  price:2500000, time:'45 phút',      qty:1, perUnit:false, unit:''}
+        ], total:14500000
+    },
+    {
+        id: 2, status:'confirmed', statusText:'Đã xác nhận',
+        date:'15/04/2024', time:'09:30', customerNote:'Răng cửa mọc lệch.',
+        doctorName:'BS. Trần Tâm', doctorSpec:'Chỉnh nha', doctorDegree:'Thạc sĩ',
+        doctorAvatar:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop',
+        room:'Phòng 203', diagnosis:null, doctorNote:null,
+        services:[{id:'1', name:'Khám tổng quát', price:100000, time:'20 phút', qty:1, perUnit:false, unit:''}],
+        total:100000
+    },
+    {
+        id: 1, status:'paid', statusText:'Đã khám',
+        date:'01/03/2024', time:'08:00', customerNote:'Muốn cạo vôi định kỳ.',
         doctorName:'BS. Nguyễn Hải', doctorSpec:'Tổng quát', doctorDegree:'CKI',
         doctorAvatar:'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=100&h=100&fit=crop',
         room:'Phòng 101',
@@ -33,34 +58,92 @@ var appointmentDetails = {
         doctorNote:'Tái khám sau 6 tháng.',
         services:[
             {id:'1', name:'Khám tổng quát', price:100000, time:'20 phút', qty:1, perUnit:false, unit:''},
-            {id:'2', name:'Cạo vôi răng', price:200000, time:'30 phút', qty:1, perUnit:false, unit:''}
-        ],
-        total:300000
-    },
-    2: {
-        status:'confirmed', statusText:'Đã xác nhận', date:'15/04/2024', time:'09:30',
-        customerNote:'Răng cửa mọc lệch.',
-        doctorName:'BS. Trần Tâm', doctorSpec:'Chỉnh nha', doctorDegree:'Thạc sĩ',
-        doctorAvatar:'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=100&h=100&fit=crop',
-        room:'Phòng 203',
-        diagnosis:null, doctorNote:null,
-        services:[
-            {id:'1', name:'Khám tổng quát', price:100000, time:'20 phút', qty:1, perUnit:false, unit:''}
-        ],
-        total:100000
-    },
-    3: {
-        status:'pending', statusText:'Chờ xác nhận', date:'20/05/2024', time:'14:00',
-        customerNote:'Muốn bọc sứ 2 răng cửa và tẩy trắng.',
-        doctorName:null, doctorSpec:null, doctorDegree:null, doctorAvatar:null,
-        room:null, diagnosis:null, doctorNote:null,
-        services:[
-            {id:'13', name:'Bọc răng sứ Zirconia', price:6000000, time:'45 phút/răng', qty:2, perUnit:true, unit:'răng'},
-            {id:'7', name:'Tẩy trắng răng Laser', price:2500000, time:'45 phút', qty:1, perUnit:false, unit:''}
-        ],
-        total:14500000
+            {id:'2', name:'Cạo vôi răng',   price:200000, time:'30 phút', qty:1, perUnit:false, unit:''}
+        ], total:300000
     }
-};
+];
+
+// ── Dùng data từ backend nếu có ──────────────────────────────────
+var svcList20          = (window.__HOSO_SERVICES__     && window.__HOSO_SERVICES__.length     > 0) ? window.__HOSO_SERVICES__     : FALLBACK_SERVICES_HOSO;
+var currentUser        = window.__HOSO_USER__          || FALLBACK_USER;
+var appointmentList    = (window.__HOSO_APPOINTMENTS__ && window.__HOSO_APPOINTMENTS__.length > 0) ? window.__HOSO_APPOINTMENTS__ : FALLBACK_APPOINTMENTS;
+
+// Chuyển appointmentList thành object {id: detail} để showDetail() dùng
+var appointmentDetails = {};
+appointmentList.forEach(function(a) { appointmentDetails[a.id] = a; });
+
+// ── Render thông tin user lên giao diện ──────────────────────────
+(function initUserInfo() {
+    var u = currentUser;
+
+    // Sidebar
+    var sidebarName  = document.getElementById('sidebarName');
+    var sidebarPhone = document.getElementById('sidebarPhone');
+    var sidebarAv    = document.getElementById('sidebarAvatar');
+    if (sidebarName)  sidebarName.textContent  = u.name  || '—';
+    if (sidebarPhone) sidebarPhone.textContent = u.phone || '';
+    if (sidebarAv && u.avatar) {
+        sidebarAv.innerHTML = '<img src="' + u.avatar + '" style="width:60px;height:60px;border-radius:50%;object-fit:cover">';
+    }
+
+    // Tab thông tin
+    var dispName   = document.getElementById('dispName');
+    var dispPhone  = document.getElementById('dispPhone');
+    var dispDob    = document.getElementById('dispDob');
+    var dispGender = document.getElementById('dispGender');
+    if (dispName)   dispName.textContent   = u.name  || '—';
+    if (dispPhone)  dispPhone.textContent  = u.phone || '—';
+    if (dispGender) dispGender.textContent = u.gender || '—';
+    if (dispDob && u.dob) {
+        var p = u.dob.split('-');
+        if (p.length === 3) dispDob.textContent = p[2] + '/' + p[1] + '/' + p[0];
+        else dispDob.textContent = u.dob;
+    }
+
+    // Pre-fill modal chỉnh sửa
+    var editName   = document.getElementById('editName');
+    var editPhone  = document.getElementById('editPhone');
+    var editDob    = document.getElementById('editDob');
+    var editGender = document.getElementById('editGender');
+    if (editName)   editName.value   = u.name  || '';
+    if (editPhone)  editPhone.value  = u.phone || '';
+    if (editDob)    editDob.value    = u.dob   || '';
+    if (editGender && u.gender) {
+        for (var i = 0; i < editGender.options.length; i++) {
+            if (editGender.options[i].value === u.gender) { editGender.selectedIndex = i; break; }
+        }
+    }
+})();
+
+// ── Render bảng lịch hẹn ─────────────────────────────────────────
+(function initHistoryTable() {
+    var tbody = document.getElementById('historyTbody');
+    if (!tbody) return;
+    if (appointmentList.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:#8c8c9a">Bạn chưa có lịch hẹn nào</td></tr>';
+        return;
+    }
+    tbody.innerHTML = appointmentList.map(function(a, i) {
+        var svcNames = a.services.map(function(s) {
+            return s.name + (s.qty > 1 ? ' x' + s.qty : '');
+        }).join(', ');
+        var canEdit   = a.status === 'pending';
+        var canCancel = a.status === 'pending' || a.status === 'confirmed';
+        var actions = '<button class="btn-action btn-view" onclick="showDetail(' + a.id + ')">Xem</button>';
+        if (canEdit)   actions += '<button class="btn-action btn-edit" onclick="openEditAppointment(' + a.id + ')">Sửa</button>';
+        if (canCancel) actions += '<button class="btn-action btn-cancel" onclick="' + (a.status === 'pending' ? 'confirmCancel' : 'confirmCancelConfirmed') + '(' + a.id + ')">Hủy</button>';
+        return '<tr data-status="' + a.status + '" data-id="' + a.id + '">'
+            + '<td class="stt-cell">' + (i + 1) + '</td>'
+            + '<td>' + a.date + '</td>'
+            + '<td>' + a.time + '</td>'
+            + '<td>' + svcNames + '</td>'
+            + '<td><span class="status-badge ' + a.status + '">' + a.statusText + '</span></td>'
+            + '<td><div class="action-buttons">' + actions + '</div></td>'
+            + '</tr>';
+    }).join('');
+})();
+
+
 
 var currentCancelId = null;
 var currentEditId = null;
@@ -95,16 +178,19 @@ function openEditModal() { document.getElementById('editInfoModal').classList.ad
 function closeEditModal() { document.getElementById('editInfoModal').classList.remove('show'); }
 function saveEditInfo() {
     var phone = document.getElementById('editPhone').value.trim();
-    var email = document.getElementById('editEmail').value.trim();
-    if (!phone && !email) { alert('Cần ít nhất SĐT hoặc Email'); return; }
-    document.getElementById('dispPhone').textContent = phone || 'Chưa cập nhật';
-    document.getElementById('dispEmail').textContent = email || 'Chưa cập nhật';
+    if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+    document.getElementById('dispPhone').textContent = phone;
     var dob = document.getElementById('editDob').value;
     if (dob) {
         var p = dob.split('-');
         document.getElementById('dispDob').textContent = p[2] + '/' + p[1] + '/' + p[0];
     }
-    document.getElementById('dispGender').textContent = document.getElementById('editGender').value;
+    var gender = document.getElementById('editGender').value;
+    document.getElementById('dispGender').textContent = gender;
+    // Cập nhật currentUser
+    currentUser.phone  = phone;
+    currentUser.dob    = dob;
+    currentUser.gender = gender;
     alert('✅ Cập nhật thành công!');
     closeEditModal();
 }
