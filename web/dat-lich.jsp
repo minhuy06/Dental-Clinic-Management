@@ -122,13 +122,8 @@
             <div class="container">
                 <div class="section-title"><h2>Đội ngũ bác sĩ</h2></div>
                 <p class="section-intro">Các bác sĩ được đào tạo chuyên sâu, nhiều năm kinh nghiệm.</p>
-                <div class="doctors-grid">
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-nguyen-hai.jpg" alt="BS"></div><div class="doctor-info"><h3>BS. Nguyễn Hải</h3><span class="doctor-specialty">Tổng quát</span><span class="doctor-degree">CKI</span></div></div>
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-tran-tam.jpg"   alt="BS"></div><div class="doctor-info"><h3>BS. Trần Tâm</h3><span class="doctor-specialty">Chỉnh nha</span><span class="doctor-degree">Thạc sĩ</span></div></div>
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-le-quang.jpg"   alt="BS"></div><div class="doctor-info"><h3>BS. Lê Quang</h3><span class="doctor-specialty">Phục hình răng</span><span class="doctor-degree">Tiến sĩ</span></div></div>
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-pham-huong.jpg" alt="BS"></div><div class="doctor-info"><h3>BS. Phạm Hương</h3><span class="doctor-specialty">Thẩm mỹ</span><span class="doctor-degree">CKI</span></div></div>
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-hoang-quan.jpg" alt="BS"></div><div class="doctor-info"><h3>BS. Hoàng Quân</h3><span class="doctor-specialty">Phẫu thuật miệng</span><span class="doctor-degree">CKII</span></div></div>
-                    <div class="doctor-card"><div class="doctor-img"><img src="${pageContext.request.contextPath}/assets/img/doctors/bs-dang-ngan.jpg"  alt="BS"></div><div class="doctor-info"><h3>BS. Đặng Ngân</h3><span class="doctor-specialty">Nhổ răng</span><span class="doctor-degree">Cử nhân</span></div></div>
+                <div class="doctors-grid" id="doctorsGrid">
+                    <%-- Render động từ backend --%>
                 </div>
             </div>
         </section>
@@ -149,6 +144,79 @@
     </div>
 
     <script>window.IS_LOGGED_IN = <%= isLoggedIn %>;</script>
+
+    <%-- ================================================================
+         DATA INJECTION — Backend đặt các attribute vào request scope:
+           request.setAttribute("serviceListJson", "[{...}, {...}]");
+           request.setAttribute("doctorListJson",  "[{...}, {...}]");
+
+         Mỗi service object cần: id, name, desc, time, price, cat, perUnit, unit
+         Mỗi doctor object cần:  name, specialty, degree, imgUrl
+
+         Nếu tên field trong DB khác, map lại trong Servlet/Controller trước khi
+         set attribute — KHÔNG cần sửa file JS.
+    ================================================================= --%>
+    <script>
+    (function() {
+        // ── DỊCH VỤ ──────────────────────────────────────────────────
+        // Backend inject: request.setAttribute("serviceListJson", jsonString);
+        var injectedServices = '${not empty serviceListJson ? serviceListJson : ""}';
+
+        if (injectedServices && injectedServices !== '') {
+            try {
+                window.allServices = JSON.parse(injectedServices);
+            } catch(e) {
+                console.warn('[dat-lich] serviceListJson parse error:', e);
+                window.allServices = null;
+            }
+        }
+        // Nếu backend chưa inject thì allServices sẽ dùng fallback trong dat-lich.js
+
+        // ── BÁC SĨ ───────────────────────────────────────────────────
+        // Backend inject: request.setAttribute("doctorListJson", jsonString);
+        var injectedDoctors = '${not empty doctorListJson ? doctorListJson : ""}';
+        var doctors = null;
+
+        if (injectedDoctors && injectedDoctors !== '') {
+            try {
+                doctors = JSON.parse(injectedDoctors);
+            } catch(e) {
+                console.warn('[dat-lich] doctorListJson parse error:', e);
+            }
+        }
+
+        // Fallback: dữ liệu mẫu nếu backend chưa inject
+        if (!doctors || doctors.length === 0) {
+            doctors = [
+                {name:'BS. Nguyễn Hải',  specialty:'Tổng quát',        degree:'CKI',    imgUrl:'assets/img/doctors/bs-nguyen-hai.jpg'},
+                {name:'BS. Trần Tâm',    specialty:'Chỉnh nha',         degree:'Thạc sĩ',imgUrl:'assets/img/doctors/bs-tran-tam.jpg'},
+                {name:'BS. Lê Quang',    specialty:'Phục hình răng',    degree:'Tiến sĩ',imgUrl:'assets/img/doctors/bs-le-quang.jpg'},
+                {name:'BS. Phạm Hương',  specialty:'Thẩm mỹ',           degree:'CKI',    imgUrl:'assets/img/doctors/bs-pham-huong.jpg'},
+                {name:'BS. Hoàng Quân',  specialty:'Phẫu thuật miệng',  degree:'CKII',   imgUrl:'assets/img/doctors/bs-hoang-quan.jpg'},
+                {name:'BS. Đặng Ngân',   specialty:'Nhổ răng',           degree:'Cử nhân',imgUrl:'assets/img/doctors/bs-dang-ngan.jpg'}
+            ];
+        }
+
+        // Render doctor cards
+        var grid = document.getElementById('doctorsGrid');
+        if (grid) {
+            var ctx = '${pageContext.request.contextPath}';
+            grid.innerHTML = doctors.map(function(d) {
+                var img = d.imgUrl
+                    ? (d.imgUrl.indexOf('http') === 0 ? d.imgUrl : ctx + '/' + d.imgUrl)
+                    : ctx + '/assets/img/doctors/default.jpg';
+                return '<div class="doctor-card">'
+                    + '<div class="doctor-img"><img src="' + img + '" alt="' + d.name + '" onerror="this.src=\'' + ctx + '/assets/img/doctors/default.jpg\'"></div>'
+                    + '<div class="doctor-info">'
+                    + '<h3>' + d.name + '</h3>'
+                    + '<span class="doctor-specialty">' + (d.specialty || '') + '</span>'
+                    + '<span class="doctor-degree">' + (d.degree || '') + '</span>'
+                    + '</div></div>';
+            }).join('');
+        }
+    })();
+    </script>
+
     <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js"></script>
 </body>
 </html>
