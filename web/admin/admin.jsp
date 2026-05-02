@@ -105,8 +105,9 @@
                     <button class="sch-today-btn" onclick="schGoToday()">Tháng này</button>
                 </div>
                 <div class="sch-legend">
-                    <span class="sch-legend-item" style="background:#dbeafe;color:#2563eb"><i class="fas fa-briefcase-medical"></i> T2–T7: 8:00–17:00</span>
-                    <span class="sch-legend-item" style="background:#fef3c7;color:#d97706"><i class="fas fa-sun"></i> CN: 8:00–12:00</span>
+                    <span class="sch-legend-item" style="background:#dbeafe;color:#1d4ed8"><i class="fas fa-sun"></i> Ca Sáng 8:00–12:00</span>
+                    <span class="sch-legend-item" style="background:#d1fae5;color:#047857"><i class="fas fa-cloud-sun"></i> Ca Chiều 12:00–17:00</span>
+                    <span class="sch-legend-item" style="background:#f3f4f6;color:#6b7280"><i class="fas fa-moon"></i> CN chỉ Ca Sáng</span>
                 </div>
                 <button class="btn-add" onclick="openShiftModal()"><i class="fas fa-plus"></i> Thêm ca</button>
             </div>
@@ -397,11 +398,19 @@
                         </select>
                     </div>
                 </div>
-                <div class="form-group"><label>Nhân viên *</label>
-                    <select id="shiftStaff"></select>
-                </div>
-                <div class="form-group"><label>Ghi chú</label>
-                    <input type="text" id="shiftNote" placeholder="Ghi chú thêm (nếu có)">
+                <div class="form-row">
+                    <div class="form-group"><label>Nhân viên *</label>
+                        <select id="shiftStaff"></select>
+                    </div>
+                    <div class="form-group"><label>Phòng *</label>
+                        <select id="shiftRoom">
+                            <option value="Phòng 1">Phòng 1</option>
+                            <option value="Phòng 2">Phòng 2</option>
+                            <option value="Phòng 3">Phòng 3</option>
+                            <option value="Phòng phẫu thuật">Phòng phẫu thuật</option>
+                            <option value="Phòng X-quang">Phòng X-quang</option>
+                        </select>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -411,10 +420,26 @@
         </div>
     </div>
 
+    <!-- MODAL: CHI TIẾT CA LÀM -->
+    <div id="shiftDetailModal" class="modal">
+        <div class="modal-content" style="max-width:420px">
+            <div class="modal-header">
+                <h3 id="shiftDetailTitle">Chi tiết ca làm</h3>
+                <span class="close" onclick="closeShiftDetailModal()">&times;</span>
+            </div>
+            <div class="modal-body" id="shiftDetailBody"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeShiftDetailModal()">Đóng</button>
+                <button class="btn-danger" onclick="deleteShiftFromDetail()" style="background:#ef4444;color:#fff;border:none;border-radius:9px;padding:.6rem 1.2rem;font-weight:700;cursor:pointer;font-family:inherit"><i class="fas fa-trash"></i> Xóa ca</button>
+                <button class="btn-save" onclick="editShiftFromDetail()"><i class="fas fa-edit"></i> Sửa ca</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: THÔNG TIN NHÂN SỰ (popup khi bấm tên) -->
     <div id="staffInfoModal" class="modal">
         <div class="modal-content" style="max-width:500px">
-            <div class="modal-header"><h3>Thông tin nhân sự</h3><span class="close" onclick="closeStaffInfoModal()">&times;</span></div>
+            <div class="modal-header"><h3>Thông tin</h3><span class="close" onclick="closeStaffInfoModal()">&times;</span></div>
             <div class="modal-body" id="staffInfoBody"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeStaffInfoModal()">Đóng</button>
@@ -429,6 +454,17 @@
             <div class="modal-header"><h3 id="accModalTitle">Thêm tài khoản mới</h3><span class="close" onclick="closeAccountModal()">&times;</span></div>
             <div class="modal-body">
                 <input type="hidden" id="accId">
+                <!-- Avatar upload -->
+                <div class="form-group acc-avatar-upload">
+                    <label>Ảnh đại diện</label>
+                    <div class="acc-avatar-row">
+                        <img id="accAvatarPreview" src="" style="display:none;width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--border-color)">
+                        <label class="acc-avatar-btn">
+                            <i class="fas fa-camera"></i> Chọn ảnh
+                            <input type="file" id="accAvatarFile" accept="image/*" style="display:none" onchange="onAvatarChange(this)">
+                        </label>
+                    </div>
+                </div>
                 <div class="form-row">
                     <div class="form-group"><label>Họ và tên *</label><input type="text" id="accName" placeholder="Nhập họ tên"></div>
                     <div class="form-group"><label>Loại tài khoản *</label>
@@ -463,7 +499,9 @@
                             <option value="Răng trẻ em">Răng trẻ em</option>
                         </select>
                     </div>
-                    <div class="form-group"><label>Bằng cấp / Học vị</label><input type="text" id="accDegree" placeholder="CKI, Thạc sĩ, Tiến sĩ"></div>
+                    <div class="form-group" id="accDegreeGroup"><label>Bằng cấp / Học vị</label>
+                        <input type="text" id="accDegree" placeholder="CKI, Thạc sĩ, Tiến sĩ">
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group"><label>Số điện thoại *</label><input type="tel" id="accPhone" placeholder="Nhập số điện thoại"></div>
