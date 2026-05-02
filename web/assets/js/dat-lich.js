@@ -1,25 +1,31 @@
-var allServices = [
-    {id:'1', name:'Khám tổng quát', desc:'Kiểm tra răng miệng toàn diện', time:'20 phút', price:100000, cat:'kham', perUnit:false},
-    {id:'2', name:'Cạo vôi răng', desc:'Loại bỏ mảng bám, vôi răng', time:'30 phút', price:200000, cat:'kham', perUnit:false},
-    {id:'3', name:'Trám răng Composite', desc:'Trám thẩm mỹ Composite', time:'30 phút', price:300000, cat:'kham', perUnit:true, unit:'răng'},
-    {id:'4', name:'Nhổ răng sữa', desc:'Nhổ răng sữa cho trẻ em', time:'15 phút', price:100000, cat:'tre-em', perUnit:true, unit:'răng'},
-    {id:'5', name:'Nhổ răng khôn mọc thẳng', desc:'Nhổ răng khôn không phẫu thuật', time:'30 phút', price:1000000, cat:'phau-thuat', perUnit:true, unit:'răng'},
-    {id:'6', name:'Nhổ răng khôn mọc ngầm', desc:'Tiểu phẫu nhổ răng khôn phức tạp', time:'60 phút', price:3000000, cat:'phau-thuat', perUnit:true, unit:'răng'},
-    {id:'7', name:'Tẩy trắng răng Laser', desc:'Tẩy trắng bằng công nghệ Laser', time:'45 phút', price:2500000, cat:'tham-my', perUnit:false},
-    {id:'8', name:'Tẩy trắng răng tại nhà', desc:'Máng tẩy trắng tại nhà', time:'20 phút', price:1500000, cat:'tham-my', perUnit:false},
-    {id:'9', name:'Lấy tủy răng cửa', desc:'Điều trị tủy răng cửa', time:'45 phút', price:800000, cat:'kham', perUnit:true, unit:'răng'},
-    {id:'10', name:'Lấy tủy răng hàm', desc:'Điều trị tủy răng hàm', time:'60 phút', price:1500000, cat:'kham', perUnit:true, unit:'răng'},
-    {id:'11', name:'Bọc răng sứ Titan', desc:'Răng sứ Titan tiêu chuẩn', time:'45 phút/răng', price:2000000, cat:'tham-my', perUnit:true, unit:'răng'},
-    {id:'12', name:'Bọc răng sứ Cercon', desc:'Răng sứ Cercon Đức', time:'45 phút/răng', price:5000000, cat:'tham-my', perUnit:true, unit:'răng'},
-    {id:'13', name:'Bọc răng sứ Zirconia', desc:'Răng sứ Zirconia nguyên khối', time:'45 phút/răng', price:6000000, cat:'tham-my', perUnit:true, unit:'răng'},
-    {id:'14', name:'Mặt dán sứ Veneer', desc:'Dán sứ siêu mỏng thẩm mỹ', time:'60 phút/răng', price:7000000, cat:'tham-my', perUnit:true, unit:'răng'},
-    {id:'15', name:'Cấy ghép Implant tiêu chuẩn', desc:'Trụ Implant Titanium', time:'60-90 phút', price:15000000, cat:'phau-thuat', perUnit:true, unit:'trụ'},
-    {id:'16', name:'Cấy ghép Implant cao cấp', desc:'Trụ Implant cao cấp Châu Âu', time:'60-90 phút', price:30000000, cat:'phau-thuat', perUnit:true, unit:'trụ'},
-    {id:'17', name:'Niềng răng mắc cài kim loại', desc:'Chỉnh nha mắc cài kim loại', time:'60 phút/lần', price:25000000, cat:'chinh-nha', perUnit:false},
-    {id:'18', name:'Niềng răng mắc cài sứ', desc:'Chỉnh nha mắc cài sứ', time:'60 phút/lần', price:35000000, cat:'chinh-nha', perUnit:false},
-    {id:'19', name:'Niềng răng Invisalign', desc:'Khay trong suốt chỉnh nha', time:'45 phút/lần', price:80000000, cat:'chinh-nha', perUnit:false},
-    {id:'20', name:'Điều trị viêm nha chu', desc:'Điều trị viêm nướu nha chu', time:'30 phút', price:500000, cat:'kham', perUnit:false}
+var FALLBACK_SERVICES = [
+    {id:'1',  name:'Khám tổng quát',              desc:'Kiểm tra răng miệng toàn diện',         time:'20 phút',      price:100000,  cat:'kham',      perUnit:false},
+    {id:'2',  name:'Cạo vôi răng',                desc:'Loại bỏ mảng bám, vôi răng',            time:'30 phút',      price:200000,  cat:'kham',      perUnit:false},
+    {id:'3',  name:'Trám răng Composite',          desc:'Trám thẩm mỹ Composite',                time:'30 phút',      price:300000,  cat:'kham',      perUnit:true,  unit:'răng'},
+    {id:'4',  name:'Nhổ răng sữa',                desc:'Nhổ răng sữa cho trẻ em',               time:'15 phút',      price:100000,  cat:'tre-em',    perUnit:true,  unit:'răng'},
+    {id:'5',  name:'Nhổ răng khôn mọc thẳng',     desc:'Nhổ răng khôn không phẫu thuật',        time:'30 phút',      price:1000000, cat:'phau-thuat',perUnit:true,  unit:'răng'},
+    {id:'6',  name:'Nhổ răng khôn mọc ngầm',      desc:'Tiểu phẫu nhổ răng khôn phức tạp',     time:'60 phút',      price:3000000, cat:'phau-thuat',perUnit:true,  unit:'răng'},
+    {id:'7',  name:'Tẩy trắng răng Laser',         desc:'Tẩy trắng bằng công nghệ Laser',        time:'45 phút',      price:2500000, cat:'tham-my',   perUnit:false},
+    {id:'8',  name:'Tẩy trắng răng tại nhà',       desc:'Máng tẩy trắng tại nhà',                time:'20 phút',      price:1500000, cat:'tham-my',   perUnit:false},
+    {id:'9',  name:'Lấy tủy răng cửa',             desc:'Điều trị tủy răng cửa',                 time:'45 phút',      price:800000,  cat:'kham',      perUnit:true,  unit:'răng'},
+    {id:'10', name:'Lấy tủy răng hàm',             desc:'Điều trị tủy răng hàm',                 time:'60 phút',      price:1500000, cat:'kham',      perUnit:true,  unit:'răng'},
+    {id:'11', name:'Bọc răng sứ Titan',            desc:'Răng sứ Titan tiêu chuẩn',              time:'45 phút/răng', price:2000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
+    {id:'12', name:'Bọc răng sứ Cercon',           desc:'Răng sứ Cercon Đức',                    time:'45 phút/răng', price:5000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
+    {id:'13', name:'Bọc răng sứ Zirconia',         desc:'Răng sứ Zirconia nguyên khối',          time:'45 phút/răng', price:6000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
+    {id:'14', name:'Mặt dán sứ Veneer',            desc:'Dán sứ siêu mỏng thẩm mỹ',             time:'60 phút/răng', price:7000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
+    {id:'15', name:'Cấy ghép Implant tiêu chuẩn', desc:'Trụ Implant Titanium',                  time:'60-90 phút',   price:15000000,cat:'phau-thuat',perUnit:true,  unit:'trụ'},
+    {id:'16', name:'Cấy ghép Implant cao cấp',    desc:'Trụ Implant cao cấp Châu Âu',           time:'60-90 phút',   price:30000000,cat:'phau-thuat',perUnit:true,  unit:'trụ'},
+    {id:'17', name:'Niềng răng mắc cài kim loại', desc:'Chỉnh nha mắc cài kim loại',            time:'60 phút/lần',  price:25000000,cat:'chinh-nha', perUnit:false},
+    {id:'18', name:'Niềng răng mắc cài sứ',       desc:'Chỉnh nha mắc cài sứ',                 time:'60 phút/lần',  price:35000000,cat:'chinh-nha', perUnit:false},
+    {id:'19', name:'Niềng răng Invisalign',        desc:'Khay trong suốt chỉnh nha',             time:'45 phút/lần',  price:80000000,cat:'chinh-nha', perUnit:false},
+    {id:'20', name:'Điều trị viêm nha chu',        desc:'Điều trị viêm nướu nha chu',            time:'30 phút',      price:500000,  cat:'kham',      perUnit:false}
 ];
+
+// Dùng data từ DB nếu có (inject qua JSP → window.allServices), không thì dùng fallback
+var allServices = (window.allServices && window.allServices.length > 0)
+    ? window.allServices
+    : FALLBACK_SERVICES;
+
 
 // === RENDER BANG DICH VU ===
 function renderServiceTable(list, showAll) {

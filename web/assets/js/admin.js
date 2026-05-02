@@ -98,8 +98,38 @@ var accFilter = 'all', accPage = 1, accPerPage = 8, editingAccId = null;
 var staffInfoCurrentId = null;
 
 // Schedule state
-var schCurrentDate = new Date('2026-04-28');
+var schCurrentDate = new Date();
 var editingShiftId = null;
+
+// ==================== OVERRIDE DATA TỪ BACKEND ====================
+// JSP inject vào window.__ADMIN_*__ trước khi load file này.
+// Nếu có thì dùng, không thì giữ nguyên demo data ở trên.
+(function() {
+    if (window.__ADMIN_SERVICES__ && window.__ADMIN_SERVICES__.length > 0) {
+        services = window.__ADMIN_SERVICES__;
+        console.info('[admin] services loaded from DB:', services.length);
+    }
+    if (window.__ADMIN_ACCOUNTS__ && window.__ADMIN_ACCOUNTS__.length > 0) {
+        accounts = window.__ADMIN_ACCOUNTS__;
+        console.info('[admin] accounts loaded from DB:', accounts.length);
+    }
+    if (window.__ADMIN_SHIFTS__ && window.__ADMIN_SHIFTS__.length > 0) {
+        shifts = window.__ADMIN_SHIFTS__;
+        console.info('[admin] shifts loaded from DB:', shifts.length);
+    }
+    if (window.__ADMIN_REVENUE__) {
+        var r = window.__ADMIN_REVENUE__;
+        if (r.months)      revenueMonths     = r.months;
+        if (r.byCat)       revenueByCat      = r.byCat;
+        if (r.topServices) revenueTopServices= r.topServices;
+        if (r.payments)    revenuePayments   = r.payments;
+        if (r.txns)        revenueTxns       = r.txns;
+        if (r.allTxns)     allTxns           = r.allTxns;
+        console.info('[admin] revenue loaded from DB');
+    }
+    // Set ngày hiện tại cho lịch
+    schCurrentDate = new Date();
+})();
 
 // ==================== TIỆN ÍCH ====================
 function escapeHtml(t) {
@@ -723,18 +753,33 @@ function updateAccStats() {
 function goAccPage(p) { accPage = p; renderAccounts(); }
 
 function onAccRoleChange() {
-    var role = document.getElementById('accRole').value;
-    var sg  = document.getElementById('accSpecialtyGroup');
-    var dg  = document.getElementById('accDegreeGroup');
+    var role  = document.getElementById('accRole').value;
+    var sg    = document.getElementById('accSpecialtyGroup');
+    var dg    = document.getElementById('accDegreeGroup');
+    var ag = document.getElementById('accAvatarUpload') || document.querySelector('.acc-avatar-upload');
     var isDoc = role === 'doctor';
-    sg.style.opacity  = isDoc ? '1'   : '0.35';
-    sg.style.pointerEvents = isDoc ? '' : 'none';
+
+    sg.style.opacity       = isDoc ? '1' : '0.35';
+    sg.style.pointerEvents = isDoc ? ''  : 'none';
     sg.querySelector('select').disabled = !isDoc;
     if (!isDoc) sg.querySelector('select').value = '';
-    dg.style.opacity  = isDoc ? '1'   : '0.35';
-    dg.style.pointerEvents = isDoc ? '' : 'none';
+
+    dg.style.opacity       = isDoc ? '1' : '0.35';
+    dg.style.pointerEvents = isDoc ? ''  : 'none';
     dg.querySelector('input').disabled = !isDoc;
     if (!isDoc) dg.querySelector('input').value = '';
+
+    if (ag) {
+        ag.style.opacity       = isDoc ? '1' : '0.35';
+        ag.style.pointerEvents = isDoc ? ''  : 'none';
+        var fileInput = ag.querySelector('input[type="file"]');
+        if (fileInput) fileInput.disabled = !isDoc;
+        if (!isDoc) {
+            var prev = document.getElementById('accAvatarPreview');
+            if (prev) { prev.src = ''; prev.style.display = 'none'; }
+            if (fileInput) fileInput.value = '';
+        }
+    }
 }
 
 function openAccountModal() {
