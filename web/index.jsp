@@ -119,7 +119,6 @@
     <jsp:include page="components/footer.jsp" />
 
     <script>window.LOGGED_USER = '<%= loggedInUser != null ? loggedInUser : "" %>';</script>
-    <script src="${pageContext.request.contextPath}/assets/js/main.js"></script>
     <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
 </body>
 </html>
