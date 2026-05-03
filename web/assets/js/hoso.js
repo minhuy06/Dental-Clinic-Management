@@ -176,23 +176,42 @@ function filterHistory(s, btn) {
 // === EDIT INFO MODAL ===
 function openEditModal() { document.getElementById('editInfoModal').classList.add('show'); }
 function closeEditModal() { document.getElementById('editInfoModal').classList.remove('show'); }
+
 function saveEditInfo() {
-    var phone = document.getElementById('editPhone').value.trim();
-    if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
-    document.getElementById('dispPhone').textContent = phone;
-    var dob = document.getElementById('editDob').value;
-    if (dob) {
-        var p = dob.split('-');
-        document.getElementById('dispDob').textContent = p[2] + '/' + p[1] + '/' + p[0];
-    }
+    var phone  = document.getElementById('editPhone').value.trim();
+    var dob    = document.getElementById('editDob').value;
     var gender = document.getElementById('editGender').value;
-    document.getElementById('dispGender').textContent = gender;
-    // Cập nhật currentUser
-    currentUser.phone  = phone;
-    currentUser.dob    = dob;
-    currentUser.gender = gender;
-    alert('✅ Cập nhật thành công!');
-    closeEditModal();
+    if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+
+    var btn = document.querySelector('#editInfoModal .btn-primary');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+    fetch(window.CONTEXT_PATH + '/api/hoso/update-info', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: phone, dob: dob, gender: gender })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Cập nhật UI
+            document.getElementById('dispPhone').textContent  = phone;
+            document.getElementById('dispGender').textContent = gender;
+            if (dob) {
+                var p = dob.split('-');
+                document.getElementById('dispDob').textContent = p[2] + '/' + p[1] + '/' + p[0];
+            }
+            document.getElementById('sidebarPhone').textContent = phone;
+            // Cập nhật currentUser local
+            currentUser.phone = phone; currentUser.dob = dob; currentUser.gender = gender;
+            closeEditModal();
+            showHosoToast('✅ Cập nhật thông tin thành công!', 'success');
+        } else {
+            showHosoToast('❌ ' + (data.message || 'Cập nhật thất bại, thử lại!'), 'error');
+        }
+    })
+    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
+    .finally(function() { btn.disabled = false; btn.textContent = 'Xác nhận'; });
 }
 
 // === DETAIL MODAL (xem phieu kham) ===
@@ -258,23 +277,72 @@ function closeModal() { document.getElementById('detailModal').classList.remove(
 // === CANCEL PENDING ===
 function confirmCancel(id) { currentCancelId = id; document.getElementById('cancelModal').classList.add('show'); }
 function closeCancelModal() { document.getElementById('cancelModal').classList.remove('show'); }
+
 function doCancelAppointment() {
-    alert('✅ Đã hủy lịch hẹn!');
-    var r = document.querySelector('tr[data-id="' + currentCancelId + '"]');
-    if (r) r.remove();
-    var stt = 1;
-    document.querySelectorAll('#historyTable tbody tr').forEach(function(r) {
-        if (r.style.display !== 'none') r.querySelector('.stt-cell').textContent = stt++;
-    });
-    closeCancelModal();
+    var btn = document.querySelector('#cancelModal .btn:not(.btn-outline)');
+    btn.disabled = true; btn.textContent = 'Đang hủy...';
+
+    fetch(window.CONTEXT_PATH + '/api/hoso/cancel-appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: currentCancelId })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Xóa row khỏi bảng
+            var r = document.querySelector('tr[data-id="' + currentCancelId + '"]');
+            if (r) r.remove();
+            // Cập nhật STT
+            var stt = 1;
+            document.querySelectorAll('#historyTbody tr').forEach(function(row) {
+                if (row.style.display !== 'none') row.querySelector('.stt-cell').textContent = stt++;
+            });
+            // Xóa khỏi local data
+            delete appointmentDetails[currentCancelId];
+            closeCancelModal();
+            showHosoToast('✅ Đã hủy lịch hẹn thành công!', 'success');
+        } else {
+            showHosoToast('❌ ' + (data.message || 'Hủy thất bại, thử lại!'), 'error');
+        }
+    })
+    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
+    .finally(function() { btn.disabled = false; btn.textContent = 'Có, hủy'; });
 }
 
 // === CANCEL CONFIRMED (2 buoc) ===
-function confirmCancelConfirmed(id) { document.getElementById('cancelConfirmedModal').classList.add('show'); }
+function confirmCancelConfirmed(id) {
+    currentCancelId = id;
+    document.getElementById('cancelConfirmedModal').classList.add('show');
+}
 function closeCancelConfirmedModal() { document.getElementById('cancelConfirmedModal').classList.remove('show'); }
+
 function doCancelConfirmed() {
-    closeCancelConfirmedModal();
-    document.getElementById('cancelInfoModal').classList.add('show');
+    var btn = document.querySelector('#cancelConfirmedModal .btn:not(.btn-outline)');
+    btn.disabled = true; btn.textContent = 'Đang gửi...';
+
+    fetch(window.CONTEXT_PATH + '/api/hoso/request-cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: currentCancelId })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        closeCancelConfirmedModal();
+        if (data.success) {
+            // Cập nhật trạng thái row thành "đang chờ hủy"
+            var r = document.querySelector('tr[data-id="' + currentCancelId + '"]');
+            if (r) {
+                var badge = r.querySelector('.status-badge');
+                if (badge) { badge.textContent = 'Chờ hủy'; badge.className = 'status-badge pending'; }
+            }
+            document.getElementById('cancelInfoModal').classList.add('show');
+        } else {
+            showHosoToast('❌ ' + (data.message || 'Gửi yêu cầu thất bại!'), 'error');
+        }
+    })
+    .catch(function() { closeCancelConfirmedModal(); showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
+    .finally(function() { btn.disabled = false; btn.textContent = 'Xác nhận hủy'; });
 }
 function closeCancelInfoModal() { document.getElementById('cancelInfoModal').classList.remove('show'); }
 
@@ -406,40 +474,66 @@ function closeEditAppointment() { document.getElementById('editAppointmentModal'
 function saveEditAppointment() {
     var ok = true;
     if (editSelectedList.length === 0) {
-        document.getElementById('editServiceGroup').classList.add('error');
-        ok = false;
+        document.getElementById('editServiceGroup').classList.add('error'); ok = false;
     } else document.getElementById('editServiceGroup').classList.remove('error');
     if (!document.getElementById('editDate').value) {
-        document.getElementById('editDateGroup').classList.add('error');
-        ok = false;
+        document.getElementById('editDateGroup').classList.add('error'); ok = false;
     } else document.getElementById('editDateGroup').classList.remove('error');
     if (!document.getElementById('editTimeSelect').value) {
-        document.getElementById('editTimeGroup').classList.add('error');
-        ok = false;
+        document.getElementById('editTimeGroup').classList.add('error'); ok = false;
     } else document.getElementById('editTimeGroup').classList.remove('error');
     if (!ok) return;
 
-    // Cap nhat data
-    var d = appointmentDetails[currentEditId];
-    d.services = editSelectedList.slice();
-    d.total = editSelectedList.reduce(function(sum, s) { return sum + s.price * s.qty; }, 0);
-    d.time = document.getElementById('editTimeSelect').value;
-    var dv = document.getElementById('editDate').value.split('-');
-    d.date = dv[2] + '/' + dv[1] + '/' + dv[0];
-    d.customerNote = document.getElementById('editNote').value;
+    var newDate = document.getElementById('editDate').value;         // YYYY-MM-DD
+    var newTime = document.getElementById('editTimeSelect').value;   // HH:mm
+    var newNote = document.getElementById('editNote').value;
 
-    // Cap nhat table row
-    var row = document.querySelector('tr[data-id="' + currentEditId + '"]');
-    if (row) {
-        row.children[1].textContent = d.date;
-        row.children[2].textContent = d.time;
-        row.children[3].textContent = editSelectedList.map(function(s) {
-            return s.name + (s.qty > 1 ? ' x' + s.qty : '');
-        }).join(', ');
-    }
+    var payload = {
+        appointmentId: currentEditId,
+        date:     newDate,
+        time:     newTime,
+        note:     newNote,
+        services: editSelectedList.map(function(s) {
+            return { id: s.id, name: s.name, price: s.price, qty: s.qty, perUnit: s.perUnit, unit: s.unit, time: s.time };
+        })
+    };
 
-    alert('✅ Cập nhật lịch hẹn thành công!');
-    closeEditAppointment();
+    var btn = document.querySelector('#editAppointmentModal .btn-primary');
+    btn.disabled = true; btn.textContent = 'Đang lưu...';
+
+    fetch(window.CONTEXT_PATH + '/api/hoso/update-appointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            // Cập nhật local data
+            var d = appointmentDetails[currentEditId];
+            d.services    = editSelectedList.slice();
+            d.total       = editSelectedList.reduce(function(sum, s) { return sum + s.price * s.qty; }, 0);
+            d.time        = newTime;
+            d.customerNote= newNote;
+            var dv = newDate.split('-');
+            d.date = dv[2] + '/' + dv[1] + '/' + dv[0];
+            // Cập nhật row bảng
+            var row = document.querySelector('tr[data-id="' + currentEditId + '"]');
+            if (row) {
+                row.children[1].textContent = d.date;
+                row.children[2].textContent = d.time;
+                row.children[3].textContent = editSelectedList.map(function(s) {
+                    return s.name + (s.qty > 1 ? ' x' + s.qty : '');
+                }).join(', ');
+            }
+            closeEditAppointment();
+            showHosoToast('✅ Cập nhật lịch hẹn thành công!', 'success');
+        } else {
+            showHosoToast('❌ ' + (data.message || 'Cập nhật thất bại, thử lại!'), 'error');
+        }
+    })
+    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
+    .finally(function() { btn.disabled = false; btn.textContent = 'Lưu thay đổi'; });
 }
 
 // === DOI MAT KHAU ===
@@ -460,27 +554,47 @@ function checkStrength(p) {
 function changePassword(e) {
     e.preventDefault();
     var ok = true;
-    if (!document.getElementById('oldPassword').value) {
-        document.getElementById('oldPassGroup').classList.add('error');
-        ok = false;
+    var oldPw = document.getElementById('oldPassword').value;
+    if (!oldPw) {
+        document.getElementById('oldPassGroup').classList.add('error'); ok = false;
     } else document.getElementById('oldPassGroup').classList.remove('error');
 
     var np = document.getElementById('newPassword').value;
     if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/.test(np)) {
-        document.getElementById('newPassGroup').classList.add('error');
-        ok = false;
+        document.getElementById('newPassGroup').classList.add('error'); ok = false;
     } else document.getElementById('newPassGroup').classList.remove('error');
 
     if (document.getElementById('confirmNewPassword').value !== np) {
-        document.getElementById('confirmPassGroup').classList.add('error');
-        ok = false;
+        document.getElementById('confirmPassGroup').classList.add('error'); ok = false;
     } else document.getElementById('confirmPassGroup').classList.remove('error');
 
-    if (ok) {
-        alert('✅ Đổi mật khẩu thành công!');
-        document.getElementById('passwordForm').reset();
-        document.getElementById('strengthBar').className = 'password-strength-bar';
-    }
+    if (!ok) return false;
+
+    var btn = document.querySelector('#passwordForm .btn-primary');
+    btn.disabled = true; btn.textContent = 'Đang đổi...';
+
+    fetch(window.CONTEXT_PATH + '/api/hoso/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ oldPassword: oldPw, newPassword: np })
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        if (data.success) {
+            document.getElementById('passwordForm').reset();
+            document.getElementById('strengthBar').className = 'password-strength-bar';
+            showHosoToast('✅ Đổi mật khẩu thành công!', 'success');
+        } else {
+            // Nếu sai mật khẩu cũ thì highlight field đó
+            if (data.code === 'WRONG_PASSWORD') {
+                document.getElementById('oldPassGroup').classList.add('error');
+            }
+            showHosoToast('❌ ' + (data.message || 'Đổi mật khẩu thất bại!'), 'error');
+        }
+    })
+    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
+    .finally(function() { btn.disabled = false; btn.textContent = '🔐 Đổi mật khẩu'; });
+
     return false;
 }
 
@@ -493,3 +607,18 @@ document.getElementById('newPassword').addEventListener('input', function() {
 document.getElementById('confirmNewPassword').addEventListener('input', function() {
     document.getElementById('confirmPassGroup').classList.remove('error');
 });
+// === TOAST THÔNG BÁO (thay cho alert) ===
+function showHosoToast(msg, type) {
+    var t = document.getElementById('hosoToast');
+    if (!t) {
+        t = document.createElement('div');
+        t.id = 'hosoToast';
+        t.style.cssText = 'position:fixed;bottom:24px;right:24px;z-index:9999;padding:12px 20px;border-radius:10px;font-size:.9rem;font-weight:600;color:#fff;max-width:320px;box-shadow:0 4px 16px rgba(0,0,0,.2);transition:opacity .3s;opacity:0;pointer-events:none';
+        document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    t.style.background = type === 'error' ? '#ef4444' : '#10b981';
+    t.style.opacity = '1';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.style.opacity = '0'; }, 3000);
+}
