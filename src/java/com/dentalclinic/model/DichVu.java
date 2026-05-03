@@ -6,20 +6,20 @@ public class DichVu {
     private int dichVuID;
     private String tenDichVu;
     private double giaTien;
-    private String thoiLuongDuKien;
+    private int thoiLuongDuKien;
     private int chuyenKhoaID;  // FK -> ChuyenKhoa
 
     // Đối tượng quan hệ
     private ChuyenKhoa chuyenKhoa;
     private List<PhongKhamDichVu> danhSachPhongKham;
 
-    private List<LichHen> danhSachLichHen;
+    private List<ChiTietLichHen> lichSuDatDichVu;
     private List<ChiTietDichVu> danhSachChiTietDichVu;
 
     public DichVu() {}
 
     public DichVu(int dichVuID, String tenDichVu, double giaTien, 
-                  String thoiLuongDuKien, int chuyenKhoaID) {
+                  int thoiLuongDuKien, int chuyenKhoaID) {
         this.dichVuID = dichVuID;
         this.tenDichVu = tenDichVu;
         this.giaTien = giaTien;
@@ -36,8 +36,8 @@ public class DichVu {
     public double getGiaTien() { return giaTien; }
     public void setGiaTien(double giaTien) { this.giaTien = giaTien; }
 
-    public String getThoiLuongDuKien() { return thoiLuongDuKien; }
-    public void setThoiLuongDuKien(String thoiLuongDuKien) { 
+    public int getThoiLuongDuKien() { return thoiLuongDuKien; }
+    public void setThoiLuongDuKien(int thoiLuongDuKien) { 
         this.thoiLuongDuKien = thoiLuongDuKien; 
     }
 
@@ -51,8 +51,13 @@ public class DichVu {
     public void setDanhSachPhongKham(List<PhongKhamDichVu> danhSachPhongKham) { 
         this.danhSachPhongKham = danhSachPhongKham; 
     }
-    public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
-    public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
+    public List<ChiTietLichHen> getLichSuDatDichVu() {
+        return lichSuDatDichVu;
+    }
+
+    public void setLichSuDatDichVu(List<ChiTietLichHen> lichSuDatDichVu) {
+        this.lichSuDatDichVu = lichSuDatDichVu;
+    }
 
     public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
     public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }

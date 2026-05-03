@@ -5,24 +5,23 @@ public class ChiTietDichVu {
     private int phieuKhamID;   // FK -> PhieuKham
     private int dichVuID;      // FK -> DichVu
     private double donGia;
-    private String viTriRang;
-    private int bacSiID;       // FK -> BacSi
+    private int viTriRang;
+    private int soLuong;
 
     // Đối tượng quan hệ
     private PhieuKham phieuKham;
     private DichVu dichVu;
-    private BacSi bacSi;
 
     public ChiTietDichVu() {}
 
     public ChiTietDichVu(int chiTietDichVuID, int phieuKhamID, int dichVuID,
-                          double donGia, String viTriRang, int bacSiID) {
+                          double donGia, int viTriRang, int soLuong) {
         this.chiTietDichVuID = chiTietDichVuID;
         this.phieuKhamID = phieuKhamID;
         this.dichVuID = dichVuID;
         this.donGia = donGia;
         this.viTriRang = viTriRang;
-        this.bacSiID = bacSiID;
+        this.soLuong = soLuong;
     }
 
     public int getChiTietDichVuID() { return chiTietDichVuID; }
@@ -37,18 +36,15 @@ public class ChiTietDichVu {
     public double getDonGia() { return donGia; }
     public void setDonGia(double donGia) { this.donGia = donGia; }
 
-    public String getViTriRang() { return viTriRang; }
-    public void setViTriRang(String viTriRang) { this.viTriRang = viTriRang; }
-
-    public int getBacSiID() { return bacSiID; }
-    public void setBacSiID(int bacSiID) { this.bacSiID = bacSiID; }
+    public int getViTriRang() { return viTriRang; }
+    public void setViTriRang(int viTriRang) { this.viTriRang = viTriRang; }
+    
+    public int getSoLuong(){return soLuong;}
+    public void setSoLuong(int soLuong){this.soLuong = soLuong;}
 
     public PhieuKham getPhieuKham() { return phieuKham; }
     public void setPhieuKham(PhieuKham phieuKham) { this.phieuKham = phieuKham; }
 
     public DichVu getDichVu() { return dichVu; }
     public void setDichVu(DichVu dichVu) { this.dichVu = dichVu; }
-
-    public BacSi getBacSi() { return bacSi; }
-    public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
 }

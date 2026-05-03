@@ -18,7 +18,6 @@ public class DBConnection {
         + "encrypt=false;"
         + "trustServerCertificate=true;";
 
-    // Khối static đảm bảo Driver chỉ bị load 1 lần duy nhất để tối ưu RAM
     static {
         try {
             Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");

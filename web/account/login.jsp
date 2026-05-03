@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Nha Khoa 5AE</title>
+    <title>Đăng nhập - Nha Khoa Kvone</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
@@ -15,12 +15,12 @@
             <div class="auth-box">
                 <div class="auth-header">
                     <h2>Đăng nhập</h2>
-                    <p>Chào mừng bạn trở lại Nha Khoa 5AE</p>
+                    <p>Chào mừng bạn trở lại Nha Khoa Kvone</p>
                 </div>
                 <form id="loginForm" onsubmit="return handleLogin(event)">
                     <div class="form-group" id="accountGroup">
-                        <label>Số điện thoại <span style="color:#e74c3c">*</span></label>
-                        <input type="text" class="form-control" id="loginAccount" placeholder="Nhập số điện thoại">
+                        <label>Số điện thoại / Email / Tên người dùng <span style="color:#e74c3c">*</span></label>
+                        <input type="text" class="form-control" id="loginAccount" placeholder="Nhập SĐT, email hoặc tên đăng nhập">
                         <div class="form-error">Vui lòng nhập thông tin đăng nhập</div>
                     </div>
                     <div class="form-group" id="passGroup">
