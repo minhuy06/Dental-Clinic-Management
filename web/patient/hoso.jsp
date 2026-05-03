@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ cá nhân - Nha Khoa Kvone</title>
+    <title>Hồ sơ cá nhân - Nha Khoa 5AE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/datlich.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/hoso.css">
@@ -21,13 +21,13 @@
                 <!-- SIDEBAR -->
                 <div class="profile-sidebar">
                     <div class="sidebar-header">
-                        <div class="sidebar-avatar">👤</div>
-                        <h3>Nguyễn Văn An</h3>
-                        <p>0901000001</p>
+                        <div class="sidebar-avatar" id="sidebarAvatar">👤</div>
+                        <h3 id="sidebarName">Đang tải...</h3>
+                        <p id="sidebarPhone"></p>
                     </div>
                     <div class="sidebar-menu">
                         <div class="sidebar-menu-item <%= "info".equals(activeTab)?"active":"" %>" onclick="switchTab('info',this)"><span class="menu-icon">📋</span> Thông tin cá nhân</div>
-                        <div class="sidebar-menu-item <%= "history".equals(activeTab)?"active":"" %>" onclick="switchTab('history',this)"><span class="menu-icon">📅</span> Quản lý lịch hẹn</div>
+                        <div class="sidebar-menu-item <%= "history".equals(activeTab)?"active":"" %>" onclick="switchTab('history',this)"><span class="menu-icon">📅</span> Lịch hẹn của tôi</div>
                         <div class="sidebar-menu-item <%= "password".equals(activeTab)?"active":"" %>" onclick="switchTab('password',this)"><span class="menu-icon">🔒</span> Đổi mật khẩu</div>
                         <div class="sidebar-menu-item logout" onclick="if(confirm('Bạn có chắc muốn đăng xuất?'))window.location.href=window.CONTEXT_PATH+'/index.jsp?logout=true'"><span class="menu-icon">🚪</span> Đăng xuất</div>
                     </div>
@@ -40,15 +40,12 @@
                         <div class="profile-content-header"><h2>Thông tin cá nhân</h2><p>Thông tin tài khoản của bạn</p></div>
                         <div class="info-display">
                             <div class="info-row-display">
-                                <div class="info-field"><span class="field-label">Họ và tên</span><span class="field-value" id="dispName">Nguyễn Văn An</span></div>
-                                <div class="info-field"><span class="field-label">Số điện thoại</span><span class="field-value" id="dispPhone">0901000001</span></div>
+                                <div class="info-field"><span class="field-label">Họ và tên</span><span class="field-value" id="dispName">—</span></div>
+                                <div class="info-field"><span class="field-label">Số điện thoại</span><span class="field-value" id="dispPhone">—</span></div>
                             </div>
                             <div class="info-row-display">
-                                <div class="info-field"><span class="field-label">Email</span><span class="field-value" id="dispEmail">nguyenvanan@gmail.com</span></div>
-                                <div class="info-field"><span class="field-label">Ngày sinh</span><span class="field-value" id="dispDob">15/05/1990</span></div>
-                            </div>
-                            <div class="info-row-display">
-                                <div class="info-field"><span class="field-label">Giới tính</span><span class="field-value" id="dispGender">Nam</span></div>
+                                <div class="info-field"><span class="field-label">Ngày sinh</span><span class="field-value" id="dispDob">—</span></div>
+                                <div class="info-field"><span class="field-label">Giới tính</span><span class="field-value" id="dispGender">—</span></div>
                             </div>
                         </div>
                         <div style="text-align:right;margin-top:20px;">
@@ -70,11 +67,7 @@
                         <div class="history-table-wrapper">
                             <table class="history-table" id="historyTable">
                                 <thead><tr><th>STT</th><th>Ngày</th><th>Giờ</th><th>Dịch vụ</th><th>Trạng thái</th><th style="text-align:center">Thao tác</th></tr></thead>
-                                <tbody>
-                                    <tr data-status="pending" data-id="3"><td class="stt-cell">1</td><td>20/05/2024</td><td>14:00</td><td>Bọc sứ Zirconia x2, Tẩy trắng</td><td><span class="status-badge pending">Chờ xác nhận</span></td><td><div class="action-buttons"><button class="btn-action btn-view" onclick="showDetail(3)">Xem</button><button class="btn-action btn-edit" onclick="openEditAppointment(3)">Sửa</button><button class="btn-action btn-cancel" onclick="confirmCancel(3)">Hủy</button></div></td></tr>
-                                    <tr data-status="confirmed" data-id="2"><td class="stt-cell">2</td><td>15/04/2024</td><td>09:30</td><td>Tư vấn chỉnh nha, Chụp X-quang</td><td><span class="status-badge confirmed">Đã xác nhận</span></td><td><div class="action-buttons"><button class="btn-action btn-view" onclick="showDetail(2)">Xem</button><button class="btn-action btn-cancel" onclick="confirmCancelConfirmed(2)">Hủy</button></div></td></tr>
-                                    <tr data-status="paid" data-id="1"><td class="stt-cell">3</td><td>01/03/2024</td><td>08:00</td><td>Khám tổng quát, Cạo vôi</td><td><span class="status-badge paid">Đã khám</span></td><td><div class="action-buttons"><button class="btn-action btn-view" onclick="showDetail(1)">Xem</button></div></td></tr>
-                                </tbody>
+                                <tbody id="historyTbody"></tbody>
                             </table>
                         </div>
                     </div>
@@ -99,15 +92,12 @@
         <div class="modal-box" style="max-width:520px;">
             <div class="modal-header"><h3>✏️ Chỉnh sửa thông tin</h3><button class="modal-close" onclick="closeEditModal()">✕</button></div>
             <div class="modal-body" style="padding:28px;">
-                <div class="form-group"><label>Họ và tên</label><input type="text" class="form-control" id="editName" value="Nguyễn Văn An" disabled style="background:#f0f4f8;color:#8c8c9a;"></div>
+                <div class="form-group"><label>Họ và tên</label><input type="text" class="form-control" id="editName" disabled style="background:#f0f4f8;color:#8c8c9a;"></div>
                 <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div class="form-group"><label>Số điện thoại</label><input type="tel" class="form-control" id="editPhone" value="0901000001"></div>
-                    <div class="form-group"><label>Email</label><input type="email" class="form-control" id="editEmail" value="nguyenvanan@gmail.com"></div>
+                    <div class="form-group"><label>Số điện thoại</label><input type="tel" class="form-control" id="editPhone"></div>
+                    <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="editDob"></div>
                 </div>
-                <div class="form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                    <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="editDob" value="1990-05-15"></div>
-                    <div class="form-group"><label>Giới tính</label><select class="form-control" id="editGender"><option value="Nam" selected>Nam</option><option value="Nữ">Nữ</option></select></div>
-                </div>
+                <div class="form-group"><label>Giới tính</label><select class="form-control" id="editGender"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeEditModal()">Hủy</button>
@@ -223,6 +213,33 @@
     </div>
 
     <jsp:include page="../components/footer.jsp" />
+
+    <script>
+    (function() {
+        var ctx = '${pageContext.request.contextPath}';
+
+        // ── THÔNG TIN USER ───────────────────────────────────────────
+        var userJson = '${not empty hosoUserJson ? hosoUserJson : ""}';
+        if (userJson) {
+            try { window.__HOSO_USER__ = JSON.parse(userJson); }
+            catch(e) { console.warn('[hoso] hosoUserJson parse error', e); }
+        }
+
+        // ── LỊCH HẸN ─────────────────────────────────────────────────
+        var apptJson = '${not empty hosoAppointmentsJson ? hosoAppointmentsJson : ""}';
+        if (apptJson) {
+            try { window.__HOSO_APPOINTMENTS__ = JSON.parse(apptJson); }
+            catch(e) { console.warn('[hoso] hosoAppointmentsJson parse error', e); }
+        }
+
+        // ── DỊCH VỤ ──────────────────────────────────────────────────
+        var svcJson = '${not empty hosoServicesJson ? hosoServicesJson : ""}';
+        if (svcJson) {
+            try { window.__HOSO_SERVICES__ = JSON.parse(svcJson); }
+            catch(e) { console.warn('[hoso] hosoServicesJson parse error', e); }
+        }
+    })();
+    </script>
     <script src="${pageContext.request.contextPath}/assets/js/hoso.js"></script>
 </body>
 </html>

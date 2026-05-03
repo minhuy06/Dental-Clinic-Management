@@ -11,7 +11,7 @@
     <div class="container">
         <a href="${pageContext.request.contextPath}/index.jsp" class="logo">
             <div class="logo-icon">🦷</div>
-            <div class="logo-text">Nha Khoa <span>Kvone</span></div>
+            <div class="logo-text">Nha Khoa <span>5AE</span></div>
         </a>
         <nav class="nav-menu" id="navMenu">
             <a href="${pageContext.request.contextPath}/index.jsp" class="<%= isIndex ? "active" : "" %>">Trang chủ</a>
@@ -68,7 +68,7 @@
         <button class="chat-close" onclick="toggleChatbox()">✕</button>
     </div>
     <div class="chatbox-body" id="chatboxBody">
-        <div class="chat-msg bot">Xin chào! Tôi là trợ lý ảo của Nha Khoa Kvone. Bạn cần hỗ trợ gì?</div>
+        <div class="chat-msg bot">Xin chào! Tôi là trợ lý ảo của Nha Khoa 5AE. Bạn cần hỗ trợ gì?</div>
     </div>
     <div class="chatbox-quick">
         <button class="quick-btn" onclick="sendQuick(this)">Giờ làm việc</button>
