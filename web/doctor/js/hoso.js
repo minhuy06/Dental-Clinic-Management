@@ -14,6 +14,53 @@ const DENTAL_SERVICES = [
     { id: 12, name: "Cấy ghép Implant", price: 18000000 }
 ];
 
+// ======================= CỜ HIỆU MOCK/REAL + DATA SOURCE =======================
+const DOCTOR_HOSO_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api/doctor',
+    MOCK_DELAY_MS: 120
+};
+
+function hosoDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function hosoRequest(path, options = {}) {
+    const method = options.method || 'POST';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(DOCTOR_HOSO_CONFIG.API_BASE + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+const hosoMockSource = {
+    saveExam: async (payload) => {
+        await hosoDelay(DOCTOR_HOSO_CONFIG.MOCK_DELAY_MS);
+        console.log('[doctor/hoso] mock save payload:', payload);
+        return { success: true };
+    }
+};
+
+const hosoApiSource = {
+    saveExam: async (payload) => hosoRequest('/examinations/save', { method: 'POST', body: payload })
+};
+
+const hosoDataSource = DOCTOR_HOSO_CONFIG.USE_MOCK ? hosoMockSource : hosoApiSource;
+
+function getQueryParam(name) {
+    const params = new URLSearchParams(window.location.search);
+    return params.get(name) || '';
+}
+
 // Format tiền Việt
 function formatVND(amount) {
     return amount.toLocaleString('vi-VN') + 'đ';
@@ -159,7 +206,7 @@ function toothClickHandler() {
 }
 
 // ========== LƯU DỮ LIỆU ==========
-function saveExamination() {
+async function saveExamination() {
     const treatments = [];
     const rows = document.querySelectorAll('#treatmentBody tr');
     rows.forEach(row => {
@@ -173,19 +220,30 @@ function saveExamination() {
             note: row.querySelector('.note-input')?.value || ''
         });
     });
+    const queryPatientName = decodeURIComponent(getQueryParam('name') || '');
+    const queryAppointmentId = parseInt(getQueryParam('id') || '0');
     const examData = {
-        patientName: 'Nguyễn Văn Hiển',
-        patientId: 'BN001234',
-        doctor: 'BS. Nguyễn Hoàng',
+        appointmentId: queryAppointmentId || null,
+        patientName: queryPatientName || 'Nguyễn Văn Hiển',
+        patientId: getQueryParam('patientId') || 'BN001234',
+        doctor: getQueryParam('doctor') || 'BS. Nguyễn Hoàng',
         date: new Date().toLocaleString('vi-VN'),
         symptoms: document.getElementById('symptoms')?.value || '',
         diagnosis: document.getElementById('diagnosis')?.value || '',
         prescription: document.getElementById('prescription')?.value || '',
         treatments: treatments
     };
-    console.log('Dữ liệu khám bệnh:', examData);
-    showToast('✅ Đã lưu thông tin thành công!', 3000);
-    // Gửi AJAX nếu cần
+    try {
+        const res = await hosoDataSource.saveExam(examData);
+        if (res && res.success === false) {
+            showToast('❌ ' + (res.message || 'Không thể lưu hồ sơ khám'), 3000);
+            return;
+        }
+        showToast('✅ Đã lưu thông tin thành công!', 3000);
+    } catch (error) {
+        console.error('[doctor/hoso] save error:', error);
+        showToast('❌ ' + (error.message || 'Lỗi kết nối khi lưu hồ sơ'), 3000);
+    }
 }
 
 // ========== IN ĐƠN THUỐC ==========
@@ -238,6 +296,7 @@ function handleBack() {
 
 // ========== KHỞI TẠO TRANG ==========
 function init() {
+    console.info('[doctor/hoso] mode:', DOCTOR_HOSO_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
     // Gắn sự kiện cho các dòng hiện có
     const existingRows = document.querySelectorAll('#treatmentBody tr');
     existingRows.forEach(row => {

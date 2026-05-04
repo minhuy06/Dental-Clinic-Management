@@ -38,6 +38,131 @@ let selectedServices = [];
 let currentStatusFilter = 'all';
 let currentPaymentAppointment = null;
 
+// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
+let APPOINTMENT_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function dsDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function dsClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function dsRequest(path, options = {}) {
+    const method = options.method || 'GET';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(APPOINTMENT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function normalizeList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+const mockDataSource = {
+    listServices: async () => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        return dsClone(servicesList);
+    },
+    listAppointments: async () => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        return dsClone(appointments);
+    },
+    createAppointment: async (payload) => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const newId = Math.max(...appointments.map(a => a.id), 0) + 1;
+        appointments.push(Object.assign({ id: newId, status: 'pending', paymentStatus: 'pending' }, payload));
+        return { success: true };
+    },
+    updateAppointment: async (payload) => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const idx = appointments.findIndex(a => a.id === payload.id);
+        if (idx === -1) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        appointments[idx] = Object.assign({}, appointments[idx], payload);
+        return { success: true };
+    },
+    updateStatus: async (id, status) => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const apt = appointments.find(a => a.id === id);
+        if (!apt) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        apt.status = status;
+        return { success: true };
+    },
+    removeAppointment: async (id) => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        appointments = appointments.filter(a => a.id !== id);
+        return { success: true };
+    },
+    confirmPayment: async (payload) => {
+        await dsDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const apt = appointments.find(a => a.id === payload.appointmentId);
+        if (!apt) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        apt.paymentStatus = 'paid';
+        return { success: true };
+    }
+};
+
+const apiDataSource = {
+    listServices: async () => normalizeList(await dsRequest('services')),
+    listAppointments: async () => normalizeList(await dsRequest('appointments')),
+    createAppointment: async (payload) => dsRequest('appointments/add', { method: 'POST', body: payload }),
+    updateAppointment: async (payload) => dsRequest('appointments/update', { method: 'PUT', body: payload }),
+    updateStatus: async (id, status) => dsRequest('appointments/toggle-status', { method: 'PUT', body: { id, status } }),
+    removeAppointment: async (id) => dsRequest('appointments/delete?id=' + id, { method: 'DELETE' }),
+    confirmPayment: async (payload) => dsRequest('appointments/confirm-payment', { method: 'PUT', body: payload })
+};
+
+const dataSource = APPOINTMENT_CONFIG.USE_MOCK ? mockDataSource : apiDataSource;
+
+async function withDataGuard(action, successMsg) {
+    try {
+        const res = await action();
+        if (res && res.success === false) {
+            showToast(res.message || 'Thao tác thất bại', 'error');
+            return null;
+        }
+        if (successMsg) showToast(successMsg, 'success');
+        return res || { success: true };
+    } catch (error) {
+        console.error('[script.js] data error:', error);
+        showToast(error.message || 'Lỗi kết nối dữ liệu', 'error');
+        return null;
+    }
+}
+
+async function loadServicesFromServer() {
+    const list = await withDataGuard(() => dataSource.listServices());
+    if (!list) return;
+    servicesList.length = 0;
+    normalizeList(list).forEach(s => servicesList.push(s));
+    loadServicesGrid();
+}
+
+async function loadAppointmentsFromServer() {
+    const list = await withDataGuard(() => dataSource.listAppointments());
+    if (!list) return;
+    appointments = normalizeList(list);
+    renderAppointments();
+}
+
 // ==================== HÀM TIỆN ÍCH ====================
 function formatDate(date) {
     let d = new Date(date);
@@ -154,13 +279,12 @@ function filterByStatus(status) {
     renderAppointments();
 }
 
-function changeStatus(id, newStatus) {
+async function changeStatus(id, newStatus) {
     let apt = appointments.find(a => a.id === id);
     if (apt) {
-        apt.status = newStatus;
-        renderAppointments();
         let statusText = newStatus === 'confirmed' ? 'duyệt' : newStatus === 'cancelled' ? 'hủy' : newStatus === 'completed' ? 'hoàn thành' : 'cập nhật';
-        showToast(`Đã ${statusText} lịch hẹn của ${apt.patientName}`);
+        let res = await withDataGuard(() => dataSource.updateStatus(id, newStatus), `Đã ${statusText} lịch hẹn của ${apt.patientName}`);
+        if (res) await loadAppointmentsFromServer();
     }
 }
 
@@ -225,12 +349,18 @@ function openPaymentModal(id) {
     document.getElementById('paymentModal').style.display = 'flex';
 }
 
-function confirmPayment() {
+async function confirmPayment() {
     if (currentPaymentAppointment) {
-        currentPaymentAppointment.paymentStatus = 'paid';
-        renderAppointments();
+        const payload = {
+            appointmentId: currentPaymentAppointment.id,
+            paymentMethod: document.getElementById('paymentMethod')?.value || 'Tiền mặt',
+            invoiceId: document.getElementById('invoiceId')?.innerText || '',
+            paidAt: new Date().toISOString()
+        };
+        let res = await withDataGuard(() => dataSource.confirmPayment(payload), `Đã thanh toán thành công cho ${currentPaymentAppointment.patientName}`);
+        if (!res) return;
         closePaymentModal();
-        showToast(`Đã thanh toán thành công cho ${currentPaymentAppointment.patientName}`);
+        await loadAppointmentsFromServer();
         currentPaymentAppointment = null;
     }
 }
@@ -513,15 +643,14 @@ function editAppointment(id) {
     }
 }
 
-function deleteAppointment(id) {
+async function deleteAppointment(id) {
     if (confirm('Bạn có chắc chắn muốn xóa lịch hẹn này?')) {
-        appointments = appointments.filter(a => a.id !== id);
-        renderAppointments();
-        showToast('Đã xóa lịch hẹn', 'success');
+        let res = await withDataGuard(() => dataSource.removeAppointment(id), 'Đã xóa lịch hẹn');
+        if (res) await loadAppointmentsFromServer();
     }
 }
 
-function saveAppointment() {
+async function saveAppointment() {
     let patientName = document.getElementById('patientName').value.trim();
     let patientPhone = document.getElementById('patientPhone').value.trim();
     let date = document.getElementById('appointmentDate').value;
@@ -530,42 +659,40 @@ function saveAppointment() {
     let room = document.getElementById('room').value;
     
     if (!patientName || !patientPhone || !date || !time || !doctor || !room) {
-        alert('Vui lòng điền đầy đủ thông tin!');
+        showToast('Vui lòng điền đầy đủ thông tin!', 'error');
         return;
     }
     
     if (selectedServices.length === 0) {
-        alert('Vui lòng chọn ít nhất một dịch vụ!');
+        showToast('Vui lòng chọn ít nhất một dịch vụ!', 'error');
         return;
     }
     
     let totalPrice = selectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
     
     if (editingId) {
-        let index = appointments.findIndex(a => a.id === editingId);
-        if (index !== -1) {
-            appointments[index] = { 
-                ...appointments[index], 
-                patientName, patientPhone, date, time, doctor, room,
-                services: selectedServices.map(s => ({ ...s })),
-                totalPrice: totalPrice
-            };
-            showToast('Đã cập nhật lịch hẹn', 'success');
-        }
+        const payload = {
+            id: editingId,
+            patientName, patientPhone, date, time, doctor, room,
+            services: selectedServices.map(s => ({ ...s })),
+            totalPrice: totalPrice
+        };
+        const res = await withDataGuard(() => dataSource.updateAppointment(payload), 'Đã cập nhật lịch hẹn');
+        if (!res) return;
     } else {
-        let newId = Math.max(...appointments.map(a => a.id), 0) + 1;
-        appointments.push({ 
-            id: newId, patientName, patientPhone, date, time, doctor, room,
+        const payload = {
+            patientName, patientPhone, date, time, doctor, room,
             services: selectedServices.map(s => ({ ...s })),
             totalPrice: totalPrice,
             status: 'pending',
             paymentStatus: 'pending'
-        });
-        showToast('Đã thêm lịch hẹn mới', 'success');
+        };
+        const res = await withDataGuard(() => dataSource.createAppointment(payload), 'Đã thêm lịch hẹn mới');
+        if (!res) return;
     }
     
     closeModal();
-    renderAppointments();
+    await loadAppointmentsFromServer();
 }
 
 function closeModal() {
@@ -592,9 +719,10 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.info('[script.js] mode:', APPOINTMENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
     updateDateDisplay();
-    loadServicesGrid();
-    renderAppointments();
+    loadServicesFromServer();
+    loadAppointmentsFromServer();
     filterByStatus('all');
     
     let today = new Date();

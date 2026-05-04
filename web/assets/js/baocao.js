@@ -47,6 +47,67 @@ let rowsPerPage = 5;
 let revenueChart = null;
 let currentChartType = 'bar';
 
+// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
+let REPORT_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function reportDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function reportClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function reportRequest(path, options = {}) {
+    const method = options.method || 'GET';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(REPORT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+const mockReportSource = {
+    getSummary: async () => {
+        await reportDelay(REPORT_CONFIG.MOCK_DELAY_MS);
+        return {
+            transactions: reportClone(transactions),
+            serviceStats: reportClone(serviceStats),
+            paymentStats: reportClone(paymentStats)
+        };
+    }
+};
+
+const apiReportSource = {
+    getSummary: async () => reportRequest('reports/revenue-summary')
+};
+
+const reportSource = REPORT_CONFIG.USE_MOCK ? mockReportSource : apiReportSource;
+
+async function loadReportData() {
+    try {
+        const data = await reportSource.getSummary();
+        if (data && Array.isArray(data.transactions)) transactions = data.transactions;
+        if (data && Array.isArray(data.serviceStats)) serviceStats = data.serviceStats;
+        if (data && Array.isArray(data.paymentStats)) paymentStats = data.paymentStats;
+    } catch (error) {
+        console.error('[baocao] data error:', error);
+        showToast(error.message || 'Không tải được dữ liệu báo cáo', 'info');
+    }
+}
+
 // ==================== HÀM TIỆN ÍCH ====================
 function formatCurrency(amount) {
     if (!amount && amount !== 0) return "0đ";
@@ -459,8 +520,9 @@ function setDefaultDates() {
 }
 
 // ==================== KHỞI TẠO ====================
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log("Đang khởi tạo trang báo cáo doanh thu...");
+    console.info('[baocao] mode:', REPORT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
     
     // Kiểm tra Chart.js đã load chưa
     if (typeof Chart === 'undefined') {
@@ -469,6 +531,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     console.log("Chart.js đã sẵn sàng!");
     
+    await loadReportData();
+
     // Render các thành phần
     renderServices();
     renderPaymentMethods();

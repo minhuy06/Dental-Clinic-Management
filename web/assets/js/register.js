@@ -4,6 +4,47 @@ function togglePass(id, btn) {
     btn.textContent = i.type === 'password' ? '👁' : '🙈';
 }
 
+var REGISTER_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: (window.CONTEXT_PATH || ''),
+    MOCK_DELAY_MS: 120
+};
+
+function registerDelay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+async function registerRequest(url, bodyParams) {
+    var res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: bodyParams.toString()
+    });
+    return res.text();
+}
+
+var registerMockApi = {
+    register: async function(formData) {
+        await registerDelay(REGISTER_CONFIG.MOCK_DELAY_MS);
+        return 'SUCCESS';
+    },
+    verifyOtp: async function(formData) {
+        await registerDelay(REGISTER_CONFIG.MOCK_DELAY_MS);
+        return formData.get('txtOTP') === '123456' ? 'SUCCESS' : 'FAILED';
+    }
+};
+
+var registerApi = {
+    register: function(formData) {
+        return registerRequest('../RegisterServlet', formData);
+    },
+    verifyOtp: function(formData) {
+        return registerRequest('../VerifyOTPServlet', formData);
+    }
+};
+
+var registerDataSource = REGISTER_CONFIG.USE_MOCK ? registerMockApi : registerApi;
+
 function checkRegStrength(p) {
     var bar = document.getElementById('regStrengthBar');
     var s = 0;
@@ -46,7 +87,7 @@ function startOtpTimer() {
 
 // === DANG KY - GOI RegisterServlet ===
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     var ok = true;
 
@@ -107,13 +148,8 @@ function handleRegister(e) {
         formData.append('txtSDT', phone);
         formData.append('txtMatKhau', pass);
 
-        fetch('../RegisterServlet', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData.toString()
-        })
-        .then(function(response) { return response.text(); })
-        .then(function(result) {
+        try {
+            var result = await registerDataSource.register(formData);
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
             if (result.trim() === 'SUCCESS') {
@@ -123,13 +159,12 @@ function handleRegister(e) {
             } else {
                 alert('Lỗi: Không thể gửi SMS. Hãy kiểm tra lại số điện thoại!');
             }
-        })
-        .catch(function(err) {
-            console.error(err);
+        } catch (err) {
+            console.error('[register] submit error:', err);
             alert('Lỗi kết nối đến máy chủ!');
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
-        });
+        }
     }
 
     return false;
@@ -137,7 +172,7 @@ function handleRegister(e) {
 
 // === XAC THUC OTP - GOI VerifyOTPServlet ===
 
-function verifyOtp() {
+async function verifyOtp() {
     var code = '';
     document.querySelectorAll('.otp-box').forEach(function(b) { code += b.value; });
 
@@ -155,13 +190,8 @@ function verifyOtp() {
     var formData = new URLSearchParams();
     formData.append('txtOTP', code);
 
-    fetch('../VerifyOTPServlet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-    })
-    .then(function(response) { return response.text(); })
-    .then(function(result) {
+    try {
+        var result = await registerDataSource.verifyOtp(formData);
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
         if (result.trim() === 'SUCCESS') {
@@ -175,11 +205,10 @@ function verifyOtp() {
             boxes.forEach(function(b) { b.value = ''; });
             boxes[0].focus();
         }
-    })
-    .catch(function(err) {
-        console.error(err);
+    } catch (err) {
+        console.error('[register] verify otp error:', err);
         alert('Lỗi kết nối đến máy chủ!');
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
-    });
+    }
 }

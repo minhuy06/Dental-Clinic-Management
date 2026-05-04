@@ -19,6 +19,86 @@ let appointments = [
 let currentSelected = null;
 let pendingAction = null;
 
+// ========================
+// CỜ HIỆU MOCK/REAL + DATA SOURCE
+// ========================
+let DOCTOR_LIST_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api/doctor',
+    MOCK_DELAY_MS: 120
+};
+
+function listDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function listRequest(path, options = {}) {
+    const method = options.method || 'GET';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(DOCTOR_LIST_CONFIG.API_BASE + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function normalizeList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+const mockListSource = {
+    listAppointments: async () => {
+        await listDelay(DOCTOR_LIST_CONFIG.MOCK_DELAY_MS);
+        return JSON.parse(JSON.stringify(appointments));
+    },
+    startExam: async (id) => {
+        await listDelay(DOCTOR_LIST_CONFIG.MOCK_DELAY_MS);
+        const target = appointments.find(a => a.id === id);
+        if (!target) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        target.status = 'examining';
+        return { success: true };
+    }
+};
+
+const apiListSource = {
+    listAppointments: async () => normalizeList(await listRequest('/appointments')),
+    startExam: async (id) => listRequest('/appointments/start-exam', { method: 'PUT', body: { id } })
+};
+
+const listDataSource = DOCTOR_LIST_CONFIG.USE_MOCK ? mockListSource : apiListSource;
+
+async function withListGuard(action, onErrorMessage) {
+    try {
+        const res = await action();
+        if (res && res.success === false) {
+            alert(res.message || onErrorMessage || 'Thao tác thất bại');
+            return null;
+        }
+        return res || { success: true };
+    } catch (error) {
+        console.error('[doctor/danhsach] data error:', error);
+        alert(error.message || onErrorMessage || 'Lỗi kết nối dữ liệu');
+        return null;
+    }
+}
+
+async function loadAppointmentsFromServer() {
+    const list = await withListGuard(() => listDataSource.listAppointments(), 'Không tải được danh sách lịch hẹn');
+    if (!list) return;
+    appointments = normalizeList(list);
+    renderTable();
+}
+
 // Cập nhật đồng hồ
 function updateDateTime() {
     const now = new Date();
@@ -119,9 +199,10 @@ function closeModal() {
 
 // Khởi tạo sự kiện khi DOM sẵn sàng
 document.addEventListener('DOMContentLoaded', () => {
+    console.info('[doctor/danhsach] mode:', DOCTOR_LIST_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
     updateDateTime();
     setInterval(updateDateTime, 1000);
-    renderTable();
+    loadAppointmentsFromServer();
 
     // Gắn sự kiện cho các ô lọc và nút làm mới
     const searchInput = document.getElementById('searchInput');
@@ -141,15 +222,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Xử lý nút xác nhận trong modal
     const confirmBtn = document.getElementById('confirmBtn');
     if (confirmBtn) {
-        confirmBtn.addEventListener('click', () => {
+        confirmBtn.addEventListener('click', async () => {
             if (pendingAction === 'start' && currentSelected) {
                 const { id, patientName } = currentSelected;
-                // Cập nhật trạng thái bệnh nhân thành 'examining'
-                const original = appointments.find(a => a.id === id);
-                if (original && original.status === 'waiting') {
-                    original.status = 'examining';
-                }
-                renderTable();
+                const res = await withListGuard(() => listDataSource.startExam(id), 'Không thể bắt đầu khám');
+                if (!res) return;
+                await loadAppointmentsFromServer();
                 closeModal();
                 // Chuyển hướng sang hoso.jsp
                 window.location.href = `hoso.jsp?id=${id}&name=${encodeURIComponent(patientName)}`;

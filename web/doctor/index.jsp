@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phòng Khám Nha Khoa 5AE - Danh Sách Chờ Khám</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/danhsach.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/danhsach.css">
     <style>
         /* Điều chỉnh lại layout do đã xóa sidebar */
         .main-container {
@@ -94,6 +94,9 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
-    <script src="js/danhsach.js"></script>
+    <script>
+        window.CONTEXT_PATH = '${pageContext.request.contextPath}';
+    </script>
+    <script src="${pageContext.request.contextPath}/doctor/js/danhsach.js"></script>
 </body>
 </html>
