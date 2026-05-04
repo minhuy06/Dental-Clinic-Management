@@ -99,7 +99,7 @@ CREATE TABLE PhieuKham (
     LichHen_ID INT NULL, 
     ChanDoan NVARCHAR(200),
     NgayTao DATETIME DEFAULT GETDATE(), 
-    TrangThai NVARCHAR(100) DEFAULT N'Chờ thanh toán',
+    TrangThai NVARCHAR(100),
     CONSTRAINT PK_PhieuKham PRIMARY KEY (PhieuKham_ID)
 );
 GO
@@ -203,39 +203,39 @@ INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
 ('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động'),
 
 -- 20 Bệnh nhân
-('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000003', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động'),
-('0901000005', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000006', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000005', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000006', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000007', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000008', '123456', N'Bệnh nhân', N'Hoạt động'),
-('0901000009', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000010', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000009', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000010', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000011', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000012', '123456', N'Bệnh nhân', N'Hoạt động'),
-('0901000013', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000014', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000013', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000014', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000015', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000016', '123456', N'Bệnh nhân', N'Hoạt động'),
-('0901000017', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000018', '123456', N'Bệnh nhân', N'Hoạt động'),
+('0901000017', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000018', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000019', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000020', '123456', N'Bệnh nhân', N'Hoạt động'),
 
 -- 20 Bác sĩ
-('0902000001', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000002', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000001', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000002', '123456', N'Bác sĩ', N'Hoạt động'), 
 ('0902000003', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000004', '123456', N'Bác sĩ', N'Hoạt động'),
-('0902000005', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000006', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000005', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000006', '123456', N'Bác sĩ', N'Hoạt động'), 
 ('0902000007', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000008', '123456', N'Bác sĩ', N'Hoạt động'),
-('0902000009', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000010', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000009', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000010', '123456', N'Bác sĩ', N'Hoạt động'), 
 ('0902000011', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000012', '123456', N'Bác sĩ', N'Hoạt động'),
-('0902000013', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000014', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000013', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000014', '123456', N'Bác sĩ', N'Hoạt động'), 
 ('0902000015', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000016', '123456', N'Bác sĩ', N'Hoạt động'),
-('0902000017', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000018', '123456', N'Bác sĩ', N'Hoạt động'),
+('0902000017', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000018', '123456', N'Bác sĩ', N'Hoạt động'), 
 ('0902000019', '123456', N'Bác sĩ', N'Hoạt động'), ('0902000020', '123456', N'Bác sĩ', N'Hoạt động'),
 
 -- 20 Lễ tân
-('0903000001', '123456', N'Lễ tân', N'Hoạt động'), ('0903000002', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000001', '123456', N'Lễ tân', N'Hoạt động'), ('0903000002', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000003', '123456', N'Lễ tân', N'Hoạt động'), ('0903000004', '123456', N'Lễ tân', N'Hoạt động'),
-('0903000005', '123456', N'Lễ tân', N'Hoạt động'), ('0903000006', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000005', '123456', N'Lễ tân', N'Hoạt động'), ('0903000006', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000007', '123456', N'Lễ tân', N'Hoạt động'), ('0903000008', '123456', N'Lễ tân', N'Hoạt động'),
-('0903000009', '123456', N'Lễ tân', N'Hoạt động'), ('0903000010', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000009', '123456', N'Lễ tân', N'Hoạt động'), ('0903000010', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000011', '123456', N'Lễ tân', N'Hoạt động'), ('0903000012', '123456', N'Lễ tân', N'Hoạt động'),
-('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000015', '123456', N'Lễ tân', N'Hoạt động'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động'),
-('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'),
+('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động');
 GO
 
@@ -433,6 +433,9 @@ ADD CONSTRAINT CK_LichHen_TrangThai CHECK (TrangThai IN (N'Chờ xác nhận', N
 GO
 
 -- Bảng Phiếu Khám
+ALTER TABLE PhieuKham
+    add Constraint DF_PhieuKham_TrangThai DEFAULT  N'Chờ thanh toán' for TrangThai
+
 ALTER TABLE PhieuKham
 ADD CONSTRAINT CK_PhieuKham_NgayTao CHECK (NgayTao <= GETDATE() AND NgayTao >= '2020-01-01');
 
@@ -1057,7 +1060,6 @@ go
 -- TẠO BẢNG HoSo
 CREATE TABLE HoSo (
     HoSo_ID     INT IDENTITY(1,1) PRIMARY KEY,
-    BenhNhan_ID INT NOT NULL UNIQUE,
     DiaChi      NVARCHAR(255),
     DiUngThuoc  NVARCHAR(500),
     TienSuBenh  NVARCHAR(500),
@@ -1065,13 +1067,14 @@ CREATE TABLE HoSo (
     NgayDangKy  DATE NOT NULL DEFAULT GETDATE(),
     GhiChu      NVARCHAR(1000),
 
-    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID)
+    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (HoSo_ID) REFERENCES BenhNhan(BenhNhan_ID),
+    Constraint UQ_HoSo_BenhNhan unique(HoSo_ID)
 );
 go
 
 -- CHUYỂN TienSuBenh TỪ BenhNhan SANG HoSo
-INSERT INTO HoSo (BenhNhan_ID, TienSuBenh, NgayDangKy)
-SELECT BenhNhan_ID, TienSuBenh, GETDATE()
+INSERT INTO HoSo (TienSuBenh, NgayDangKy)
+SELECT TienSuBenh, GETDATE()
 FROM BenhNhan;
 
 -- Xóa cột TienSuBenh khỏi BenhNhan sau khi đã chuyển xong
@@ -1096,3 +1099,68 @@ SET
         WHEN 1 THEN N'Đã hoàn thành'
         ELSE N'Tạm dừng' END,
     GhiChu = N'Dữ liệu mẫu hệ thống';
+
+-- Xóa cột BacSi_ID trong ChiTietDichVu (1 bác sĩ làm hết)
+alter table ChiTietDichVu
+    drop constraint FK_ChiTietDichVu_BacSi
+alter table ChiTietDichVu
+    drop column BacSi_ID
+go
+
+-- Xóa TrangThai và TrieuChung trong PhieuKham
+alter table PhieuKham
+    drop constraint CK_PhieuKham_TrangThai
+alter table PhieuKham
+    drop constraint DF_PhieuKham_TrangThai
+alter table PhieuKham
+    drop column TrangThai
+alter table PhieuKham
+    drop column TrieuChung
+go
+
+-- Sửa thuộc tính ViTriRang trong ChiTietDichVu thành kiểu int
+alter table ChiTietDichVu
+    drop column ViTriRang
+alter table ChiTietDichVu
+    add ViTriRang int
+
+-- Cập nhật răng hàm trên bên phải (11-15)
+UPDATE ChiTietDichVu SET ViTriRang = 11 WHERE ChiTietDichVu_ID = 1;
+UPDATE ChiTietDichVu SET ViTriRang = 12 WHERE ChiTietDichVu_ID = 2;
+UPDATE ChiTietDichVu SET ViTriRang = 13 WHERE ChiTietDichVu_ID = 3;
+UPDATE ChiTietDichVu SET ViTriRang = 14 WHERE ChiTietDichVu_ID = 4;
+UPDATE ChiTietDichVu SET ViTriRang = 15 WHERE ChiTietDichVu_ID = 5;
+
+-- Cập nhật răng hàm trên bên trái (21-25)
+UPDATE ChiTietDichVu SET ViTriRang = 21 WHERE ChiTietDichVu_ID = 6;
+UPDATE ChiTietDichVu SET ViTriRang = 22 WHERE ChiTietDichVu_ID = 7;
+UPDATE ChiTietDichVu SET ViTriRang = 23 WHERE ChiTietDichVu_ID = 8;
+UPDATE ChiTietDichVu SET ViTriRang = 24 WHERE ChiTietDichVu_ID = 9;
+UPDATE ChiTietDichVu SET ViTriRang = 25 WHERE ChiTietDichVu_ID = 10;
+
+-- Cập nhật răng hàm dưới bên trái (31-35)
+UPDATE ChiTietDichVu SET ViTriRang = 31 WHERE ChiTietDichVu_ID = 11;
+UPDATE ChiTietDichVu SET ViTriRang = 32 WHERE ChiTietDichVu_ID = 12;
+UPDATE ChiTietDichVu SET ViTriRang = 33 WHERE ChiTietDichVu_ID = 13;
+UPDATE ChiTietDichVu SET ViTriRang = 34 WHERE ChiTietDichVu_ID = 14;
+UPDATE ChiTietDichVu SET ViTriRang = 35 WHERE ChiTietDichVu_ID = 15;
+
+-- Cập nhật răng hàm dưới bên phải (41-45)
+UPDATE ChiTietDichVu SET ViTriRang = 41 WHERE ChiTietDichVu_ID = 16;
+UPDATE ChiTietDichVu SET ViTriRang = 42 WHERE ChiTietDichVu_ID = 17;
+UPDATE ChiTietDichVu SET ViTriRang = 43 WHERE ChiTietDichVu_ID = 18;
+UPDATE ChiTietDichVu SET ViTriRang = 44 WHERE ChiTietDichVu_ID = 19;
+UPDATE ChiTietDichVu SET ViTriRang = 45 WHERE ChiTietDichVu_ID = 20;
+
+-- Thêm thuộc tính SoLuong trong bảng ChiTietDichVu
+ALTER TABLE ChiTietDichVu 
+ADD SoLuong INT NULL;
+GO
+
+UPDATE ChiTietDichVu 
+SET SoLuong = 1, ViTriRang = NULL 
+WHERE DichVu_ID IN (1, 2, 7, 8, 17, 18, 19, 20);
+
+UPDATE ChiTietDichVu 
+SET SoLuong = 1 
+WHERE DichVu_ID IN (3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16);

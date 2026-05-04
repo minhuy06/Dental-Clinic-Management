@@ -4,7 +4,6 @@ import java.sql.Date;
 import java.util.List;// Hoặc dùng java.time.LocalDate tùy thói quen của nhóm
 
 public class TaiKhoan {
-    // --- Các thuộc tính khớp 100% với cột trong Database ---
     private int taiKhoanID;      // Khớp cột TaiKhoan_ID (PK)
     private String soDienThoai;  // Khớp cột SoDienThoai (Tên đăng nhập)
     private String matKhau;      // Khớp cột MatKhau
