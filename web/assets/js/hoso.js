@@ -72,6 +72,90 @@ var appointmentList    = (window.__HOSO_APPOINTMENTS__ && window.__HOSO_APPOINTM
 var appointmentDetails = {};
 appointmentList.forEach(function(a) { appointmentDetails[a.id] = a; });
 
+// ── CỜ HIỆU MOCK/REAL + DATA SOURCE ──────────────────────────────
+var HOSO_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: (window.CONTEXT_PATH || '') + '/api/hoso',
+    MOCK_DELAY_MS: 120
+};
+
+function hosoDelay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+async function hosoRequest(path, options) {
+    var opts = options || {};
+    var method = opts.method || 'POST';
+    var body = opts.body || null;
+    var headers = opts.headers || {};
+    var reqOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== null && body !== undefined) reqOptions.body = JSON.stringify(body);
+
+    var res = await fetch(HOSO_CONFIG.API_BASE + path, reqOptions);
+    var json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) ? json.message : ('Lỗi HTTP: ' + res.status));
+    return json || {};
+}
+
+var hosoMockApi = {
+    updateInfo: async function(payload) {
+        await hosoDelay(HOSO_CONFIG.MOCK_DELAY_MS);
+        currentUser.phone = payload.phone;
+        currentUser.dob = payload.dob;
+        currentUser.gender = payload.gender;
+        return { success: true };
+    },
+    cancelAppointment: async function(payload) {
+        await hosoDelay(HOSO_CONFIG.MOCK_DELAY_MS);
+        var id = payload.appointmentId;
+        appointmentList = appointmentList.filter(function(a) { return a.id !== id; });
+        delete appointmentDetails[id];
+        return { success: true };
+    },
+    requestCancel: async function(payload) {
+        await hosoDelay(HOSO_CONFIG.MOCK_DELAY_MS);
+        var d = appointmentDetails[payload.appointmentId];
+        if (d) { d.status = 'pending'; d.statusText = 'Chờ hủy'; }
+        return { success: true };
+    },
+    updateAppointment: async function(payload) {
+        await hosoDelay(HOSO_CONFIG.MOCK_DELAY_MS);
+        var d = appointmentDetails[payload.appointmentId];
+        if (!d) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        var dv = payload.date.split('-');
+        d.date = dv[2] + '/' + dv[1] + '/' + dv[0];
+        d.time = payload.time;
+        d.customerNote = payload.note || '';
+        d.services = payload.services.map(function(s) {
+            return {
+                id: s.id, name: s.name, price: s.price, qty: s.qty, perUnit: s.perUnit,
+                unit: s.unit || '', time: s.time
+            };
+        });
+        d.total = d.services.reduce(function(sum, s) { return sum + (s.price * s.qty); }, 0);
+        return { success: true };
+    },
+    changePassword: async function(payload) {
+        await hosoDelay(HOSO_CONFIG.MOCK_DELAY_MS);
+        if (!payload.oldPassword) return { success: false, code: 'WRONG_PASSWORD', message: 'Sai mật khẩu cũ' };
+        return { success: true };
+    }
+};
+
+var hosoApi = {
+    updateInfo: function(payload) { return hosoRequest('/update-info', { method: 'POST', body: payload }); },
+    cancelAppointment: function(payload) { return hosoRequest('/cancel-appointment', { method: 'POST', body: payload }); },
+    requestCancel: function(payload) { return hosoRequest('/request-cancel', { method: 'POST', body: payload }); },
+    updateAppointment: function(payload) { return hosoRequest('/update-appointment', { method: 'POST', body: payload }); },
+    changePassword: function(payload) { return hosoRequest('/change-password', { method: 'POST', body: payload }); }
+};
+
+var hosoDataSource = HOSO_CONFIG.USE_MOCK ? hosoMockApi : hosoApi;
+
 // ── Render thông tin user lên giao diện ──────────────────────────
 (function initUserInfo() {
     var u = currentUser;
@@ -177,7 +261,7 @@ function filterHistory(s, btn) {
 function openEditModal() { document.getElementById('editInfoModal').classList.add('show'); }
 function closeEditModal() { document.getElementById('editInfoModal').classList.remove('show'); }
 
-function saveEditInfo() {
+async function saveEditInfo() {
     var phone  = document.getElementById('editPhone').value.trim();
     var dob    = document.getElementById('editDob').value;
     var gender = document.getElementById('editGender').value;
@@ -186,13 +270,8 @@ function saveEditInfo() {
     var btn = document.querySelector('#editInfoModal .btn-primary');
     btn.disabled = true; btn.textContent = 'Đang lưu...';
 
-    fetch(window.CONTEXT_PATH + '/api/hoso/update-info', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: phone, dob: dob, gender: gender })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
+    try {
+        var data = await hosoDataSource.updateInfo({ phone: phone, dob: dob, gender: gender });
         if (data.success) {
             // Cập nhật UI
             document.getElementById('dispPhone').textContent  = phone;
@@ -209,9 +288,12 @@ function saveEditInfo() {
         } else {
             showHosoToast('❌ ' + (data.message || 'Cập nhật thất bại, thử lại!'), 'error');
         }
-    })
-    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
-    .finally(function() { btn.disabled = false; btn.textContent = 'Xác nhận'; });
+    } catch (error) {
+        console.error('[hoso] update info error:', error);
+        showHosoToast('❌ ' + (error.message || 'Lỗi kết nối, vui lòng thử lại!'), 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Xác nhận';
+    }
 }
 
 // === DETAIL MODAL (xem phieu kham) ===
@@ -278,17 +360,12 @@ function closeModal() { document.getElementById('detailModal').classList.remove(
 function confirmCancel(id) { currentCancelId = id; document.getElementById('cancelModal').classList.add('show'); }
 function closeCancelModal() { document.getElementById('cancelModal').classList.remove('show'); }
 
-function doCancelAppointment() {
+async function doCancelAppointment() {
     var btn = document.querySelector('#cancelModal .btn:not(.btn-outline)');
     btn.disabled = true; btn.textContent = 'Đang hủy...';
 
-    fetch(window.CONTEXT_PATH + '/api/hoso/cancel-appointment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointmentId: currentCancelId })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
+    try {
+        var data = await hosoDataSource.cancelAppointment({ appointmentId: currentCancelId });
         if (data.success) {
             // Xóa row khỏi bảng
             var r = document.querySelector('tr[data-id="' + currentCancelId + '"]');
@@ -305,9 +382,12 @@ function doCancelAppointment() {
         } else {
             showHosoToast('❌ ' + (data.message || 'Hủy thất bại, thử lại!'), 'error');
         }
-    })
-    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
-    .finally(function() { btn.disabled = false; btn.textContent = 'Có, hủy'; });
+    } catch (error) {
+        console.error('[hoso] cancel appointment error:', error);
+        showHosoToast('❌ ' + (error.message || 'Lỗi kết nối, vui lòng thử lại!'), 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Có, hủy';
+    }
 }
 
 // === CANCEL CONFIRMED (2 buoc) ===
@@ -317,17 +397,12 @@ function confirmCancelConfirmed(id) {
 }
 function closeCancelConfirmedModal() { document.getElementById('cancelConfirmedModal').classList.remove('show'); }
 
-function doCancelConfirmed() {
+async function doCancelConfirmed() {
     var btn = document.querySelector('#cancelConfirmedModal .btn:not(.btn-outline)');
     btn.disabled = true; btn.textContent = 'Đang gửi...';
 
-    fetch(window.CONTEXT_PATH + '/api/hoso/request-cancel', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ appointmentId: currentCancelId })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
+    try {
+        var data = await hosoDataSource.requestCancel({ appointmentId: currentCancelId });
         closeCancelConfirmedModal();
         if (data.success) {
             // Cập nhật trạng thái row thành "đang chờ hủy"
@@ -340,9 +415,13 @@ function doCancelConfirmed() {
         } else {
             showHosoToast('❌ ' + (data.message || 'Gửi yêu cầu thất bại!'), 'error');
         }
-    })
-    .catch(function() { closeCancelConfirmedModal(); showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
-    .finally(function() { btn.disabled = false; btn.textContent = 'Xác nhận hủy'; });
+    } catch (error) {
+        closeCancelConfirmedModal();
+        console.error('[hoso] request cancel error:', error);
+        showHosoToast('❌ ' + (error.message || 'Lỗi kết nối, vui lòng thử lại!'), 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Xác nhận hủy';
+    }
 }
 function closeCancelInfoModal() { document.getElementById('cancelInfoModal').classList.remove('show'); }
 
@@ -471,7 +550,7 @@ document.getElementById('editTimeSelect').addEventListener('change', function() 
 
 function closeEditAppointment() { document.getElementById('editAppointmentModal').classList.remove('show'); }
 
-function saveEditAppointment() {
+async function saveEditAppointment() {
     var ok = true;
     if (editSelectedList.length === 0) {
         document.getElementById('editServiceGroup').classList.add('error'); ok = false;
@@ -501,13 +580,8 @@ function saveEditAppointment() {
     var btn = document.querySelector('#editAppointmentModal .btn-primary');
     btn.disabled = true; btn.textContent = 'Đang lưu...';
 
-    fetch(window.CONTEXT_PATH + '/api/hoso/update-appointment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
+    try {
+        var data = await hosoDataSource.updateAppointment(payload);
         if (data.success) {
             // Cập nhật local data
             var d = appointmentDetails[currentEditId];
@@ -531,9 +605,12 @@ function saveEditAppointment() {
         } else {
             showHosoToast('❌ ' + (data.message || 'Cập nhật thất bại, thử lại!'), 'error');
         }
-    })
-    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
-    .finally(function() { btn.disabled = false; btn.textContent = 'Lưu thay đổi'; });
+    } catch (error) {
+        console.error('[hoso] update appointment error:', error);
+        showHosoToast('❌ ' + (error.message || 'Lỗi kết nối, vui lòng thử lại!'), 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Lưu thay đổi';
+    }
 }
 
 // === DOI MAT KHAU ===
@@ -551,7 +628,7 @@ function checkStrength(p) {
     else bar.classList.add('strong');
 }
 
-function changePassword(e) {
+async function changePassword(e) {
     e.preventDefault();
     var ok = true;
     var oldPw = document.getElementById('oldPassword').value;
@@ -573,13 +650,8 @@ function changePassword(e) {
     var btn = document.querySelector('#passwordForm .btn-primary');
     btn.disabled = true; btn.textContent = 'Đang đổi...';
 
-    fetch(window.CONTEXT_PATH + '/api/hoso/change-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ oldPassword: oldPw, newPassword: np })
-    })
-    .then(function(res) { return res.json(); })
-    .then(function(data) {
+    try {
+        var data = await hosoDataSource.changePassword({ oldPassword: oldPw, newPassword: np });
         if (data.success) {
             document.getElementById('passwordForm').reset();
             document.getElementById('strengthBar').className = 'password-strength-bar';
@@ -591,9 +663,12 @@ function changePassword(e) {
             }
             showHosoToast('❌ ' + (data.message || 'Đổi mật khẩu thất bại!'), 'error');
         }
-    })
-    .catch(function() { showHosoToast('❌ Lỗi kết nối, vui lòng thử lại!', 'error'); })
-    .finally(function() { btn.disabled = false; btn.textContent = '🔐 Đổi mật khẩu'; });
+    } catch (error) {
+        console.error('[hoso] change password error:', error);
+        showHosoToast('❌ ' + (error.message || 'Lỗi kết nối, vui lòng thử lại!'), 'error');
+    } finally {
+        btn.disabled = false; btn.textContent = '🔐 Đổi mật khẩu';
+    }
 
     return false;
 }

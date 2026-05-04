@@ -1,4 +1,16 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%
+    String patientName = request.getParameter("name");
+    if (patientName == null || patientName.trim().isEmpty()) patientName = "Nguyễn Văn Hiển";
+    String patientId = request.getParameter("patientId");
+    if (patientId == null || patientId.trim().isEmpty()) patientId = "BN001234";
+    String patientPhone = request.getParameter("phone");
+    if (patientPhone == null || patientPhone.trim().isEmpty()) patientPhone = "0987 654 321";
+    String doctorName = request.getParameter("doctor");
+    if (doctorName == null || doctorName.trim().isEmpty()) doctorName = "BS. Nguyễn Hoàng";
+    String appointmentDateTime = request.getParameter("apptTime");
+    if (appointmentDateTime == null || appointmentDateTime.trim().isEmpty()) appointmentDateTime = "22/05/2024 | 09:30 AM";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -13,8 +25,8 @@
 
 <header>
     <a class="btn-back" id="backBtn"  href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
-    <div class="doctor-info"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - BS. NGUYỄN HOÀNG</div>
-    <div class="appointment-time"><i class="fa-regular fa-calendar"></i> 22/05/2024 | 09:30 AM</div>
+    <div class="doctor-info"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
+    <div class="appointment-time"><i class="fa-regular fa-calendar"></i> <%= appointmentDateTime %></div>
 </header>
 
 <div class="main-layout">
@@ -22,10 +34,10 @@
         <div class="card">
             <div class="patient-info-header">
                 <div class="patient-avatar"><i class="fa-solid fa-user-large"></i></div>
-                <h3 class="patient-name">Nguyễn Văn Hiển</h3>
+                <h3 class="patient-name"><%= patientName %></h3>
                 <p class="patient-detail"><i class="fa-regular fa-venus-mars"></i> Nam | 28 Tuổi</p>
-                <p class="patient-detail"><i class="fa-solid fa-phone"></i> 0987 654 321</p>
-                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: #BN001234</p>
+                <p class="patient-detail"><i class="fa-solid fa-phone"></i> <%= patientPhone %></p>
+                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: #<%= patientId %></p>
             </div>
             <div class="medical-history">
                 <div class="section-title"><i class="fa-solid fa-circle-exclamation"></i> CẢNH BÁO Y TẾ</div>
@@ -116,6 +128,15 @@
 
 <div id="toastMessage" class="toast-message"></div>
 
+<script>
+    window.DOCTOR_HOSO_BOOTSTRAP = {
+        patientName: '<%= patientName.replace("'", "\\'") %>',
+        patientId: '<%= patientId.replace("'", "\\'") %>',
+        patientPhone: '<%= patientPhone.replace("'", "\\'") %>',
+        doctorName: '<%= doctorName.replace("'", "\\'") %>',
+        appointmentDateTime: '<%= appointmentDateTime.replace("'", "\\'") %>'
+    };
+</script>
 <script src="${pageContext.request.contextPath}/doctor/js/hoso.js"></script>
 </body>
 </html>

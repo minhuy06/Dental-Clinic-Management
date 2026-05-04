@@ -29,6 +29,102 @@ let currentPage = 1;
 let rowsPerPage = 5;
 let editingId = null;
 
+// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
+let PATIENT_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function delayMs(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function deepClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function requestApi(path, options = {}) {
+    const method = options.method || 'GET';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(PATIENT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function normalizeList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+const mockDataSource = {
+    list: async () => {
+        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
+        return deepClone(patients);
+    },
+    create: async (payload) => {
+        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
+        const newId = Math.max(...patients.map(p => p.id), 0) + 1;
+        patients.push(Object.assign({ id: newId }, payload));
+        return { success: true };
+    },
+    update: async (payload) => {
+        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
+        const idx = patients.findIndex(p => p.id === payload.id);
+        if (idx === -1) return { success: false, message: 'Không tìm thấy bệnh nhân' };
+        patients[idx] = Object.assign({}, patients[idx], payload);
+        return { success: true };
+    },
+    remove: async (id) => {
+        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
+        patients = patients.filter(p => p.id !== id);
+        return { success: true };
+    }
+};
+
+const apiDataSource = {
+    list: async () => normalizeList(await requestApi('patients')),
+    create: async (payload) => requestApi('patients/add', { method: 'POST', body: payload }),
+    update: async (payload) => requestApi('patients/update', { method: 'PUT', body: payload }),
+    remove: async (id) => requestApi('patients/delete?id=' + id, { method: 'DELETE' })
+};
+
+const patientDataSource = PATIENT_CONFIG.USE_MOCK ? mockDataSource : apiDataSource;
+
+async function withDataGuard(action, successMsg) {
+    try {
+        const res = await action();
+        if (res && res.success === false) {
+            showToast(res.message || 'Thao tác thất bại', 'error');
+            return null;
+        }
+        if (successMsg) showToast(successMsg);
+        return res || { success: true };
+    } catch (error) {
+        console.error('Patient data error:', error);
+        showToast(error.message || 'Lỗi kết nối dữ liệu', 'error');
+        return null;
+    }
+}
+
+async function loadPatientsFromServer() {
+    const list = await withDataGuard(() => patientDataSource.list());
+    if (!list) return;
+    patients = normalizeList(list);
+    renderTable();
+}
+
 // ==================== HÀM TIỆN ÍCH ====================
 function formatDate(dateStr) {
     if (!dateStr) return '';
@@ -211,16 +307,16 @@ function editPatient(id) {
     }
 }
 
-function deletePatient(id) {
+async function deletePatient(id) {
     if (confirm('Bạn có chắc chắn muốn xóa bệnh nhân này?')) {
-        patients = patients.filter(p => p.id !== id);
+        const res = await withDataGuard(() => patientDataSource.remove(id), 'Đã xóa bệnh nhân thành công');
+        if (!res) return;
         if (patients.length === 0) currentPage = 1;
-        renderTable();
-        showToast('Đã xóa bệnh nhân thành công');
+        await loadPatientsFromServer();
     }
 }
 
-function savePatient() {
+async function savePatient() {
     let fullName = document.getElementById('fullName').value.trim();
     let gender = document.getElementById('gender').value;
     let phone = document.getElementById('phone').value.trim();
@@ -233,7 +329,7 @@ function savePatient() {
     let notes = document.getElementById('notes').value.trim();
     
     if (!fullName || !phone) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+        showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
         return;
     }
     
@@ -241,29 +337,26 @@ function savePatient() {
     let finalMedicalHistory = medicalHistory === '' ? 'Không' : medicalHistory;
     
     if (editingId) {
-        let index = patients.findIndex(p => p.id === editingId);
-        if (index !== -1) {
-            patients[index] = { 
-                ...patients[index], 
-                fullName, gender, phone, birthDate, address, 
-                allergy: finalAllergy, medicalHistory: finalMedicalHistory, 
-                status, registerDate, notes
-            };
-            showToast('Đã cập nhật thông tin bệnh nhân');
-        }
+        const updatePayload = {
+            id: editingId, fullName, gender, phone, birthDate, address,
+            allergy: finalAllergy, medicalHistory: finalMedicalHistory,
+            status, registerDate, notes
+        };
+        const res = await withDataGuard(() => patientDataSource.update(updatePayload), 'Đã cập nhật thông tin bệnh nhân');
+        if (!res) return;
     } else {
-        let newId = Math.max(...patients.map(p => p.id), 0) + 1;
-        patients.push({
-            id: newId, fullName, gender, phone, birthDate, address, 
+        const createPayload = {
+            fullName, gender, phone, birthDate, address,
             allergy: finalAllergy, medicalHistory: finalMedicalHistory, 
             status, registerDate: registerDate || new Date().toISOString().split('T')[0], 
             notes
-        });
-        showToast('Đã thêm bệnh nhân mới');
+        };
+        const res = await withDataGuard(() => patientDataSource.create(createPayload), 'Đã thêm bệnh nhân mới');
+        if (!res) return;
     }
     
     closeModal();
-    renderTable();
+    await loadPatientsFromServer();
 }
 
 function closeModal() {
@@ -273,7 +366,8 @@ function closeModal() {
 
 // ==================== KHỞI TẠO ====================
 document.addEventListener('DOMContentLoaded', () => {
-    renderTable();
+    console.info('[benhnhan] mode:', PATIENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    loadPatientsFromServer();
     
     document.getElementById('openAddBtn').onclick = openAddModal;
     document.querySelector('.close').onclick = closeModal;

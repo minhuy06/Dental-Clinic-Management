@@ -48,6 +48,123 @@ let editingId = null;
 let selectedServices = [];
 let currentStatusFilter = 'all';
 
+// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
+let APPOINTMENT_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function aptDelay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function aptClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function aptRequest(path, options = {}) {
+    const method = options.method || 'GET';
+    const body = options.body;
+    const headers = options.headers || {};
+    const fetchOptions = {
+        method: method,
+        headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    const res = await fetch(APPOINTMENT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    let json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function aptNormalizeList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+const mockAppointmentSource = {
+    listServices: async () => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        return aptClone(servicesList);
+    },
+    listAppointments: async () => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        return aptClone(appointments);
+    },
+    createAppointment: async (payload) => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const newId = Math.max(...appointments.map(a => a.id), 0) + 1;
+        appointments.push(Object.assign({ id: newId, status: 'pending' }, payload));
+        return { success: true };
+    },
+    updateAppointment: async (payload) => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const idx = appointments.findIndex(a => a.id === payload.id);
+        if (idx === -1) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        appointments[idx] = Object.assign({}, appointments[idx], payload);
+        return { success: true };
+    },
+    updateStatus: async (id, status) => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        const apt = appointments.find(a => a.id === id);
+        if (!apt) return { success: false, message: 'Không tìm thấy lịch hẹn' };
+        apt.status = status;
+        return { success: true };
+    },
+    removeAppointment: async (id) => {
+        await aptDelay(APPOINTMENT_CONFIG.MOCK_DELAY_MS);
+        appointments = appointments.filter(a => a.id !== id);
+        return { success: true };
+    }
+};
+
+const apiAppointmentSource = {
+    listServices: async () => aptNormalizeList(await aptRequest('services')),
+    listAppointments: async () => aptNormalizeList(await aptRequest('appointments')),
+    createAppointment: async (payload) => aptRequest('appointments/add', { method: 'POST', body: payload }),
+    updateAppointment: async (payload) => aptRequest('appointments/update', { method: 'PUT', body: payload }),
+    updateStatus: async (id, status) => aptRequest('appointments/toggle-status', { method: 'PUT', body: { id, status } }),
+    removeAppointment: async (id) => aptRequest('appointments/delete?id=' + id, { method: 'DELETE' })
+};
+
+const appointmentSource = APPOINTMENT_CONFIG.USE_MOCK ? mockAppointmentSource : apiAppointmentSource;
+
+async function withAppointmentGuard(action, successMsg) {
+    try {
+        const res = await action();
+        if (res && res.success === false) {
+            showToast(res.message || 'Thao tác thất bại', 'error');
+            return null;
+        }
+        if (successMsg) showToast(successMsg, 'success');
+        return res || { success: true };
+    } catch (error) {
+        console.error('[lichhen] data error:', error);
+        showToast(error.message || 'Lỗi kết nối dữ liệu', 'error');
+        return null;
+    }
+}
+
+async function loadAppointmentsFromServer() {
+    const list = await withAppointmentGuard(() => appointmentSource.listAppointments());
+    if (!list) return;
+    appointments = aptNormalizeList(list);
+    renderAppointments();
+}
+
+async function loadServicesFromServer() {
+    const list = await withAppointmentGuard(() => appointmentSource.listServices());
+    if (!list) return;
+    servicesList.length = 0;
+    aptNormalizeList(list).forEach(s => servicesList.push(s));
+    loadServicesGrid();
+}
+
 // ==================== HÀM TIỆN ÍCH ====================
 function formatDate(date) {
     let d = new Date(date);
@@ -153,13 +270,12 @@ function filterByStatus(status) {
     renderAppointments();
 }
 
-function changeStatus(id, newStatus) {
+async function changeStatus(id, newStatus) {
     let apt = appointments.find(a => a.id === id);
     if (apt) {
-        apt.status = newStatus;
-        renderAppointments();
         let statusText = newStatus === 'confirmed' ? 'duyệt' : newStatus === 'cancelled' ? 'hủy' : newStatus === 'completed' ? 'hoàn thành' : 'cập nhật';
-        showToast(`Đã ${statusText} lịch hẹn của ${apt.patientName}`);
+        let res = await withAppointmentGuard(() => appointmentSource.updateStatus(id, newStatus), `Đã ${statusText} lịch hẹn của ${apt.patientName}`);
+        if (res) await loadAppointmentsFromServer();
     }
 }
 
@@ -452,15 +568,14 @@ function editAppointment(id) {
     }
 }
 
-function deleteAppointment(id) {
+async function deleteAppointment(id) {
     if (confirm('Bạn có chắc chắn muốn xóa lịch hẹn này?')) {
-        appointments = appointments.filter(a => a.id !== id);
-        renderAppointments();
-        showToast('Đã xóa lịch hẹn', 'success');
+        let res = await withAppointmentGuard(() => appointmentSource.removeAppointment(id), 'Đã xóa lịch hẹn');
+        if (res) await loadAppointmentsFromServer();
     }
 }
 
-function saveAppointment() {
+async function saveAppointment() {
     let patientName = document.getElementById('patientName').value.trim();
     let patientPhone = document.getElementById('patientPhone').value.trim();
     let date = document.getElementById('appointmentDate').value;
@@ -469,41 +584,38 @@ function saveAppointment() {
     let room = document.getElementById('room').value;
     
     if (!patientName || !patientPhone || !date || !time || !doctor) {
-        alert('Vui lòng điền đầy đủ thông tin!');
+        showToast('Vui lòng điền đầy đủ thông tin!', 'error');
         return;
     }
     
     if (selectedServices.length === 0) {
-        alert('Vui lòng chọn ít nhất một dịch vụ!');
+        showToast('Vui lòng chọn ít nhất một dịch vụ!', 'error');
         return;
     }
     
     let totalPrice = selectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
     
     if (editingId) {
-        let index = appointments.findIndex(a => a.id === editingId);
-        if (index !== -1) {
-            appointments[index] = { 
-                ...appointments[index], 
-                patientName, patientPhone, date, time, doctor, room,
-                services: selectedServices.map(s => ({ ...s })),
-                totalPrice: totalPrice
-            };
-            showToast('Đã cập nhật lịch hẹn', 'success');
-        }
+        const payload = {
+            id: editingId, patientName, patientPhone, date, time, doctor, room,
+            services: selectedServices.map(s => ({ ...s })),
+            totalPrice: totalPrice
+        };
+        const res = await withAppointmentGuard(() => appointmentSource.updateAppointment(payload), 'Đã cập nhật lịch hẹn');
+        if (!res) return;
     } else {
-        let newId = Math.max(...appointments.map(a => a.id), 0) + 1;
-        appointments.push({ 
-            id: newId, patientName, patientPhone, date, time, doctor, room,
+        const payload = {
+            patientName, patientPhone, date, time, doctor, room,
             services: selectedServices.map(s => ({ ...s })),
             totalPrice: totalPrice,
             status: 'pending'
-        });
-        showToast('Đã thêm lịch hẹn mới', 'success');
+        };
+        const res = await withAppointmentGuard(() => appointmentSource.createAppointment(payload), 'Đã thêm lịch hẹn mới');
+        if (!res) return;
     }
     
     closeModal();
-    renderAppointments();
+    await loadAppointmentsFromServer();
 }
 
 function closeModal() {
@@ -519,11 +631,12 @@ document.addEventListener('click', function(e) {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.info('[lichhen] mode:', APPOINTMENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
     updateDateDisplay();
     let doctorSelect = document.getElementById('doctorName');
     if (doctorSelect) doctorSelect.addEventListener('change', updateRoom);
-    loadServicesGrid();
-    renderAppointments();
+    loadServicesFromServer();
+    loadAppointmentsFromServer();
     filterByStatus('all');
     
     // Gắn sự kiện cho các nút

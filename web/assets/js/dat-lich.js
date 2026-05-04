@@ -21,6 +21,80 @@ var FALLBACK_SERVICES = [
     {id:'20', name:'Điều trị viêm nha chu',        desc:'Điều trị viêm nướu nha chu',            time:'30 phút',      price:500000,  cat:'kham',      perUnit:false}
 ];
 
+var BOOKING_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function bookingDelay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+function bookingClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function bookingRequest(path, options) {
+    var opts = options || {};
+    var method = opts.method || 'GET';
+    var body = opts.body;
+    var headers = opts.headers || {};
+    var fetchOptions = {
+        method: method,
+        headers: Object.assign({'Content-Type': 'application/json'}, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    var res = await fetch(BOOKING_CONFIG.API_BASE + '/' + path, fetchOptions);
+    var json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) ? json.message : ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function normalizeBookingList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+var mockBookingSource = {
+    servicesList: async function() {
+        await bookingDelay(BOOKING_CONFIG.MOCK_DELAY_MS);
+        return bookingClone(FALLBACK_SERVICES);
+    },
+    createBooking: async function(payload) {
+        await bookingDelay(BOOKING_CONFIG.MOCK_DELAY_MS);
+        console.info('[dat-lich] mock booking created:', payload);
+        return {success:true};
+    }
+};
+
+var apiBookingSource = {
+    servicesList: async function() { return normalizeBookingList(await bookingRequest('services')); },
+    createBooking: async function(payload) { return bookingRequest('appointments/add', {method:'POST', body:payload}); }
+};
+
+var bookingSource = BOOKING_CONFIG.USE_MOCK ? mockBookingSource : apiBookingSource;
+
+async function withBookingGuard(action, successMsg) {
+    try {
+        var res = await action();
+        if (res && res.success === false) {
+            alert(res.message || 'Không thể xử lý đặt lịch');
+            return null;
+        }
+        if (successMsg) alert(successMsg);
+        return res || {success:true};
+    } catch (error) {
+        console.error('[dat-lich] data error:', error);
+        alert(error.message || 'Có lỗi kết nối dữ liệu!');
+        return null;
+    }
+}
+
 // Dùng data từ DB nếu có (inject qua JSP → window.allServices), không thì dùng fallback
 var allServices = (window.allServices && window.allServices.length > 0)
     ? window.allServices
@@ -198,10 +272,43 @@ function handleBooking() {
         ok = false;
     } else document.getElementById('timeGroup').classList.remove('error');
 
-    if (ok) {
-        alert('✅ Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận trong 30 phút.');
-        resetBookingForm();
-    }
+    if (ok) submitBooking();
+}
+
+async function submitBooking() {
+    var bookingDate = document.getElementById('bookingDate').value;
+    var bookingTime = document.getElementById('bookingTimeSelect').value;
+    var bookingNote = document.getElementById('bookingNote').value.trim();
+    var totalAmount = selectedList.reduce(function(sum, s){ return sum + (s.price * s.qty); }, 0);
+
+    var payload = {
+        date: bookingDate,
+        time: bookingTime,
+        note: bookingNote,
+        services: selectedList.map(function(s) {
+            return {
+                id: s.id,
+                name: s.name,
+                price: s.price,
+                quantity: s.qty
+            };
+        }),
+        totalAmount: totalAmount
+    };
+
+    var res = await withBookingGuard(
+        function() { return bookingSource.createBooking(payload); },
+        '✅ Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận trong 30 phút.'
+    );
+    if (res) resetBookingForm();
+}
+
+async function loadServicesForBooking() {
+    var list = await withBookingGuard(function() { return bookingSource.servicesList(); });
+    if (!list) return;
+    allServices = normalizeBookingList(list);
+    renderServiceTable(allServices, false);
+    buildCheckboxGrid();
 }
 
 // === POPUP DANG NHAP ===
@@ -211,3 +318,8 @@ function closeLoginModal() {
 function goToLogin() {
     window.location.href = window.CONTEXT_PATH + '/account/login.jsp';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.info('[dat-lich] mode:', BOOKING_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    loadServicesForBooking();
+});
