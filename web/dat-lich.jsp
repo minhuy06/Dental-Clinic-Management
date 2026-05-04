@@ -1,4 +1,6 @@
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -43,26 +45,11 @@
                             <label>Chọn dịch vụ <span style="color:#e74c3c">*</span></label>
                             <select class="form-control" id="serviceAdd">
                                 <option value="">-- Chọn dịch vụ để thêm --</option>
-                                <option value="1" data-price="100000" data-time="20 phút">Khám tổng quát</option>
-                                <option value="2" data-price="200000" data-time="30 phút">Cạo vôi răng</option>
-                                <option value="3" data-price="300000" data-time="30 phút">Trám răng Composite</option>
-                                <option value="4" data-price="100000" data-time="15 phút">Nhổ răng sữa</option>
-                                <option value="5" data-price="1000000" data-time="30 phút">Nhổ răng khôn mọc thẳng</option>
-                                <option value="6" data-price="3000000" data-time="60 phút">Nhổ răng khôn mọc ngầm</option>
-                                <option value="7" data-price="2500000" data-time="45 phút">Tẩy trắng răng Laser</option>
-                                <option value="8" data-price="1500000" data-time="20 phút">Tẩy trắng răng tại nhà</option>
-                                <option value="9" data-price="800000" data-time="45 phút">Lấy tủy răng cửa</option>
-                                <option value="10" data-price="1500000" data-time="60 phút">Lấy tủy răng hàm</option>
-                                <option value="11" data-price="2000000" data-time="45 phút/răng">Bọc răng sứ Titan</option>
-                                <option value="12" data-price="5000000" data-time="45 phút/răng">Bọc răng sứ Cercon</option>
-                                <option value="13" data-price="6000000" data-time="45 phút/răng">Bọc răng sứ Zirconia</option>
-                                <option value="14" data-price="7000000" data-time="60 phút/răng">Mặt dán sứ Veneer</option>
-                                <option value="15" data-price="15000000" data-time="60-90 phút">Cấy ghép Implant</option>
-                                <option value="16" data-price="30000000" data-time="60-90 phút">Cấy ghép Implant cao cấp</option>
-                                <option value="17" data-price="25000000" data-time="60 phút/lần">Niềng răng mắc cài kim loại</option>
-                                <option value="18" data-price="35000000" data-time="60 phút/lần">Niềng răng mắc cài sứ</option>
-                                <option value="19" data-price="80000000" data-time="45 phút/lần">Niềng răng Invisalign</option>
-                                <option value="20" data-price="500000" data-time="30 phút">Điều trị viêm nha chu</option>
+                                <c:if test="${not empty listDV}"> 
+                                    <c:forEach items="${listDV}" var="dv" varStatus="loop">
+                                        <option value="${loop.count}" data-price="${dv.giaTien}" data-time="${dv.thoiLuongDuKien} phút">${dv.tenDichVu}</option>
+                                    </c:forEach>
+                                </c:if>
                             </select>
                             <button type="button" onclick="addService()" style="margin-top:10px;padding:9px 22px;font-size:0.85rem;font-weight:600;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;font-family:var(--font-body);">+ Thêm dịch vụ</button>
                             <div class="form-error">Vui lòng chọn ít nhất 1 dịch vụ</div>
@@ -103,46 +90,11 @@
                     <table class="price-table" id="priceTable">
                         <thead><tr><th>STT</th><th>Dịch vụ</th><th>⏱ Thời gian</th><th>Giá (VNĐ)</th></tr></thead>
                         <tbody>
-                            <tr><td>1</td><td>Khám tổng quát<br><small style="color:var(--text-muted)">Kiểm tra răng miệng toàn diện</small></td><td class="time-cell">🕐 20 phút</td><td class="price">100,000</td></tr>
-                            <tr><td>2</td><td>Cạo vôi răng<br><small style="color:var(--text-muted)">Loại bỏ mảng bám, vôi răng</small></td><td class="time-cell">🕐 30 phút</td><td class="price">200,000</td></tr>
-                            <tr><td>3</td><td>Trám răng Composite<br><small style="color:var(--text-muted)">Trám thẩm mỹ bằng vật liệu Composite</small></td><td class="time-cell">🕐 30 phút</td><td class="price">300,000</td></tr>
-                            <tr><td>4</td><td>Nhổ răng sữa<br><small style="color:var(--text-muted)">Nhổ răng sữa cho trẻ em</small></td><td class="time-cell">🕐 15 phút</td><td class="price">100,000</td></tr>
-                            <tr><td>5</td><td>Nhổ răng khôn mọc thẳng<br><small style="color:var(--text-muted)">Nhổ răng khôn không phẫu thuật</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,000,000</td></tr>
-                            <tr><td>6</td><td>Nhổ răng khôn mọc ngầm<br><small style="color:var(--text-muted)">Tiểu phẫu nhổ răng khôn phức tạp</small></td><td class="time-cell">🕐 60 phút</td><td class="price">3,000,000</td></tr>
-                            <tr><td>7</td><td>Tẩy trắng răng Laser<br><small style="color:var(--text-muted)">Tẩy trắng bằng công nghệ Laser</small></td><td class="time-cell">🕐 45 phút</td><td class="price">2,500,000</td></tr>
-                            <tr><td>8</td><td>Tẩy trắng răng tại nhà<br><small style="color:var(--text-muted)">Máng tẩy trắng sử dụng tại nhà</small></td><td class="time-cell">🕐 20 phút</td><td class="price">1,500,000</td></tr>
-                            <tr><td>9</td><td>Lấy tủy răng cửa<br><small style="color:var(--text-muted)">Điều trị tủy răng cửa bị viêm</small></td><td class="time-cell">🕐 45 phút</td><td class="price">800,000</td></tr>
-                            <tr><td>10</td><td>Lấy tủy răng hàm<br><small style="color:var(--text-muted)">Điều trị tủy răng hàm nhiều chân</small></td><td class="time-cell">🕐 60 phút</td><td class="price">1,500,000</td></tr>
-                            <tr class="hidden-row"><td>11</td><td>Bọc răng sứ Titan<br><small style="color:var(--text-muted)">Răng sứ kim loại Titan tiêu chuẩn</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">2,000,000</td></tr>
-                            <tr class="hidden-row"><td>12</td><td>Bọc răng sứ Cercon<br><small style="color:var(--text-muted)">Răng sứ Cercon cao cấp Đức</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">5,000,000</td></tr>
-                            <tr class="hidden-row"><td>13</td><td>Bọc răng sứ Zirconia<br><small style="color:var(--text-muted)">Răng sứ Zirconia nguyên khối</small></td><td class="time-cell">🕐 45 phút/răng</td><td class="price">6,000,000</td></tr>
-                            <tr class="hidden-row"><td>14</td><td>Mặt dán sứ Veneer<br><small style="color:var(--text-muted)">Dán sứ siêu mỏng thẩm mỹ</small></td><td class="time-cell">🕐 60 phút/răng</td><td class="price">7,000,000</td></tr>
-                            <tr class="hidden-row"><td>15</td><td>Cấy ghép Implant tiêu chuẩn<br><small style="color:var(--text-muted)">Trụ Implant Titanium tiêu chuẩn</small></td><td class="time-cell">🕐 60-90 phút</td><td class="price">15,000,000</td></tr>
-                            <tr class="hidden-row"><td>16</td><td>Cấy ghép Implant cao cấp<br><small style="color:var(--text-muted)">Trụ Implant cao cấp Châu Âu</small></td><td class="time-cell">🕐 60-90 phút</td><td class="price">30,000,000</td></tr>
-                            <tr class="hidden-row"><td>17</td><td>Niềng răng mắc cài kim loại<br><small style="color:var(--text-muted)">Chỉnh nha mắc cài kim loại truyền thống</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">25,000,000</td></tr>
-                            <tr class="hidden-row"><td>18</td><td>Niềng răng mắc cài sứ<br><small style="color:var(--text-muted)">Chỉnh nha mắc cài sứ thẩm mỹ</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">35,000,000</td></tr>
-                            <tr class="hidden-row"><td>19</td><td>Niềng răng Invisalign<br><small style="color:var(--text-muted)">Khay trong suốt chỉnh nha hiện đại</small></td><td class="time-cell">🕐 45 phút/lần</td><td class="price">80,000,000</td></tr>
-                            <tr class="hidden-row"><td>20</td><td>Điều trị viêm nha chu<br><small style="color:var(--text-muted)">Điều trị viêm nướu, viêm nha chu</small></td><td class="time-cell">🕐 30 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>21</td><td>Chụp X-quang răng<br><small style="color:var(--text-muted)">Chụp phim X-quang kỹ thuật số</small></td><td class="time-cell">🕐 10 phút</td><td class="price">150,000</td></tr>
-                            <tr class="hidden-row"><td>22</td><td>Chụp CT Cone Beam<br><small style="color:var(--text-muted)">Chụp CT 3D toàn hàm</small></td><td class="time-cell">🕐 15 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>23</td><td>Trám răng thẩm mỹ<br><small style="color:var(--text-muted)">Trám thẩm mỹ phục hồi hình dáng</small></td><td class="time-cell">🕐 30 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>24</td><td>Điều trị tủy răng trẻ em<br><small style="color:var(--text-muted)">Lấy tủy răng sữa cho trẻ</small></td><td class="time-cell">🕐 30 phút</td><td class="price">600,000</td></tr>
-                            <tr class="hidden-row"><td>25</td><td>Nhổ răng vĩnh viễn thường<br><small style="color:var(--text-muted)">Nhổ răng lung lay, răng sâu nặng</small></td><td class="time-cell">🕐 20 phút</td><td class="price">500,000</td></tr>
-                            <tr class="hidden-row"><td>26</td><td>Phẫu thuật cắt lợi trùm<br><small style="color:var(--text-muted)">Cắt lợi trùm răng khôn</small></td><td class="time-cell">🕐 30 phút</td><td class="price">800,000</td></tr>
-                            <tr class="hidden-row"><td>27</td><td>Ghép xương hàm<br><small style="color:var(--text-muted)">Ghép xương chuẩn bị cấy Implant</small></td><td class="time-cell">🕐 60 phút</td><td class="price">5,000,000</td></tr>
-                            <tr class="hidden-row"><td>28</td><td>Nâng xoang hàm<br><small style="color:var(--text-muted)">Nâng xoang hỗ trợ Implant hàm trên</small></td><td class="time-cell">🕐 90 phút</td><td class="price">8,000,000</td></tr>
-                            <tr class="hidden-row"><td>29</td><td>Răng giả tháo lắp nhựa<br><small style="color:var(--text-muted)">Hàm giả nhựa dẻo tháo lắp</small></td><td class="time-cell">🕐 45 phút/lần</td><td class="price">2,000,000</td></tr>
-                            <tr class="hidden-row"><td>30</td><td>Răng giả tháo lắp kim loại<br><small style="color:var(--text-muted)">Hàm giả khung kim loại bền chắc</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">4,000,000</td></tr>
-                            <tr class="hidden-row"><td>31</td><td>Cầu răng sứ (3 đơn vị)<br><small style="color:var(--text-muted)">Phục hình cầu răng sứ 3 đơn vị</small></td><td class="time-cell">🕐 60 phút/lần</td><td class="price">9,000,000</td></tr>
-                            <tr class="hidden-row"><td>32</td><td>Điều trị cười hở lợi<br><small style="color:var(--text-muted)">Phẫu thuật chỉnh hình nướu</small></td><td class="time-cell">🕐 45 phút</td><td class="price">3,000,000</td></tr>
-                            <tr class="hidden-row"><td>33</td><td>Tạo hình nướu thẩm mỹ<br><small style="color:var(--text-muted)">Chỉnh sửa đường viền nướu</small></td><td class="time-cell">🕐 30 phút</td><td class="price">2,500,000</td></tr>
-                            <tr class="hidden-row"><td>34</td><td>Điều trị đau khớp thái dương<br><small style="color:var(--text-muted)">Điều trị rối loạn khớp hàm</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,500,000</td></tr>
-                            <tr class="hidden-row"><td>35</td><td>Máng chống nghiến răng<br><small style="color:var(--text-muted)">Máng bảo vệ răng khi ngủ</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,200,000</td></tr>
-                            <tr class="hidden-row"><td>36</td><td>Trám răng sữa trẻ em<br><small style="color:var(--text-muted)">Trám răng sữa bị sâu cho bé</small></td><td class="time-cell">🕐 15 phút</td><td class="price">150,000</td></tr>
-                            <tr class="hidden-row"><td>37</td><td>Bôi Fluoride phòng sâu<br><small style="color:var(--text-muted)">Bôi gel Fluoride ngừa sâu răng</small></td><td class="time-cell">🕐 15 phút</td><td class="price">200,000</td></tr>
-                            <tr class="hidden-row"><td>38</td><td>Trám bít hố rãnh<br><small style="color:var(--text-muted)">Bít hố rãnh phòng sâu răng hàm</small></td><td class="time-cell">🕐 20 phút</td><td class="price">250,000</td></tr>
-                            <tr class="hidden-row"><td>39</td><td>Khám nha khoa định kỳ trẻ em<br><small style="color:var(--text-muted)">Khám kiểm tra răng miệng cho bé</small></td><td class="time-cell">🕐 15 phút</td><td class="price">80,000</td></tr>
-                            <tr class="hidden-row"><td>40</td><td>Tư vấn thiết kế nụ cười DSD<br><small style="color:var(--text-muted)">Digital Smile Design - thiết kế nụ cười số</small></td><td class="time-cell">🕐 30 phút</td><td class="price">1,000,000</td></tr>
+                        <c:if test="${not empty listDV}">
+                            <c:forEach items="${listDV}" var="dv" varStatus="loop">
+                                <tr class="${loop.index >= 10 ? 'hidden-row' :''}"><td>${loop.count}</td><td>${dv.chuyenKhoa.tenChuyenKhoa}<br><small style="color:var(--text-muted)">${dv.tenDichVu}</small></td><td class="time-cell">🕐 ${dv.thoiLuongDuKien} phút</td><td class="price">${dv.giaTien}</td></tr>
+                            </c:forEach>
+                        </c:if>
                         </tbody>
                     </table>
                 </div>

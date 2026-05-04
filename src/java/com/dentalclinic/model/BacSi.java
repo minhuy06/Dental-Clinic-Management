@@ -9,7 +9,7 @@ public class BacSi {
     private String trinhDo;
     
     // Đối tượng quan hệ (Dùng để chứa dữ liệu sau khi JOIN)
-    private TaiKhoan taiKhoan; 
+    private TaiKhoan taiKhoan;  // ???
     private List<BacSiChuyenKhoa> danhSachChuyenKhoa;
     private List<LichHen> danhSachLichHen;
     private List<PhieuKham> danhSachPhieuKham;
@@ -19,7 +19,7 @@ public class BacSi {
 
     public BacSi(int bacSiID, int taiKhoanID, String anhDaiDien, String trinhDo) {
         this.bacSiID = bacSiID;
-        this.taiKhoanID = taiKhoanID;
+        this.taiKhoanID = taiKhoanID; //???? 
         this.anhDaiDien = anhDaiDien;
         this.trinhDo = trinhDo;
     }

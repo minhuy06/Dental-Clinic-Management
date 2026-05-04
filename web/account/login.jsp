@@ -143,20 +143,48 @@
             }
 
             if (isValid) {
-                // Gui form den backend (Servlet)
-                // Hien tai chua co backend nen chi thong bao
-                // Demo: luu ten vao session thong qua URL (backend se xu ly thuc te)
-                window.location.href = '${pageContext.request.contextPath}/index.jsp?loginSuccess=true&phone=' + encodeURIComponent(phone);
-                // Khi co backend, dung: document.getElementById('loginForm').submit();
-            }
+                const params = new URLSearchParams();
+                params.append('userPhone', phone);
+                params.append('userPassword', password);
 
+                fetch('${pageContext.request.contextPath}/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: params.toString()
+                })
+                .then(response => {
+                    if (response.redirected) {
+                        window.location.href = response.url; 
+                        return;
+                    }
+                    return response.text(); 
+                })
+                .then(text => {
+                    if (text === "ERROR") {
+                        let msgDiv = document.getElementById('message');
+                        if (msgDiv) {
+                            msgDiv.innerText = "Tài khoản hoặc mật khẩu không đúng!";
+                            msgDiv.style.color = "red";
+                        } else {
+                            alert("Tài khoản hoặc mật khẩu không đúng!"); 
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    let msgDiv = document.getElementById('message');
+                    if (msgDiv) {
+                        msgDiv.innerText = "Lỗi kết nối máy chủ!";
+                        msgDiv.style.color = "red";
+                    }
+                });
+            }
             return false;
         }
-
-        // Xoa loi khi nguoi dung go lai
         document.getElementById('phone').addEventListener('input', function() {
             document.getElementById('phoneGroup').classList.remove('error');
-            // Chi cho nhap so
             this.value = this.value.replace(/[^0-9]/g, '');
         });
 

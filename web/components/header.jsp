@@ -1,9 +1,10 @@
 <%-- components/header.jsp - final version --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page import="com.dentalclinic.model.TaiKhoan" %>
 <%
     String currentPage = request.getRequestURI();
     // Demo: kiem tra dang nhap tu session
-    String loggedInUser = (String) session.getAttribute("loggedInUser");
+    TaiKhoan Acc = (TaiKhoan) session.getAttribute("loggedInUser");
 %>
 
 <header class="header" id="header">
@@ -21,17 +22,17 @@
             %>
             <a href="${pageContext.request.contextPath}/index.jsp"
                 accesskey=""class="<%= isIndex ? "active" : "" %>">Trang chủ</a>
-            <a href="${pageContext.request.contextPath}/dat-lich.jsp#datlich"
+            <a href="${pageContext.request.contextPath}/datlich#datlich"
                 class="<%= isDatLich ? "active" : "" %>" data-section="datlich">Đặt lịch</a>
-            <a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu"
+            <a href="${pageContext.request.contextPath}/datlich#dichvu"
                 class="<%= isDatLich ? "" : "" %>" data-section="dichvu">Dịch vụ</a>
-            <a href="${pageContext.request.contextPath}/dat-lich.jsp#bacsi"
+            <a href="${pageContext.request.contextPath}/datlich#bacsi"
                 accesskey=""class="<%= isDatLich ? "" : "" %>" data-section="bacsi">Bác sĩ</a>
 
             <div class="nav-mobile-actions">
-                <% if (loggedInUser != null) { %>
+                <% if (Acc != null) { %>
                     <a href="${pageContext.request.contextPath}/patient/hoso.jsp" class="btn btn-primary" style="width:100%;">
-                        👤 <%= loggedInUser %>
+                        👤 <%= Acc.getHoTen() %>
                     </a>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
@@ -40,11 +41,11 @@
         </nav>
 
         <div class="header-actions">
-            <% if (loggedInUser != null) { %>
+            <% if (Acc != null) { %>
                 <div class="user-dropdown-wrapper">
                     <div class="user-avatar-btn" onclick="toggleUserDropdown()">
                         <div class="user-avatar-circle">👤</div>
-                        <span class="user-avatar-name"><%= loggedInUser %></span>
+                        <span class="user-avatar-name"><%= Acc.getHoTen() %></span>
                         <span class="user-arrow">▼</span>
                     </div>
                     <div class="user-dropdown" id="userDropdown">
@@ -52,7 +53,7 @@
                         <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=history" class="user-dropdown-item">📅 Quản lý lịch hẹn</a>
                         <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=password" class="user-dropdown-item">🔒 Bảo mật</a>
                         <div class="user-dropdown-divider"></div>
-                        <a href="${pageContext.request.contextPath}/account/logout.jsp" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
+                        <a href="${pageContext.request.contextPath}/logout" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
                     </div>
                 </div>
             <% } else { %>

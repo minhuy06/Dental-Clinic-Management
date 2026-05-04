@@ -6,7 +6,7 @@ public class DichVu {
     private int dichVuID;
     private String tenDichVu;
     private double giaTien;
-    private String thoiLuongDuKien;
+    private int thoiLuongDuKien;
     private int chuyenKhoaID;  // FK -> ChuyenKhoa
 
     // Đối tượng quan hệ
@@ -19,7 +19,7 @@ public class DichVu {
     public DichVu() {}
 
     public DichVu(int dichVuID, String tenDichVu, double giaTien, 
-                  String thoiLuongDuKien, int chuyenKhoaID) {
+                  int thoiLuongDuKien, int chuyenKhoaID) {
         this.dichVuID = dichVuID;
         this.tenDichVu = tenDichVu;
         this.giaTien = giaTien;
@@ -36,8 +36,8 @@ public class DichVu {
     public double getGiaTien() { return giaTien; }
     public void setGiaTien(double giaTien) { this.giaTien = giaTien; }
 
-    public String getThoiLuongDuKien() { return thoiLuongDuKien; }
-    public void setThoiLuongDuKien(String thoiLuongDuKien) { 
+    public int getThoiLuongDuKien() { return thoiLuongDuKien; }
+    public void setThoiLuongDuKien(int thoiLuongDuKien) { 
         this.thoiLuongDuKien = thoiLuongDuKien; 
     }
 

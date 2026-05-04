@@ -38,12 +38,12 @@
                         <div class="profile-content-header"><h2>Thông tin cá nhân</h2><p>Xem và cập nhật thông tin của bạn</p></div>
                         <form class="info-form" id="infoForm" onsubmit="return saveInfo(event)">
                             <div class="form-row">
-                                <div class="form-group"><label>Họ và tên <span style="color:#e74c3c">*</span></label><input type="text" class="form-control" id="infoName" value="Nguyễn Văn An"></div>
-                                <div class="form-group"><label>Số điện thoại</label><input type="text" class="form-control" value="0901000001" disabled></div>
+                                <div class="form-group"><label>Họ và tên <span style="color:#e74c3c">*</span></label><input type="text" class="form-control" id="infoName" value="${loggedInUser.hoTen}"></div>
+                                <div class="form-group"><label>Số điện thoại</label><input type="text" class="form-control" value="${loggedInUser.soDienThoai}" disabled></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label>Email</label><input type="email" class="form-control" id="infoEmail" value="nguyenvanan@gmail.com"></div>
-                                <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="infoDob" value="1990-05-15"></div>
+                                <div class="form-group"><label>Ngày sinh</label><input type="date" class="form-control" id="infoDob" value="${loggedInUser.ngaySinh}"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group"><label>Giới tính</label><select class="form-control" id="infoGender"><option value="1" selected>Nam</option><option value="0">Nữ</option></select></div>
@@ -291,7 +291,7 @@
     // === DANG XUAT ===
     function confirmLogout(){document.getElementById('logoutModal').classList.add('show');}
     function closeLogoutModal(){document.getElementById('logoutModal').classList.remove('show');}
-    function doLogout(){window.location.href='${pageContext.request.contextPath}/account/logout.jsp';}
+    function doLogout(){window.location.href='${pageContext.request.contextPath}/logout';}
 
     // === DOI MAT KHAU ===
     function checkStrength(p){
