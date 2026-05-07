@@ -5,15 +5,10 @@ import com.dentalclinic.model.LichHen;
 import java.util.List;
 
 public class LichHenService {
-    private LichHenDAO lichHenDAO = new LichHenDAO();
+    private LichHenDAO lhDAO = new LichHenDAO();
 
-    public List<LichHen> getAllLichHen(){
-        return lichHenDAO.getAllLichHen();
+    public boolean createBooking(LichHen lh, List<Integer> dichVuIds) {
+        // Có thể thêm logic kiểm tra trùng lịch ở đây
+        return lhDAO.insertBooking(lh, dichVuIds) > 0;
     }
-
-    public List<LichHen> getLichHenByBenhNhan(int benhNhanID){
-        return lichHenDAO.getLichHenByBenhNhan(benhNhanID);
-    }
-
-    
 }
