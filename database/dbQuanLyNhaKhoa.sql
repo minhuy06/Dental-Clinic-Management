@@ -635,26 +635,25 @@ GO
 INSERT INTO CaLam (TenCa, GioBatDau, GioKetThuc)
 VALUES 
 (N'Ca Sáng', '08:00:00', '12:00:00'),
-(N'Ca Chiều', '13:30:00', '17:30:00'),
-(N'Ca Tối', '18:00:00', '21:00:00');
+(N'Ca Chiều', '13:30:00', '17:30:00')
 
 -- THỨ HAI (20/04/2026) - 6 dòng
 INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
 (21, 1, '2026-04-20', N'Đang làm việc'), (41, 1, '2026-04-20', N'Đang làm việc'),
 (22, 2, '2026-04-20', N'Đang làm việc'), (42, 2, '2026-04-20', N'Đang làm việc'),
-(23, 3, '2026-04-20', N'Đang làm việc'), (43, 3, '2026-04-20', N'Đang làm việc');
+(23, 1, '2026-04-20', N'Đang làm việc'), (43, 1, '2026-04-20', N'Đang làm việc');
 
 -- THỨ BA (21/04/2026) - 6 dòng
 INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
 (24, 1, '2026-04-21', N'Đang làm việc'), (44, 1, '2026-04-21', N'Đang làm việc'),
 (25, 2, '2026-04-21', N'Đang làm việc'), (45, 2, '2026-04-21', N'Đang làm việc'),
-(26, 3, '2026-04-21', N'Đang làm việc'), (46, 3, '2026-04-21', N'Xin nghỉ');
+(26, 2, '2026-04-21', N'Đang làm việc'), (46, 2, '2026-04-21', N'Xin nghỉ');
 
 -- THỨ TƯ (22/04/2026) - 6 dòng
 INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
 (27, 1, '2026-04-22', N'Đang làm việc'), (47, 1, '2026-04-22', N'Đang làm việc'),
 (28, 2, '2026-04-22', N'Đang làm việc'), (48, 2, '2026-04-22', N'Đang làm việc'),
-(29, 3, '2026-04-22', N'Đã kín lịch'),   (49, 3, '2026-04-22', N'Đang làm việc');
+(29, 2, '2026-04-22', N'Đã kín lịch'),   (49, 1, '2026-04-22', N'Đang làm việc');
 
 -- THỨ NĂM (23/04/2026) - 4 dòng
 INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, TrangThai) VALUES 
@@ -675,7 +674,7 @@ alter table BenhNhan
 CREATE TABLE PhongKham (
     Phong_ID INT IDENTITY(1,1) PRIMARY KEY,
     TenPhong NVARCHAR(50) NOT NULL,
-    TrangThai NVARCHAR(50) DEFAULT N'Trống' -- Các trạng thái: Trống, Đang khám, Bảo trì
+    TrangThai NVARCHAR(50)
 );
 go
 
@@ -836,11 +835,11 @@ alter table BacSi
 -- Thêm dữ liệu
 INSERT INTO ChuyenKhoa (TenChuyenKhoa) 
 VALUES
-(N'Nha khoa tổng quát'),
+(N'Khám & Chẩn đoán'),
+(N'Thẩm mỹ'),
 (N'Chỉnh nha'),
-(N'Nha khoa thẩm mỹ'),
-(N'Phẫu thuật & Implant'),
-(N'Nha khoa Trẻ em');
+(N'Phẫu thuật'),
+(N'Trẻ em');
 
 INSERT INTO BacSi_ChuyenKhoa (BacSi_ID, ChuyenKhoa_ID)
 VALUES 
@@ -1164,3 +1163,85 @@ WHERE DichVu_ID IN (1, 2, 7, 8, 17, 18, 19, 20);
 UPDATE ChiTietDichVu 
 SET SoLuong = 1 
 WHERE DichVu_ID IN (3, 4, 5, 6, 9, 10, 11, 12, 13, 14, 15, 16);
+
+-- XÓA KHÓA NGOẠI VÀ BẢNG BacSi_ChuyenKhoa
+ALTER TABLE BacSi_ChuyenKhoa DROP CONSTRAINT FK_BSCK_BacSi;
+ALTER TABLE BacSi_ChuyenKhoa DROP CONSTRAINT FK_BSCK_ChuyenKhoa;
+DROP TABLE BacSi_ChuyenKhoa;
+GO
+
+-- THÊM CỘT ChuyenKhoa_ID VÀO BẢNG BacSi
+ALTER TABLE BacSi ADD ChuyenKhoa_ID INT;
+GO
+
+-- CẬP NHẬT DỮ LIỆU CHUYÊN KHOA CHO TỪNG BÁC SĨ
+
+-- Nhóm 1: Nha khoa tổng quát (ID = 1)
+UPDATE BacSi SET ChuyenKhoa_ID = 1 WHERE BacSi_ID BETWEEN 1 AND 7;
+
+-- Nhóm 2: Chỉnh nha (ID = 2)
+UPDATE BacSi SET ChuyenKhoa_ID = 2 WHERE BacSi_ID BETWEEN 8 AND 11;
+
+-- Nhóm 3: Nha khoa thẩm mỹ (ID = 3)
+UPDATE BacSi SET ChuyenKhoa_ID = 3 WHERE BacSi_ID BETWEEN 12 AND 15;
+
+-- Nhóm 4: Phẫu thuật & Implant (ID = 4)
+UPDATE BacSi SET ChuyenKhoa_ID = 4 WHERE BacSi_ID BETWEEN 16 AND 18;
+
+-- Nhóm 5: Nha khoa Trẻ em (ID = 5)
+UPDATE BacSi SET ChuyenKhoa_ID = 5 WHERE BacSi_ID BETWEEN 19 AND 20;
+GO
+
+-- THIẾT LẬP RÀNG BUỘC NOT NULL VÀ KHÓA NGOẠI
+-- Ép kiểu NOT NULL để đảm bảo bác sĩ nào cũng phải có chuyên khoa
+ALTER TABLE BacSi ALTER COLUMN ChuyenKhoa_ID INT NOT NULL;
+GO
+
+-- Thêm khóa ngoại nối bảng BacSi với bảng ChuyenKhoa
+ALTER TABLE BacSi 
+ADD CONSTRAINT FK_BacSi_ChuyenKhoa FOREIGN KEY (ChuyenKhoa_ID) REFERENCES ChuyenKhoa(ChuyenKhoa_ID) ON DELETE CASCADE;
+GO
+
+-- Xóa trạng thái trong lịch làm việc
+alter table LichLamViec
+    drop column TrangThai
+
+-- Xóa PhongKham_DichVu
+Alter table PhongKham_DichVu
+    drop constraint FK_PKDV_Phong
+alter table PhongKham_DichVu
+    drop constraint FK_PKDV_DichVu
+drop table PhongKham_DichVu
+
+-- Xóa trạng thái phòng khám
+alter table PhongKham
+    drop constraint CK_PhongKham_TrangThai
+alter table PhongKham
+    drop column TrangThai
+
+-- Thêm Phong_ID vào LichHen
+ALTER TABLE LichHen
+ADD Phong_ID INT;
+GO
+
+-- Cập nhật ngẫu nhiên Phong_ID từ 1 đến 10 cho TẤT CẢ các lịch hẹn
+UPDATE LichHen
+SET Phong_ID = ABS(CHECKSUM(NEWID())) % 10 + 1
+WHERE Phong_ID IS NULL;
+GO
+
+-- Xóa Phong_ID ở PhieuKham
+alter table PhieuKham
+    drop constraint FK_PhieuKham_PhongKham
+alter table PhieuKham
+    drop column Phong_ID
+
+-- Thêm khóa ngoại từ LichHen đến PhongKham
+alter table LichHen
+    add constraint FK_LichHen_PhongKham foreign key(Phong_ID) references PhongKham(Phong_ID)
+
+-- Xóa BacSi_Id ở PhieuKham
+alter table PhieuKham
+    drop constraint FK_PhieuKham_BacSi
+alter table PhieuKham
+    drop column BacSi_ID

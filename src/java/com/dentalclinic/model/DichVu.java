@@ -8,10 +8,9 @@ public class DichVu {
     private double giaTien;
     private int thoiLuongDuKien;
     private int chuyenKhoaID;  // FK -> ChuyenKhoa
-
+    private boolean tinhTheoRang;
     // Đối tượng quan hệ
     private ChuyenKhoa chuyenKhoa;
-    private List<PhongKhamDichVu> danhSachPhongKham;
 
     private List<ChiTietLichHen> lichSuDatDichVu;
     private List<ChiTietDichVu> danhSachChiTietDichVu;
@@ -19,12 +18,13 @@ public class DichVu {
     public DichVu() {}
 
     public DichVu(int dichVuID, String tenDichVu, double giaTien, 
-                  int thoiLuongDuKien, int chuyenKhoaID) {
+                  int thoiLuongDuKien, int chuyenKhoaID, boolean tinhTheoRang) {
         this.dichVuID = dichVuID;
         this.tenDichVu = tenDichVu;
         this.giaTien = giaTien;
         this.thoiLuongDuKien = thoiLuongDuKien;
         this.chuyenKhoaID = chuyenKhoaID;
+        this.tinhTheoRang = tinhTheoRang;
     }
 
     public int getDichVuID() { return dichVuID; }
@@ -44,13 +44,12 @@ public class DichVu {
     public int getChuyenKhoaID() { return chuyenKhoaID; }
     public void setChuyenKhoaID(int chuyenKhoaID) { this.chuyenKhoaID = chuyenKhoaID; }
 
+    public boolean isTinhTheoRang(){return tinhTheoRang;}
+    public void setTinhTheoRang(boolean tinhTheoRang){this.tinhTheoRang = tinhTheoRang;}
+    
     public ChuyenKhoa getChuyenKhoa() { return chuyenKhoa; }
     public void setChuyenKhoa(ChuyenKhoa chuyenKhoa) { this.chuyenKhoa = chuyenKhoa; }
 
-    public List<PhongKhamDichVu> getDanhSachPhongKham() { return danhSachPhongKham; }
-    public void setDanhSachPhongKham(List<PhongKhamDichVu> danhSachPhongKham) { 
-        this.danhSachPhongKham = danhSachPhongKham; 
-    }
     public List<ChiTietLichHen> getLichSuDatDichVu() {
         return lichSuDatDichVu;
     }

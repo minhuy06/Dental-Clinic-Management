@@ -69,7 +69,7 @@
             <div class="service-grid" id="serviceGrid"></div>
             <div class="pagination" id="svcPagination"></div>
         </div>
-
+         
         <!-- ==================== TAB: LỊCH LÀM VIỆC ==================== -->
         <div class="tab-panel" id="panel-schedule">
             <!-- Stats -->
@@ -161,7 +161,7 @@
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>ID</th><th>Họ tên</th><th>Loại TK</th><th>Chuyên khoa</th><th>Số điện thoại</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Họ tên</th><th>Loại TK</th><th>Chuyên khoa</th><th>Số điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
                     <tbody id="accTableBody"></tbody>
                 </table>
             </div>
@@ -489,13 +489,11 @@
                     <div class="form-group" id="accSpecialtyGroup"><label>Chuyên khoa</label>
                         <select id="accSpecialty">
                             <option value="">-- Chọn chuyên khoa --</option>
-                            <option value="Răng tổng quát">Răng tổng quát</option>
-                            <option value="Chỉnh nha">Chỉnh nha</option>
-                            <option value="Phục hình">Phục hình</option>
-                            <option value="Thẩm mỹ nha">Thẩm mỹ nha</option>
-                            <option value="Phẫu thuật miệng">Phẫu thuật miệng</option>
-                            <option value="Nha chu">Nha chu</option>
-                            <option value="Răng trẻ em">Răng trẻ em</option>
+                            <option value="Răng tổng quát">Khám & Chẩn đoán</option>
+                            <option value="Chỉnh nha">Thẩm mỹ</option>
+                            <option value="Phục hình">Chỉnh nha</option>
+                            <option value="Thẩm mỹ nha">Phẫu thuật</option>
+                            <option value="Phẫu thuật miệng">Trẻ em</option>
                         </select>
                     </div>
                     <div class="form-group" id="accDegreeGroup"><label>Bằng cấp / Học vị</label>
