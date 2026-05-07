@@ -46,35 +46,31 @@ public class LichHenDAO {
     }
 
     // Lấy tất cả lịch hẹn cho Lễ tân (index.jsp)
-    public List<LichHen> getAllLichHen() {
-        List<LichHen> list = new ArrayList<>();
-        String sql = "SELECT lh.*, tkBN.HoTen AS TenBenhNhan " +
-                     "FROM LichHen lh " +
-                     "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-                     "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-                     "ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                LichHen lh = mapResultSetToLichHen(rs);
-
-                // 1. Tạo TaiKhoan chứa tên Bệnh nhân
-                TaiKhoan tkBn = new TaiKhoan();
-                tkBn.setHoTen(rs.getNString("TenBenhNhan"));
-
-                // 2. Tạo đối tượng BenhNhan và bỏ TaiKhoan vào
-                BenhNhan bn = new BenhNhan();
-                bn.setTaiKhoan(tkBn);
-
-                // 3. Gán BenhNhan vào LichHen
-                lh.setBenhNhan(bn); 
-
-                list.add(lh);
-            }
-        } catch (SQLException e) { e.printStackTrace(); }
-        return list;
-    }
+public List<LichHen> getAllLichHen() {
+    List<LichHen> list = new ArrayList<>();
+    String sql = "SELECT lh.*, tkBN.HoTen AS TenBenhNhan FROM LichHen lh " +
+                 "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
+                 "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
+                 "ORDER BY lh.NgayKham DESC";
+    try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            LichHen lh = mapResultSetToLichHen(rs);
+            
+            // QUAN TRỌNG: Phải khởi tạo đủ các lớp lồng nhau
+            TaiKhoan tk = new TaiKhoan();
+            tk.setHoTen(rs.getNString("TenBenhNhan"));
+            
+            BenhNhan bn = new BenhNhan();
+            bn.setTaiKhoan(tk); // Bỏ TaiKhoan vào BenhNhan
+            
+            lh.setBenhNhan(bn); // Bỏ BenhNhan vào LichHen
+            list.add(lh);
+        }
+    } catch (SQLException e) { e.printStackTrace(); }
+    return list;
+}
 
     // Lưu lịch hẹn mới (Fix lỗi N"" và kiểu dữ liệu)
     public int insertBooking(LichHen lh, List<Integer> dichVuIds) {

@@ -12,43 +12,46 @@ import javax.servlet.http.*;
 @WebServlet("/dat-lich")
 public class BookingServlet extends HttpServlet {
     
-    // Sử dụng Service thay vì gọi trực tiếp nhiều DAO
     private LichHenService lhService = new LichHenService();
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // 1. Thiết lập Tiếng Việt cho dữ liệu từ Form gửi lên
+        // 1. Thiết lập Tiếng Việt cho dữ liệu gửi lên từ Form
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
-        // 2. Kiểm tra đăng nhập (Lấy ID bệnh nhân từ session)
+        // 2. Lấy ID người dùng từ Session (ID của bảng BenhNhan)
         HttpSession session = request.getSession();
-        Integer benhNhanID = (Integer) session.getAttribute("userId"); 
+        Integer bnID = (Integer) session.getAttribute("benhNhanId"); 
         
-        if (benhNhanID == null) {
+        // Nếu chưa đăng nhập hoặc không tìm thấy ID bệnh nhân
+        if (bnID == null) {
             response.sendRedirect("login.jsp");
             return;
         }
 
-        // 3. Đọc dữ liệu từ Form JSP
-        String ngayStr = request.getParameter("ngayKham"); // Định dạng yyyy-MM-dd
-        String gioStr = request.getParameter("gioKham");   // Định dạng HH:mm
-        String ghiChu = request.getParameter("ghiChu");
-        String[] dichVuIds = request.getParameterValues("dichVu"); 
-
         try {
-            // 4. Tạo và đóng gói dữ liệu vào đối tượng Model
+            // 3. Đọc dữ liệu từ Form dat-lich.jsp
+            String ngayStr = request.getParameter("ngayKham"); // yyyy-MM-dd
+            String gioStr = request.getParameter("gioKham");   // HH:mm
+            String ghiChu = request.getParameter("ghiChu");
+            String[] dichVuIds = request.getParameterValues("dichVu"); 
+
+            // 4. Đóng gói vào đối tượng Model LichHen
             LichHen lh = new LichHen();
-            lh.setBenhNhanID(benhNhanID);
+            lh.setBenhNhanID(bnID);
             lh.setNgayKham(java.sql.Date.valueOf(ngayStr));
-            // Thêm ":00" để đúng định dạng HH:mm:ss của java.sql.Time
             lh.setGioKham(java.sql.Time.valueOf(gioStr + ":00"));
             lh.setGhiChu(ghiChu);
-            lh.setTrangThai("Chờ duyệt"); // Trạng thái mặc định
+            
+            // Trạng thái mặc định ban đầu
+            lh.setTrangThai("Chờ duyệt");
+            // Mặc định phòng chờ số 1 (Hoặc logic tự động của bạn)
+            lh.setPhongID(1);
 
-            // Chuyển mảng String ID sang List<Integer>
+            // Chuyển mảng String ID dịch vụ sang List<Integer>
             List<Integer> listDV = new ArrayList<>();
             if (dichVuIds != null) {
                 for (String id : dichVuIds) {
@@ -56,26 +59,34 @@ public class BookingServlet extends HttpServlet {
                 }
             }
 
-            // 5. Gọi Service xử lý (Service sẽ tự tìm bác sĩ rảnh và lưu vào DB)
+            // 5. Gọi Service xử lý logic (Tìm bác sĩ rảnh và lưu vào DB)
             String result = lhService.createBooking(lh, listDV);
 
             if ("SUCCESS".equals(result)) {
-                // Đặt lịch thành công, chuyển hướng đến trang thông báo
-                response.sendRedirect("booking-success.jsp");
+                // ĐẶT THÀNH CÔNG: Chuyển hướng sang trang hồ sơ cá nhân để xem kết quả
+                // Dùng Redirect để trang Hồ Sơ load lại dữ liệu mới nhất từ DB
+                response.sendRedirect(request.getContextPath() + "/ho-so");
             } else {
-                // Thất bại (hết bác sĩ, lỗi DB...), quay lại trang đặt lịch kèm thông báo lỗi
+                // THẤT BẠI: Quay lại trang đặt lịch kèm thông báo lỗi (Hết bác sĩ, trùng lịch...)
                 request.setAttribute("error", result);
-                request.getRequestDispatcher("booking.jsp").forward(request, response);
+                request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
             }
 
         } catch (IllegalArgumentException e) {
-            // Lỗi định dạng ngày giờ không khớp
-            request.setAttribute("error", "Định dạng ngày hoặc giờ không hợp lệ!");
-            request.getRequestDispatcher("booking.jsp").forward(request, response);
+            // Lỗi khi parse ngày tháng hoặc giờ
+            request.setAttribute("error", "Ngày hoặc giờ khám không hợp lệ!");
+            request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra trong quá trình xử lý!");
-            request.getRequestDispatcher("booking.jsp").forward(request, response);
+            request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
+            request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
         }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException {
+        // Nếu người dùng truy cập trực tiếp bằng link, chuyển về trang đặt lịch
+        response.sendRedirect("dat-lich.jsp");
     }
 }

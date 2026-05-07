@@ -8,19 +8,21 @@ import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 
-@WebServlet("/reception/dashboard")
+@WebServlet("/reception-dashboard") // Đây là đường dẫn (Link) để vào trang
 public class ReceptionServlet extends HttpServlet {
     private LichHenDAO lhDAO = new LichHenDAO();
 
+    @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
         
-        // Lấy toàn bộ lịch hẹn trong hệ thống
-        List<LichHen> allLichHen = lhDAO.getAllLichHen();
+        // 1. Lấy danh sách lịch hẹn
+        List<LichHen> list = lhDAO.getAllLichHen();
         
-        // Gửi List sang index.jsp (Dùng JSTL <c:forEach> để hiển thị)
-        request.setAttribute("listLichHen", allLichHen);
+        // 2. Gửi dữ liệu sang JSP
+        request.setAttribute("allLichHen", list);
         
-        request.getRequestDispatcher("/index.jsp").forward(request, response);
+        // 3. Mở file index.jsp (Giao diện lễ tân chuyên nghiệp)
+request.getRequestDispatcher("/reception/index.jsp").forward(request, response);
     }
 }

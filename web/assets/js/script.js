@@ -448,10 +448,6 @@ function updateStats() {
     let pending = appointments.filter(apt => apt.status === 'pending').length;
     let completed = appointments.filter(apt => apt.status === 'completed').length;
     
-    document.getElementById('totalAppointments').innerText = total;
-    document.getElementById('confirmedCount').innerText = confirmed;
-    document.getElementById('pendingCount').innerText = pending;
-    document.getElementById('completedCount').innerText = completed;
 }
 
 function filterAppointments() { renderAppointments(); }

@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -43,7 +44,7 @@
                     <h3>Tổng lịch hẹn</h3>
                     <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
                 </div>
-                <div class="stat-number" id="totalAppointments">0</div>
+                <div class="stat-number" id="totalAppointments">${allLichHen.size()}</div>
                 <div class="stat-change"><i class="fas fa-chart-line"></i> Tất cả lịch hẹn</div>
             </div>
             <div class="stat-card" onclick="filterByStatus('confirmed')" id="statConfirmed">
@@ -124,7 +125,53 @@
                         <th>Thao tác</th>
                     </tr>
                 </thead>
-                <tbody id="appointmentTableBody"></tbody>
+              <tbody id="appointmentTableBody">
+    <c:forEach var="lh" items="${allLichHen}">
+        <tr>
+            <td>${lh.gioKham}</td>
+            
+            <td>
+                <div class="patient-info">
+                    <div class="patient-name">${lh.benhNhan.taiKhoan.hoTen}</div>
+                </div>
+            </td>
+            
+            <td>${lh.bacSi.taiKhoan.hoTen}</td>
+            
+            <td>${lh.ghiChu}</td> <%-- Tạm thời để ghi chú hoặc danh sách dịch vụ --%>
+            
+            <td>Phòng 1</td> <%-- Thay bằng biến phòng nếu có trong DB --%>
+            
+            <td>
+                <span class="status-badge ${lh.trangThai == 'Chờ duyệt' ? 'pending' : 'confirmed'}">
+                    ${lh.trangThai}
+                </span>
+            </td>
+            
+            <td><span class="status-badge pending">Chưa thu</span></td>
+            
+            <td>
+                <div class="action-buttons">
+                    <button class="btn-action" onclick="viewDetail(${lh.lichHenID})" title="Xem chi tiết">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn-action" onclick="approveAppointment(${lh.lichHenID})" title="Duyệt">
+                        <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    </c:forEach>
+    
+    <c:if test="${empty allLichHen}">
+        <tr>
+            <td colspan="8" style="text-align: center; padding: 20px;">
+                Không có lịch hẹn nào cần xử lý.
+            </td>
+        </tr>
+    </c:if>
+</tbody>
+                
             </table>
         </div>
     </div>
