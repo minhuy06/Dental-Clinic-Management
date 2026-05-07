@@ -258,8 +258,7 @@ var mockDataSource = {
         create: async function(payload) {
             await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
             var newId = accounts.length ? Math.max.apply(null, accounts.map(function(a){ return a.id; })) + 1 : 1;
-            var today = new Date().toISOString().split('T')[0];
-            accounts.push(Object.assign({id:newId, createdDate:today}, payload));
+            accounts.push(Object.assign({id:newId}, payload));
             return {success:true};
         },
         update: async function(payload) {
@@ -964,7 +963,6 @@ function renderAccounts() {
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
                 '<td style="font-size:0.82rem">' + specialty + '</td>' +
                 '<td>' + (a.phone || '—') + '</td>' +
-                '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
                 '<td onclick="event.stopPropagation()"><div class="action-btns">' +
                     '<button class="btn-action btn-edit" onclick="editAccount(' + a.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
@@ -1089,7 +1087,7 @@ async function saveAccount() {
     var prevSrc = document.getElementById('accAvatarPreview').src;
     var avatar = (prevSrc && prevSrc.indexOf('data:') === 0) ? prevSrc : (editingAccId ? (accounts.find(function(a){return a.id===editingAccId;})||{}).avatar||'' : '');
     var data = {
-        name: name, role: role, phone: phone, username: phone,
+        name: name, role: role, phone: phone,
         dob: document.getElementById('accDob').value,
         gender: document.getElementById('accGender').value,
         specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
