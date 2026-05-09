@@ -668,6 +668,194 @@ public class LichHenDAO {
         return list;
     }
 
+    public boolean updateTrangThai(int lichHenId, String trangThai) {
+        String sql = "UPDATE LichHen SET TrangThai = ? WHERE LichHen_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, trangThai);
+            ps.setInt(2, lichHenId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteById(int lichHenId) {
+        String sql = "DELETE FROM LichHen WHERE LichHen_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lichHenId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static class ReceptionBookingDetail {
+        public int lichHenId;
+        public int benhNhanId;
+        public int bacSiId;
+        public int phongId;
+        public Date ngayKham;
+        public Time gioKham;
+        public String ghiChu;
+        public String patientName;
+        public String patientPhone;
+        public List<Integer> dichVuIds = new ArrayList<>();
+    }
+
+    public ReceptionBookingDetail getReceptionDetailById(int lichHenId) {
+        String sql = "SELECT lh.LichHen_ID, lh.BenhNhan_ID, lh.BacSi_ID, lh.Phong_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, " +
+                     "tk.HoTen AS TenBenhNhan, tk.SoDienThoai AS SdtBenhNhan " +
+                     "FROM LichHen lh " +
+                     "JOIN BenhNhan bn ON bn.BenhNhan_ID = lh.BenhNhan_ID " +
+                     "JOIN TaiKhoan tk ON tk.TaiKhoan_ID = bn.TaiKhoan_ID " +
+                     "WHERE lh.LichHen_ID = ?";
+        ReceptionBookingDetail d = null;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lichHenId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    d = new ReceptionBookingDetail();
+                    d.lichHenId = rs.getInt("LichHen_ID");
+                    d.benhNhanId = rs.getInt("BenhNhan_ID");
+                    d.bacSiId = rs.getInt("BacSi_ID");
+                    d.phongId = rs.getInt("Phong_ID");
+                    d.ngayKham = rs.getDate("NgayKham");
+                    d.gioKham = rs.getTime("GioKham");
+                    d.ghiChu = rs.getNString("GhiChu");
+                    d.patientName = rs.getNString("TenBenhNhan");
+                    d.patientPhone = rs.getString("SdtBenhNhan");
+                }
+            }
+            if (d != null) {
+                try (PreparedStatement psDv = conn.prepareStatement("SELECT DichVu_ID FROM ChiTietLichHen WHERE LichHen_ID = ?")) {
+                    psDv.setInt(1, lichHenId);
+                    try (ResultSet rsDv = psDv.executeQuery()) {
+                        while (rsDv.next()) {
+                            d.dichVuIds.add(rsDv.getInt("DichVu_ID"));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return d;
+    }
+
+    public boolean updateBookingWithServices(LichHen lh, List<Integer> dichVuIds) {
+        String sqlUpdate = "UPDATE LichHen SET BenhNhan_ID = ?, BacSi_ID = ?, NgayKham = ?, GioKham = ?, GhiChu = ?, Phong_ID = ? WHERE LichHen_ID = ?";
+        String sqlDeleteDv = "DELETE FROM ChiTietLichHen WHERE LichHen_ID = ?";
+        String sqlInsertDv = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID) VALUES (?, ?)";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement psUp = conn.prepareStatement(sqlUpdate)) {
+                psUp.setInt(1, lh.getBenhNhanID());
+                psUp.setInt(2, lh.getBacSiID());
+                psUp.setDate(3, lh.getNgayKham());
+                psUp.setTime(4, lh.getGioKham());
+                psUp.setNString(5, lh.getGhiChu());
+                psUp.setInt(6, lh.getPhongID());
+                psUp.setInt(7, lh.getLichHenID());
+                if (psUp.executeUpdate() <= 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+            try (PreparedStatement psDel = conn.prepareStatement(sqlDeleteDv)) {
+                psDel.setInt(1, lh.getLichHenID());
+                psDel.executeUpdate();
+            }
+            if (dichVuIds != null && !dichVuIds.isEmpty()) {
+                try (PreparedStatement psIns = conn.prepareStatement(sqlInsertDv)) {
+                    for (Integer dv : dichVuIds) {
+                        psIns.setInt(1, lh.getLichHenID());
+                        psIns.setInt(2, dv);
+                        psIns.addBatch();
+                    }
+                    psIns.executeBatch();
+                }
+            }
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static class PaymentItem {
+        public String serviceName;
+        public int quantity;
+        public double unitPrice;
+        public double lineTotal;
+    }
+
+    public static class ReceptionPaymentDetail {
+        public int lichHenId;
+        public String patientName;
+        public String patientPhone;
+        public Date ngayKham;
+        public Time gioKham;
+        public String doctorName;
+        public List<PaymentItem> items = new ArrayList<>();
+        public double subtotal;
+    }
+
+    public ReceptionPaymentDetail getReceptionPaymentDetail(int lichHenId) {
+        String headSql = "SELECT lh.LichHen_ID, lh.NgayKham, lh.GioKham, " +
+                         "tkbn.HoTen AS TenBenhNhan, tkbn.SoDienThoai AS SdtBenhNhan, " +
+                         "tkbs.HoTen AS TenBacSi " +
+                         "FROM LichHen lh " +
+                         "JOIN BenhNhan bn ON bn.BenhNhan_ID = lh.BenhNhan_ID " +
+                         "JOIN TaiKhoan tkbn ON tkbn.TaiKhoan_ID = bn.TaiKhoan_ID " +
+                         "JOIN BacSi bs ON bs.BacSi_ID = lh.BacSi_ID " +
+                         "JOIN TaiKhoan tkbs ON tkbs.TaiKhoan_ID = bs.TaiKhoan_ID " +
+                         "WHERE lh.LichHen_ID = ?";
+        String itemSql = "SELECT dv.TenDichVu, ISNULL(ctlh.SoLuong, 1) AS SoLuong, dv.GiaTien " +
+                         "FROM ChiTietLichHen ctlh " +
+                         "JOIN DichVu dv ON dv.DichVu_ID = ctlh.DichVu_ID " +
+                         "WHERE ctlh.LichHen_ID = ?";
+        ReceptionPaymentDetail d = null;
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement psHead = conn.prepareStatement(headSql);
+             PreparedStatement psItem = conn.prepareStatement(itemSql)) {
+            psHead.setInt(1, lichHenId);
+            try (ResultSet rs = psHead.executeQuery()) {
+                if (rs.next()) {
+                    d = new ReceptionPaymentDetail();
+                    d.lichHenId = rs.getInt("LichHen_ID");
+                    d.ngayKham = rs.getDate("NgayKham");
+                    d.gioKham = rs.getTime("GioKham");
+                    d.patientName = rs.getNString("TenBenhNhan");
+                    d.patientPhone = rs.getString("SdtBenhNhan");
+                    d.doctorName = rs.getNString("TenBacSi");
+                }
+            }
+            if (d == null) return null;
+            psItem.setInt(1, lichHenId);
+            try (ResultSet rsItem = psItem.executeQuery()) {
+                while (rsItem.next()) {
+                    PaymentItem item = new PaymentItem();
+                    item.serviceName = rsItem.getNString("TenDichVu");
+                    item.quantity = rsItem.getInt("SoLuong");
+                    item.unitPrice = rsItem.getDouble("GiaTien");
+                    item.lineTotal = item.unitPrice * item.quantity;
+                    d.subtotal += item.lineTotal;
+                    d.items.add(item);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return d;
+    }
+
 }
 
 

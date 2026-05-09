@@ -1,5 +1,7 @@
 package com.dentalclinic.controller;
 
+import com.dentalclinic.dao.DichVuDAO;
+import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.LichHen;
 import com.dentalclinic.service.LichHenService;
 import java.io.IOException;
@@ -7,12 +9,47 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/dat-lich")
 public class BookingServlet extends HttpServlet {
     
-    private LichHenService lhService = new LichHenService();
+    private final LichHenService lhService = new LichHenService();
+    private final DichVuDAO dichVuDAO = new DichVuDAO();
+
+    private static String jsonEscape(String raw) {
+        if (raw == null) return "";
+        return raw.replace("\\", "\\\\")
+                  .replace("\"", "\\\"")
+                  .replace("\r", "\\r")
+                  .replace("\n", "\\n")
+                  .replace("\t", "\\t");
+    }
+
+    private static String buildServiceListJson(List<DichVu> services) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        for (int i = 0; i < services.size(); i++) {
+            DichVu dv = services.get(i);
+            if (i > 0) sb.append(",");
+            sb.append("{")
+              .append("\"id\":").append(dv.getDichVuID()).append(",")
+              .append("\"name\":\"").append(jsonEscape(dv.getTenDichVu())).append("\",")
+              .append("\"desc\":\"").append(jsonEscape(dv.getTenDichVu())).append("\",")
+              .append("\"time\":\"").append(dv.getThoiLuongDuKien()).append(" phút\",")
+              .append("\"price\":").append((long) dv.getGiaTien()).append(",")
+              .append("\"cat\":\"all\",")
+              .append("\"perUnit\":").append(dv.isTinhTheoRang());
+            if (dv.isTinhTheoRang()) {
+                sb.append(",\"unit\":\"răng\"");
+            }
+            sb.append("}");
+        }
+        sb.append("]");
+        return sb.toString();
+    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -21,16 +58,6 @@ public class BookingServlet extends HttpServlet {
         // 1. Thiết lập Tiếng Việt cho dữ liệu gửi lên từ Form
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
-
-        // 2. Lấy ID người dùng từ Session (ID của bảng BenhNhan)
-        HttpSession session = request.getSession();
-        Integer bnID = (Integer) session.getAttribute("benhNhanId"); 
-        
-        // Nếu chưa đăng nhập hoặc không tìm thấy ID bệnh nhân
-        if (bnID == null) {
-            response.sendRedirect("login.jsp");
-            return;
-        }
 
         try {
             // 3. Đọc dữ liệu từ Form dat-lich.jsp
@@ -41,13 +68,13 @@ public class BookingServlet extends HttpServlet {
 
             // 4. Đóng gói vào đối tượng Model LichHen
             LichHen lh = new LichHen();
-            lh.setBenhNhanID(bnID);
+            lh.setBenhNhanID(1);
             lh.setNgayKham(java.sql.Date.valueOf(ngayStr));
             lh.setGioKham(java.sql.Time.valueOf(gioStr + ":00"));
             lh.setGhiChu(ghiChu);
             
             // Trạng thái mặc định ban đầu
-            lh.setTrangThai("Chờ duyệt");
+            lh.setTrangThai("Chờ xác nhận");
             // Mặc định phòng chờ số 1 (Hoặc logic tự động của bạn)
             lh.setPhongID(1);
 
@@ -63,30 +90,29 @@ public class BookingServlet extends HttpServlet {
             String result = lhService.createBooking(lh, listDV);
 
             if ("SUCCESS".equals(result)) {
-                // ĐẶT THÀNH CÔNG: Chuyển hướng sang trang hồ sơ cá nhân để xem kết quả
-                // Dùng Redirect để trang Hồ Sơ load lại dữ liệu mới nhất từ DB
-                response.sendRedirect(request.getContextPath() + "/ho-so");
+                response.sendRedirect(request.getContextPath() + "/dat-lich?booked=1");
             } else {
-                // THẤT BẠI: Quay lại trang đặt lịch kèm thông báo lỗi (Hết bác sĩ, trùng lịch...)
                 request.setAttribute("error", result);
-                request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
+                request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
+                request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
             }
 
         } catch (IllegalArgumentException e) {
-            // Lỗi khi parse ngày tháng hoặc giờ
             request.setAttribute("error", "Ngày hoặc giờ khám không hợp lệ!");
-            request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
+            request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
+            request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
         } catch (Exception e) {
             e.printStackTrace();
             request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            request.getRequestDispatcher("dat-lich.jsp").forward(request, response);
+            request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
+            request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
         }
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException {
-        // Nếu người dùng truy cập trực tiếp bằng link, chuyển về trang đặt lịch
-        response.sendRedirect("dat-lich.jsp");
+        request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
+        request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
     }
 }

@@ -192,20 +192,39 @@
             
             <td>
                 <c:set var="badgeClass" value="status-pending"/>
+                <c:set var="statusLabel" value="${lh.trangThai}"/>
                 <c:choose>
                     <c:when test="${lh.trangThai eq 'Đã hủy'}"><c:set var="badgeClass" value="status-cancelled"/></c:when>
                     <c:when test="${lh.trangThai eq 'Đã thanh toán'}"><c:set var="badgeClass" value="rcv-status-settled"/></c:when>
                     <c:when test="${lh.trangThai eq 'Hoàn thành'}"><c:set var="badgeClass" value="status-completed"/></c:when>
                     <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã đến'}"><c:set var="badgeClass" value="status-confirmed"/></c:when>
-                    <c:when test="${lh.trangThai eq 'Chờ duyệt' or lh.trangThai eq 'Chờ xác nhận'}"><c:set var="badgeClass" value="status-pending"/></c:when>
+                    <c:when test="${lh.trangThai eq 'Chờ duyệt' or lh.trangThai eq 'Chờ xác nhận'}">
+                        <c:set var="badgeClass" value="status-pending"/>
+                        <c:set var="statusLabel" value="Chờ duyệt"/>
+                    </c:when>
                 </c:choose>
-                <span class="status-badge ${badgeClass}">${lh.trangThai}</span>
+                <div class="status-dropdown">
+                    <span class="status-badge ${badgeClass}" onclick="toggleReceptionStatusMenu(${lh.lichHenID})">${statusLabel}</span>
+                    <div class="status-menu" id="statusMenu_${lh.lichHenID}">
+                        <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'pending')">
+                            <i class="fas fa-hourglass-half" style="color:#f59e0b;"></i> Chờ duyệt
+                        </div>
+                        <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'approved')">
+                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Đã duyệt
+                        </div>
+                    </div>
+                </div>
             </td>
             
             <td>
                 <c:choose>
                     <c:when test="${lh.trangThai eq 'Đã thanh toán'}">
                         <span class="rcv-pay-pill rcv-pay-pill--done"><i class="fas fa-sack-dollar"></i> Đã thu</span>
+                    </c:when>
+                    <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã đến'}">
+                        <button class="btn-payment" onclick="openReceptionPaymentModal(${lh.lichHenID})">
+                            <i class="fas fa-credit-card"></i> Thanh toán
+                        </button>
                     </c:when>
                     <c:otherwise>
                         <span class="rcv-pay-pill rcv-pay-pill--open"><i class="fas fa-hourglass-half"></i> Chưa thu</span>
@@ -218,8 +237,8 @@
                     <button class="btn-action" onclick="viewDetail(${lh.lichHenID})" title="Xem chi tiết">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action" onclick="approveAppointment(${lh.lichHenID})" title="Duyệt">
-                        <i class="fas fa-check"></i>
+                    <button class="btn-action" onclick="deleteReceptionAppointment(${lh.lichHenID})" title="Xóa lịch hẹn">
+                        <i class="fas fa-trash"></i>
                     </button>
                 </div>
             </td>
@@ -300,11 +319,9 @@
                             <label>Phòng khám *</label>
                             <select id="room" required>
                                 <option value="">Chọn phòng</option>
-                                <option value="Phòng 1">Phòng 1 (Tổng quát)</option>
-                                <option value="Phòng 2">Phòng 2 (Chỉnh nha)</option>
-                                <option value="Phòng 3">Phòng 3 (Phục hình)</option>
-                                <option value="Phòng 4">Phòng 4 (Phẫu thuật)</option>
-                                <option value="Phòng 5">Phòng 5 (VIP)</option>
+                                <c:forEach var="phong" items="${danhSachPhongKham}">
+                                    <option value="${phong.phongID}">${fn:escapeXml(phong.tenPhong)}</option>
+                                </c:forEach>
                             </select>
                         </div>
                     </div>
@@ -423,6 +440,8 @@
             loc: '<c:out value="${rcvLoc}"/>',
             histTotal: <c:choose><c:when test="${receptionHistBanner eq true}">true</c:when><c:otherwise>false</c:otherwise></c:choose>
         };
+        window.SERVICE_LIST_FROM_DB = <c:out value="${empty serviceListJson ? '[]' : serviceListJson}" escapeXml="false"/>;
+        window.ROOM_LIST_FROM_DB = <c:out value="${empty roomListJson ? '[]' : roomListJson}" escapeXml="false"/>;
     </script>
     <style>
         body#receptionDashboardPage .reception-toolbar,

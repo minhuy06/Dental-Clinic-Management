@@ -46,4 +46,73 @@ public class BenhNhanDAO {
         }
         return list;
     }
+
+    public int resolveOrCreateDeskPatient(String hoTen, String soDienThoai) {
+        String ten = hoTen == null ? "" : hoTen.trim();
+        String sdt = soDienThoai == null ? "" : soDienThoai.trim();
+        if (ten.isEmpty() || sdt.isEmpty()) return -1;
+
+        String findSql = "SELECT bn.BenhNhan_ID, tk.TaiKhoan_ID FROM BenhNhan bn " +
+                         "JOIN TaiKhoan tk ON tk.TaiKhoan_ID = bn.TaiKhoan_ID " +
+                         "WHERE tk.SoDienThoai = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(findSql)) {
+            ps.setString(1, sdt);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int taiKhoanId = rs.getInt("TaiKhoan_ID");
+                    int benhNhanId = rs.getInt("BenhNhan_ID");
+                    try (PreparedStatement ups = conn.prepareStatement("UPDATE TaiKhoan SET HoTen = ? WHERE TaiKhoan_ID = ?")) {
+                        ups.setNString(1, ten);
+                        ups.setInt(2, taiKhoanId);
+                        ups.executeUpdate();
+                    }
+                    return benhNhanId;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        String insertTk = "INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai, HoTen) VALUES (?, ?, N'Bệnh nhân', N'Hoạt động', ?)";
+        String insertBn = "INSERT INTO BenhNhan (TaiKhoan_ID) VALUES (?)";
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement psTk = conn.prepareStatement(insertTk, Statement.RETURN_GENERATED_KEYS)) {
+                psTk.setString(1, sdt);
+                psTk.setString(2, "123456");
+                psTk.setNString(3, ten);
+                psTk.executeUpdate();
+                int taiKhoanId = -1;
+                try (ResultSet keys = psTk.getGeneratedKeys()) {
+                    if (keys.next()) taiKhoanId = keys.getInt(1);
+                }
+                if (taiKhoanId <= 0) {
+                    conn.rollback();
+                    return -1;
+                }
+                try (PreparedStatement psBn = conn.prepareStatement(insertBn, Statement.RETURN_GENERATED_KEYS)) {
+                    psBn.setInt(1, taiKhoanId);
+                    psBn.executeUpdate();
+                    int benhNhanId = -1;
+                    try (ResultSet keysBn = psBn.getGeneratedKeys()) {
+                        if (keysBn.next()) benhNhanId = keysBn.getInt(1);
+                    }
+                    if (benhNhanId <= 0) {
+                        conn.rollback();
+                        return -1;
+                    }
+                    conn.commit();
+                    return benhNhanId;
+                }
+            } catch (SQLException ex) {
+                conn.rollback();
+                ex.printStackTrace();
+                return -1;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }

@@ -1,29 +1,28 @@
 package com.dentalclinic.controller;
 
-import com.dentalclinic.dao.LichLamViecDAO;
-import com.dentalclinic.model.LichLamViec;
+import com.dentalclinic.dao.AdminDashboardDAO;
 import java.io.IOException;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet("/admin/dashboard")
+@WebServlet({"/admin", "/admin/dashboard"})
 public class AdminServlet extends HttpServlet {
-    private LichLamViecDAO llvDAO = new LichLamViecDAO();
+    private final AdminDashboardDAO adminDAO = new AdminDashboardDAO();
 
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
+        request.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("UTF-8");
 
-        // 1. Lấy danh sách trực tiếp từ DAO
-        List<LichLamViec> list = llvDAO.getAllForAdmin();
+        request.setAttribute("adminServicesJson", adminDAO.getServicesJson());
+        request.setAttribute("adminAccountsJson", adminDAO.getAccountsJson());
+        request.setAttribute("adminShiftsJson", adminDAO.getShiftsJson());
+        request.setAttribute("adminRevenueJson", adminDAO.getRevenueJson());
 
-        // 2. Đẩy danh sách dưới dạng List vào request
-        request.setAttribute("listLich", list);
-
-        // 3. Chuyển hướng sang trang admin.jsp
-        request.getRequestDispatcher("/admin.jsp").forward(request, response);
+        request.getRequestDispatcher("/admin/admin.jsp").forward(request, response);
     }
 }

@@ -99,6 +99,22 @@ public class LichLamViecDAO {
         }
     }
 
+    public boolean update(LichLamViec lv) {
+        String sql = "UPDATE LichLamViec SET TaiKhoan_ID = ?, Ca_ID = ?, NgayLam = ?, Phong_ID = ? WHERE Lich_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lv.getTaiKhoanID());
+            ps.setInt(2, lv.getCaID());
+            ps.setDate(3, lv.getNgayLam());
+            ps.setInt(4, lv.getPhongID());
+            ps.setInt(5, lv.getLichID());
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     /**
      * Kiểm tra trùng lịch: Một bác sĩ không thể trực 2 nơi/2 ca trong cùng 1 thời điểm
      */
@@ -109,6 +125,23 @@ public class LichLamViecDAO {
             ps.setInt(1, taiKhoanID);
             ps.setDate(2, ngay);
             ps.setInt(3, caID);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isDuplicateExcludingId(int taiKhoanID, Date ngay, int caID, int lichID) {
+        String sql = "SELECT 1 FROM LichLamViec WHERE TaiKhoan_ID = ? AND NgayLam = ? AND Ca_ID = ? AND Lich_ID <> ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, taiKhoanID);
+            ps.setDate(2, ngay);
+            ps.setInt(3, caID);
+            ps.setInt(4, lichID);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }

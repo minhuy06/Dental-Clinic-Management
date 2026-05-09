@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -520,25 +521,11 @@
     </div>
 
     <script>
-    (function() {
-        var ctx = '${pageContext.request.contextPath}';
-
-        // ── DỊCH VỤ ──────────────────────────────────────────────────
-        var svcJson = '${not empty adminServicesJson ? adminServicesJson : ""}';
-        if (svcJson) { try { window.__ADMIN_SERVICES__ = JSON.parse(svcJson); } catch(e) { console.warn('adminServicesJson parse error', e); } }
-
-        // ── TÀI KHOẢN ────────────────────────────────────────────────
-        var accJson = '${not empty adminAccountsJson ? adminAccountsJson : ""}';
-        if (accJson) { try { window.__ADMIN_ACCOUNTS__ = JSON.parse(accJson); } catch(e) { console.warn('adminAccountsJson parse error', e); } }
-
-        // ── CA LÀM VIỆC ──────────────────────────────────────────────
-        var shiftJson = '${not empty adminShiftsJson ? adminShiftsJson : ""}';
-        if (shiftJson) { try { window.__ADMIN_SHIFTS__ = JSON.parse(shiftJson); } catch(e) { console.warn('adminShiftsJson parse error', e); } }
-
-        // ── DOANH THU ────────────────────────────────────────────────
-        var revJson = '${not empty adminRevenueJson ? adminRevenueJson : ""}';
-        if (revJson) { try { window.__ADMIN_REVENUE__ = JSON.parse(revJson); } catch(e) { console.warn('adminRevenueJson parse error', e); } }
-    })();
+        window.ADMIN_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.__ADMIN_SERVICES__ = <c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/>;
+        window.__ADMIN_ACCOUNTS__ = <c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/>;
+        window.__ADMIN_SHIFTS__ = <c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/>;
+        window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
     </script>
 
     <script src="${pageContext.request.contextPath}/assets/js/admin.js"></script>

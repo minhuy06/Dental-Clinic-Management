@@ -96,10 +96,10 @@ async function handleLogin(e) {
     }
     return false;
 }
-
 document.getElementById('loginAccount').addEventListener('input', function() {
     document.getElementById('accountGroup').classList.remove('error');
 });
 document.getElementById('loginPassword').addEventListener('input', function() {
     document.getElementById('passGroup').classList.remove('error');
 });
+

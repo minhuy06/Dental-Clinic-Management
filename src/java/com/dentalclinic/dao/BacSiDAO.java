@@ -7,6 +7,7 @@ import com.dentalclinic.model.ChuyenKhoa;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalTime;
 
 public class BacSiDAO {
 
@@ -72,22 +73,29 @@ public class BacSiDAO {
      * 2. Tìm danh sách ID bác sĩ rảnh dựa trên ngày và giờ.
      * Đây là logic chạy ngầm sau khi người dùng nhấn "Lưu lịch hẹn".
      */
-    public List<Integer> getAvailableDoctorIds(String ngayKham, String gioKham) {
+    public List<Integer> getAvailableDoctorIds(String ngayKham, String gioKham, int phongId) {
         List<Integer> availableIds = new ArrayList<>();
         
-        // Logic: 
-        // 1. Phải có lịch làm việc (LichLamViec) vào ngày đó.
-        // 2. Không được có lịch hẹn (LichHen) nào trùng giờ đó mà trạng thái chưa hủy.
-        String sql = "SELECT BacSi_ID FROM BacSi " +
-                     "WHERE BacSi_ID IN (SELECT BacSi_ID FROM LichLamViec WHERE NgayLamViec = ?) " +
-                     "AND BacSi_ID NOT IN (SELECT BacSi_ID FROM LichHen WHERE NgayKham = ? AND GioKham = ? AND TrangThai <> N'Đã hủy')";
+        String sql = "SELECT DISTINCT b.BacSi_ID FROM BacSi b " +
+                     "JOIN LichLamViec lv ON lv.TaiKhoan_ID = b.TaiKhoan_ID " +
+                     "JOIN CaLam cl ON cl.Ca_ID = lv.Ca_ID " +
+                     "WHERE lv.NgayLam = ? " +
+                     "AND ? >= cl.GioBatDau AND ? < cl.GioKetThuc " +
+                     "AND b.BacSi_ID NOT IN ( " +
+                     "   SELECT lh.BacSi_ID FROM LichHen lh " +
+                     "   WHERE lh.NgayKham = ? AND lh.GioKham = ? AND lh.TrangThai <> N'Đã hủy' " +
+                     ")";
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             
-            ps.setString(1, ngayKham);
-            ps.setString(2, ngayKham);
-            ps.setString(3, gioKham);
+            Date ngay = java.sql.Date.valueOf(ngayKham);
+            Time gio = java.sql.Time.valueOf(gioKham);
+            ps.setDate(1, ngay);
+            ps.setTime(2, gio);
+            ps.setTime(3, gio);
+            ps.setDate(4, ngay);
+            ps.setTime(5, gio);
             
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -98,6 +106,96 @@ public class BacSiDAO {
             e.printStackTrace();
         }
         return availableIds;
+    }
+
+    public boolean isDoctorAvailable(int bacSiId, String ngayKham, String gioKham, int phongId) {
+        String sql = "SELECT 1 FROM BacSi b " +
+                     "WHERE b.BacSi_ID = ? " +
+                     "AND NOT EXISTS ( " +
+                     "  SELECT 1 FROM LichHen lh " +
+                     "  WHERE lh.BacSi_ID = b.BacSi_ID AND lh.NgayKham = ? AND lh.GioKham = ? AND lh.TrangThai <> N'Đã hủy' " +
+                     ")";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            Date ngay = java.sql.Date.valueOf(ngayKham);
+            Time gio = java.sql.Time.valueOf(gioKham);
+            ps.setInt(1, bacSiId);
+            ps.setDate(2, ngay);
+            ps.setTime(3, gio);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public static class TimeRange {
+        private final LocalTime start;
+        private final LocalTime end;
+        public TimeRange(LocalTime start, LocalTime end) {
+            this.start = start;
+            this.end = end;
+        }
+        public LocalTime getStart() { return start; }
+        public LocalTime getEnd() { return end; }
+    }
+
+    public List<TimeRange> getDoctorShiftsOnDate(int bacSiId, String ngayKham) {
+        List<TimeRange> ranges = new ArrayList<>();
+        String sql = "SELECT cl.GioBatDau, cl.GioKetThuc " +
+                     "FROM BacSi b " +
+                     "JOIN LichLamViec lv ON lv.TaiKhoan_ID = b.TaiKhoan_ID " +
+                     "JOIN CaLam cl ON cl.Ca_ID = lv.Ca_ID " +
+                     "WHERE b.BacSi_ID = ? AND lv.NgayLam = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bacSiId);
+            ps.setDate(2, java.sql.Date.valueOf(ngayKham));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Time s = rs.getTime("GioBatDau");
+                    Time e = rs.getTime("GioKetThuc");
+                    if (s != null && e != null) {
+                        ranges.add(new TimeRange(s.toLocalTime(), e.toLocalTime()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ranges;
+    }
+
+    public List<TimeRange> getDoctorBusySlotsOnDate(int bacSiId, String ngayKham) {
+        List<TimeRange> ranges = new ArrayList<>();
+        String sql = "SELECT lh.GioKham AS StartTime, " +
+                     "DATEADD(MINUTE, ISNULL(( " +
+                     "   SELECT SUM(ISNULL(dv.ThoiLuongDuKien, 30) * ISNULL(ctlh.SoLuong, 1)) " +
+                     "   FROM ChiTietLichHen ctlh " +
+                     "   JOIN DichVu dv ON dv.DichVu_ID = ctlh.DichVu_ID " +
+                     "   WHERE ctlh.LichHen_ID = lh.LichHen_ID " +
+                     "), 30) + 15, CAST(lh.GioKham AS DATETIME)) AS EndTime " +
+                     "FROM LichHen lh " +
+                     "WHERE lh.BacSi_ID = ? AND lh.NgayKham = ? AND lh.TrangThai <> N'Đã hủy'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bacSiId);
+            ps.setDate(2, java.sql.Date.valueOf(ngayKham));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Time start = rs.getTime("StartTime");
+                    Timestamp end = rs.getTimestamp("EndTime");
+                    if (start != null && end != null) {
+                        ranges.add(new TimeRange(start.toLocalTime(), end.toLocalDateTime().toLocalTime()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ranges;
     }
 
     /**
