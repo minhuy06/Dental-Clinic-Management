@@ -6,10 +6,7 @@ import java.util.List; // Phục vụ cho List<ChiTietDichVu>
 public class PhieuKham {
     // --- Các thuộc tính cơ bản (Dùng để thao tác DB) ---
     private int phieuKhamID;      // Khớp cột PhieuKham_ID (PK)
-    private int lichHenID;        // Khớp cột LichHen_ID (FK)
-    private int bacSiID;          // Khớp cột BacSi_ID (FK)
-    private int phongID;          // Khớp cột Phong_ID (FK)
-    
+    private int lichHenID;        // Khớp cột LichHen_ID (FK)    
     private String lyDoKham;      // Khớp cột LyDoKham
     private String chanDoan;      // Khớp cột ChanDoan
     private String ghiChu;        // Khớp cột GhiChu
@@ -20,7 +17,6 @@ public class PhieuKham {
     private BacSi bacSi;          // Bác sĩ phụ trách chính
     private PhongKham phongKham;  // Phòng thực hiện khám
 
-    // 💡 Bổ sung đặc biệt: Một Phiếu khám sẽ có NHIỀU Chi tiết dịch vụ (Tẩy trắng, Nhổ răng...)
     private List<ChiTietDichVu> danhSachDichVu; 
     // Constructor mặc định
     public PhieuKham() {}
@@ -30,8 +26,6 @@ public class PhieuKham {
                      , String chanDoan, String ghiChu, Timestamp ngayTao) {
         this.phieuKhamID = phieuKhamID;
         this.lichHenID = lichHenID;
-        this.bacSiID = bacSiID;
-        this.phongID = phongID;
         this.lyDoKham = lyDoKham;
         this.chanDoan = chanDoan;
         this.ghiChu = ghiChu;
@@ -45,12 +39,6 @@ public class PhieuKham {
 
     public int getLichHenID() { return lichHenID; }
     public void setLichHenID(int lichHenID) { this.lichHenID = lichHenID; }
-
-    public int getBacSiID() { return bacSiID; }
-    public void setBacSiID(int bacSiID) { this.bacSiID = bacSiID; }
-
-    public int getPhongID() { return phongID; }
-    public void setPhongID(int phongID) { this.phongID = phongID; }
 
     public String getLyDoKham() { return lyDoKham; }
     public void setLyDoKham(String lyDoKham) { this.lyDoKham = lyDoKham; }

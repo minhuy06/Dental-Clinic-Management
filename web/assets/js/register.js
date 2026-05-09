@@ -4,6 +4,47 @@ function togglePass(id, btn) {
     btn.textContent = i.type === 'password' ? '👁' : '🙈';
 }
 
+var REGISTER_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: (window.CONTEXT_PATH || ''),
+    MOCK_DELAY_MS: 120
+};
+
+function registerDelay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+async function registerRequest(url, bodyParams) {
+    var res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: bodyParams.toString()
+    });
+    return res.text();
+}
+
+var registerMockApi = {
+    register: async function(formData) {
+        await registerDelay(REGISTER_CONFIG.MOCK_DELAY_MS);
+        return 'SUCCESS';
+    },
+    verifyOtp: async function(formData) {
+        await registerDelay(REGISTER_CONFIG.MOCK_DELAY_MS);
+        return formData.get('txtOTP') === '123456' ? 'SUCCESS' : 'FAILED';
+    }
+};
+
+var registerApi = {
+    register: function(formData) {
+        return registerRequest('../RegisterServlet', formData);
+    },
+    verifyOtp: function(formData) {
+        return registerRequest('../VerifyOTPServlet', formData);
+    }
+};
+
+var registerDataSource = REGISTER_CONFIG.USE_MOCK ? registerMockApi : registerApi;
+
 function checkRegStrength(p) {
     var bar = document.getElementById('regStrengthBar');
     var s = 0;
@@ -46,7 +87,7 @@ function startOtpTimer() {
 
 // === DANG KY - GOI RegisterServlet ===
 
-function handleRegister(e) {
+async function handleRegister(e) {
     e.preventDefault();
     var ok = true;
 
@@ -58,28 +99,15 @@ function handleRegister(e) {
         document.getElementById('nameGroup').classList.remove('error');
     }
 
-    // Kiem tra SDT + Email (phai co it nhat 1)
+    // Kiem tra SDT (bat buoc)
     var phone = document.getElementById('regPhone').value.trim();
-    var email = document.getElementById('regEmail').value.trim();
-    var hasContact = false;
     document.getElementById('phoneGroup').classList.remove('error');
-    document.getElementById('emailGroup').classList.remove('error');
-    document.getElementById('contactError').style.display = 'none';
 
-    if (phone) {
-        if (!/^(0[0-9]{9})$/.test(phone)) {
-            document.getElementById('phoneGroup').classList.add('error');
-            ok = false;
-        } else hasContact = true;
-    }
-    if (email) {
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            document.getElementById('emailGroup').classList.add('error');
-            ok = false;
-        } else hasContact = true;
-    }
-    if (!hasContact) {
-        document.getElementById('contactError').style.display = 'block';
+    if (!phone) {
+        document.getElementById('phoneGroup').classList.add('error');
+        ok = false;
+    } else if (!/^(0[0-9]{9})$/.test(phone)) {
+        document.getElementById('phoneGroup').classList.add('error');
         ok = false;
     }
 
@@ -120,13 +148,8 @@ function handleRegister(e) {
         formData.append('txtSDT', phone);
         formData.append('txtMatKhau', pass);
 
-        fetch('../RegisterServlet', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: formData.toString()
-        })
-        .then(function(response) { return response.text(); })
-        .then(function(result) {
+        try {
+            var result = await registerDataSource.register(formData);
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
             if (result.trim() === 'SUCCESS') {
@@ -136,13 +159,12 @@ function handleRegister(e) {
             } else {
                 alert('Lỗi: Không thể gửi SMS. Hãy kiểm tra lại số điện thoại!');
             }
-        })
-        .catch(function(err) {
-            console.error(err);
+        } catch (err) {
+            console.error('[register] submit error:', err);
             alert('Lỗi kết nối đến máy chủ!');
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
-        });
+        }
     }
 
     return false;
@@ -150,7 +172,7 @@ function handleRegister(e) {
 
 // === XAC THUC OTP - GOI VerifyOTPServlet ===
 
-function verifyOtp() {
+async function verifyOtp() {
     var code = '';
     document.querySelectorAll('.otp-box').forEach(function(b) { code += b.value; });
 
@@ -168,13 +190,8 @@ function verifyOtp() {
     var formData = new URLSearchParams();
     formData.append('txtOTP', code);
 
-    fetch('../VerifyOTPServlet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: formData.toString()
-    })
-    .then(function(response) { return response.text(); })
-    .then(function(result) {
+    try {
+        var result = await registerDataSource.verifyOtp(formData);
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
         if (result.trim() === 'SUCCESS') {
@@ -188,11 +205,10 @@ function verifyOtp() {
             boxes.forEach(function(b) { b.value = ''; });
             boxes[0].focus();
         }
-    })
-    .catch(function(err) {
-        console.error(err);
+    } catch (err) {
+        console.error('[register] verify otp error:', err);
         alert('Lỗi kết nối đến máy chủ!');
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
-    });
+    }
 }
