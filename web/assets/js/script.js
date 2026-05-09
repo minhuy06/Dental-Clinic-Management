@@ -38,6 +38,10 @@ let selectedServices = [];
 let currentStatusFilter = 'all';
 let currentPaymentAppointment = null;
 
+function isReceptionDashboard() {
+    return document.body && document.body.id === 'receptionDashboardPage';
+}
+
 // ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
 let APPOINTMENT_CONFIG = {
     USE_MOCK: true,
@@ -157,10 +161,66 @@ async function loadServicesFromServer() {
 }
 
 async function loadAppointmentsFromServer() {
+    if (isReceptionDashboard()) return;
     const list = await withDataGuard(() => dataSource.listAppointments());
     if (!list) return;
     appointments = normalizeList(list);
     renderAppointments();
+}
+
+function applyReceptionTableFilters() {
+    const doctor = document.getElementById('filterDoctor')?.value || '';
+    const searchRaw = document.getElementById('searchInput')?.value || '';
+    const search = searchRaw.toLowerCase().trim();
+    document.querySelectorAll('#appointmentTableBody tr[data-lh-id]').forEach(tr => {
+        let ok = true;
+        if (!isReceptionDashboard() && currentStatusFilter !== 'all' && tr.dataset.status !== currentStatusFilter) ok = false;
+        if (doctor && String(tr.dataset.bacsiId) !== String(doctor)) ok = false;
+        if (search) {
+            const pn = (tr.dataset.patientName || '').toLowerCase();
+            const ph = String(tr.dataset.patientPhone || '').replace(/\s/g, '');
+            const term = search.replace(/\s/g, '');
+            if (!pn.includes(search) && !ph.includes(term)) ok = false;
+        }
+        tr.style.display = ok ? '' : 'none';
+    });
+}
+
+/** URL lễ tân: thẻ thống kê không gắn view=tuần; loc≠all chỉ ngày + loc; Tuần/Tháng chỉ khi loc=all không hist. */
+function buildReceptionDashboardUrl(selectedYmd, ctx) {
+    if (!ctx || !ctx.baseUrl) return '';
+    const ngay = encodeURIComponent(selectedYmd);
+    const rawLoc = (ctx.loc == null ? '' : String(ctx.loc)).trim().toLowerCase();
+    const locKey = rawLoc === '' ? 'all' : rawLoc;
+    const loc = encodeURIComponent(locKey);
+    let href = `${ctx.baseUrl}?ngay=${ngay}&loc=${loc}`;
+    const isAllLoc = locKey === 'all';
+    if (!isAllLoc) return href;
+    if (ctx.histTotal === true || ctx.histTotal === 'true') {
+        href += '&hist=1';
+        return href;
+    }
+    href += '&view=' + encodeURIComponent(ctx.viewMode || 'day');
+    return href;
+}
+
+function shiftReceptionDashboardDate(delta) {
+    const ctx = window.RECEPTION_CONTEXT;
+    if (!ctx || !ctx.baseUrl || !ctx.selectedDate) return;
+    const d = new Date(ctx.selectedDate + 'T12:00:00');
+    let vm = ctx.viewMode || 'day';
+    if (ctx.loc === 'all' && (ctx.histTotal === true || ctx.histTotal === 'true')) {
+        vm = 'day';
+    }
+    if (vm === 'day') d.setDate(d.getDate() + delta);
+    else if (vm === 'week') d.setDate(d.getDate() + delta * 7);
+    else if (vm === 'month') d.setMonth(d.getMonth() + delta);
+    else if (vm === 'year') d.setFullYear(d.getFullYear() + delta);
+    else d.setDate(d.getDate() + delta);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    window.location.href = buildReceptionDashboardUrl(`${y}-${m}-${day}`, ctx);
 }
 
 // ==================== HÀM TIỆN ÍCH ====================
@@ -270,6 +330,17 @@ function isInMonth(dateStr, monthDates) { return monthDates.includes(dateStr); }
 
 // ==================== QUẢN LÝ TRẠNG THÁI ====================
 function filterByStatus(status) {
+    if (isReceptionDashboard()) {
+        const ctx = window.RECEPTION_CONTEXT;
+        if (!ctx || !ctx.baseUrl) return;
+        const nm = ctx.selectedDate;
+        const nextCtx = Object.assign({}, ctx, {
+            loc: status === 'all' ? 'all' : status,
+            histTotal: status === 'all'
+        });
+        window.location.href = buildReceptionDashboardUrl(nm, nextCtx);
+        return;
+    }
     currentStatusFilter = status;
     document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
     if (status === 'all') document.getElementById('statAll').classList.add('active');
@@ -367,6 +438,7 @@ async function confirmPayment() {
 
 // ==================== HIỂN THỊ DỮ LIỆU ====================
 function renderAppointments() {
+    if (isReceptionDashboard()) return;
     let filterDoctor = document.getElementById('filterDoctor')?.value || '';
     let searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
     
@@ -450,10 +522,20 @@ function updateStats() {
     
 }
 
-function filterAppointments() { renderAppointments(); }
+function filterAppointments() {
+    if (isReceptionDashboard()) {
+        applyReceptionTableFilters();
+        return;
+    }
+    renderAppointments();
+}
 
 // ==================== ĐIỀU KHIỂN NGÀY THÁNG ====================
 function changeDate(delta) {
+    if (isReceptionDashboard()) {
+        shiftReceptionDashboardDate(delta);
+        return;
+    }
     if (currentView === 'day') {
         currentDate.setDate(currentDate.getDate() + delta);
     } else if (currentView === 'week') {
@@ -466,6 +548,8 @@ function changeDate(delta) {
 }
 
 function updateDateDisplay() {
+    const cdEl = document.getElementById('currentDate');
+    if (cdEl && cdEl.dataset.serverFixed === '1') return;
     let displayText = '';
     if (currentView === 'day') {
         displayText = formatDisplayDate(currentDate);
@@ -474,7 +558,8 @@ function updateDateDisplay() {
     } else if (currentView === 'month') {
         displayText = formatMonthYear(currentDate);
     }
-    document.getElementById('currentDate').innerText = displayText;
+    const out = document.getElementById('currentDate');
+    if (out) out.innerText = displayText;
 }
 
 function goToday() {
@@ -714,12 +799,30 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function viewDetail(id) {
+    showToast('Chi tiết lịch hẹn #' + id + ' (chưa có API chi tiết).', 'info');
+}
+
+function approveAppointment(id) {
+    showToast('Duyệt lịch #' + id + ' — vui lòng kết nối servlet cập nhật trạng thái.', 'info');
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     console.info('[script.js] mode:', APPOINTMENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    if (isReceptionDashboard() && window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.selectedDate) {
+        currentDate = new Date(window.RECEPTION_CONTEXT.selectedDate + 'T12:00:00');
+        currentView = 'day';
+    }
     updateDateDisplay();
     loadServicesFromServer();
-    loadAppointmentsFromServer();
-    filterByStatus('all');
+    if (!isReceptionDashboard()) {
+        loadAppointmentsFromServer();
+    }
+    if (isReceptionDashboard()) {
+        applyReceptionTableFilters();
+    } else {
+        filterByStatus('all');
+    }
     
     let today = new Date();
     let todayStr = formatDate(today);
@@ -734,7 +837,41 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (prevDayBtn) prevDayBtn.onclick = () => changeDate(-1);
     if (nextDayBtn) nextDayBtn.onclick = () => changeDate(1);
-    if (todayBtn) todayBtn.onclick = goToday;
+    if (todayBtn) {
+        if (isReceptionDashboard()) {
+            const panel = document.getElementById('receptionCalendarPanel');
+            const pick = document.getElementById('receptionDatePick');
+            const applyBtn = document.getElementById('receptionCalendarApply');
+            todayBtn.onclick = (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (!panel) return;
+                const open = panel.style.display !== 'none';
+                panel.style.display = open ? 'none' : 'block';
+                if (!open && pick && window.RECEPTION_CONTEXT) pick.value = window.RECEPTION_CONTEXT.selectedDate;
+            };
+            if (applyBtn) {
+                applyBtn.onclick = () => {
+                    const v = pick && pick.value;
+                    if (!v) {
+                        showToast('Vui lòng chọn ngày', 'error');
+                        return;
+                    }
+                    const ctx = window.RECEPTION_CONTEXT;
+                    if (!ctx) return;
+                    window.location.href = buildReceptionDashboardUrl(v, ctx);
+                };
+            }
+            document.addEventListener('click', (e) => {
+                if (!panel || panel.style.display === 'none') return;
+                if (todayBtn.contains(e.target)) return;
+                if (panel.contains(e.target)) return;
+                panel.style.display = 'none';
+            });
+        } else {
+            todayBtn.onclick = goToday;
+        }
+    }
     if (addBtn) addBtn.onclick = openAddModal;
     
     // View options

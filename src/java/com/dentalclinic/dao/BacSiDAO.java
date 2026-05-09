@@ -16,24 +16,56 @@ public class BacSiDAO {
      */
     public List<BacSi> getAllForDisplay() {
         List<BacSi> list = new ArrayList<>();
-        // Query JOIN 3 bảng để lấy đầy đủ thông tin hiển thị
         String sql = "SELECT b.*, t.HoTen, c.TenChuyenKhoa " +
                      "FROM BacSi b " +
                      "JOIN TaiKhoan t ON b.TaiKhoan_ID = t.TaiKhoan_ID " +
                      "JOIN ChuyenKhoa c ON b.ChuyenKhoa_ID = c.ChuyenKhoa_ID " +
                      "WHERE t.TrangThai = N'Hoạt động'";
-        
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-
+            ResultSetMetaData md = rs.getMetaData();
             while (rs.next()) {
-                list.add(mapFullInfo(rs));
+                list.add(mapFullInfo(rs, md));
             }
+            return list;
         } catch (SQLException e) {
+            System.err.println("[BacSiDAO] getAllForDisplay fallback (không JOIN ChuyenKhoa hoặc thiếu ChuyenKhoa_ID): " + e.getMessage());
             e.printStackTrace();
         }
+        String fallback = "SELECT b.BacSi_ID, b.TaiKhoan_ID, b.AnhDaiDien, b.TrinhDo, t.HoTen, CAST(N'—' AS NVARCHAR(100)) AS TenChuyenKhoa, CAST(0 AS INT) AS ChuyenKhoa_ID "
+                + "FROM BacSi b "
+                + "JOIN TaiKhoan t ON b.TaiKhoan_ID = t.TaiKhoan_ID "
+                + "WHERE t.TrangThai = N'Hoạt động'";
+        if (bacSiHasChuyenKhoaIdColumn()) {
+            fallback = "SELECT b.BacSi_ID, b.TaiKhoan_ID, b.ChuyenKhoa_ID, b.AnhDaiDien, b.TrinhDo, t.HoTen, "
+                    + "COALESCE(c.TenChuyenKhoa, N'—') AS TenChuyenKhoa FROM BacSi b "
+                    + "JOIN TaiKhoan t ON b.TaiKhoan_ID = t.TaiKhoan_ID "
+                    + "LEFT JOIN ChuyenKhoa c ON b.ChuyenKhoa_ID = c.ChuyenKhoa_ID "
+                    + "WHERE t.TrangThai = N'Hoạt động'";
+        }
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(fallback);
+             ResultSet rs = ps.executeQuery()) {
+            ResultSetMetaData md = rs.getMetaData();
+            while (rs.next()) {
+                list.add(mapFullInfo(rs, md));
+            }
+        } catch (SQLException e2) {
+            e2.printStackTrace();
+        }
         return list;
+    }
+
+    private boolean bacSiHasChuyenKhoaIdColumn() {
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = N'BacSi' AND COLUMN_NAME = N'ChuyenKhoa_ID'");
+             ResultSet rs = ps.executeQuery()) {
+            return rs.next();
+        } catch (SQLException e) {
+            return false;
+        }
     }
 
     /**
@@ -80,7 +112,8 @@ public class BacSiDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapFullInfo(rs);
+                ResultSetMetaData md = rs.getMetaData();
+                if (rs.next()) return mapFullInfo(rs, md);
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -88,25 +121,37 @@ public class BacSiDAO {
         return null;
     }
 
-    // Hàm Helper để đóng gói dữ liệu từ SQL vào Object Model
-    private BacSi mapFullInfo(ResultSet rs) throws SQLException {
+    private static boolean mdHas(ResultSetMetaData md, String col) throws SQLException {
+        int n = md.getColumnCount();
+        for (int i = 1; i <= n; i++) {
+            String l = md.getColumnLabel(i);
+            if (l != null && l.equalsIgnoreCase(col)) return true;
+        }
+        return false;
+    }
+
+    private BacSi mapFullInfo(ResultSet rs, ResultSetMetaData md) throws SQLException {
         BacSi bs = new BacSi();
         bs.setBacSiID(rs.getInt("BacSi_ID"));
         bs.setTaiKhoanID(rs.getInt("TaiKhoan_ID"));
-        bs.setChuyenKhoaID(rs.getInt("ChuyenKhoa_ID"));
-        bs.setAnhDaiDien(rs.getString("AnhDaiDien"));
+        if (mdHas(md, "ChuyenKhoa_ID")) {
+            bs.setChuyenKhoaID(rs.getInt("ChuyenKhoa_ID"));
+        } else {
+            bs.setChuyenKhoaID(0);
+        }
+        if (mdHas(md, "AnhDaiDien")) {
+            bs.setAnhDaiDien(rs.getString("AnhDaiDien"));
+        }
         bs.setTrinhDo(rs.getNString("TrinhDo"));
-        
-        // Mapping thông tin từ bảng TaiKhoan (Lấy HoTen)
+
         TaiKhoan tk = new TaiKhoan();
         tk.setHoTen(rs.getNString("HoTen"));
         bs.setTaiKhoan(tk);
-        
-        // Mapping thông tin Chuyên Khoa
+
         ChuyenKhoa ck = new ChuyenKhoa();
         ck.setTenChuyenKhoa(rs.getNString("TenChuyenKhoa"));
         bs.setChuyenKhoa(ck);
-        
+
         return bs;
     }
 }
