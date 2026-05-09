@@ -1245,3 +1245,115 @@ alter table PhieuKham
     drop constraint FK_PhieuKham_BacSi
 alter table PhieuKham
     drop column BacSi_ID
+go
+
+------ STORED PROCEDURE ------
+---- Admin: Quản lý tài khoản
+-- Thêm tài khoản bác sĩ/lễ tân
+create procedure SP_ThemTaiKhoan_NhanSu
+    @HoTen nvarchar(100),
+    @SoDienThoai varchar(15),
+    @MatKhau varchar(100),
+    @VaiTro varchar(30),
+    @NgaySinh date,
+    @GioiTinh bit,
+    @ChuyenKhoa_ID int,
+    @TrinhDo nvarchar(50),
+    @AnhDaiDien varchar(255)
+as
+begin
+    begin try
+        begin tran
+            declare @TaiKhoan_ID int;
+            DECLARE @VaiTroTiengViet nvarchar(30);
+
+            IF @VaiTro = 'doctor' SET @VaiTroTiengViet = N'Bác sĩ'
+            ELSE IF @VaiTro = 'staff' SET @VaiTroTiengViet = N'Lễ tân'
+            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Admin'
+            ELSE SET @VaiTroTiengViet = N'Khách hàng';
+
+            -- Thêm vào TaiKhoan
+            insert into TaiKhoan(SoDienThoai, MatKhau, VaiTro, HoTen, NgaySinh, GioiTinh)
+            values (@SoDienThoai, @MatKhau, @VaiTroTiengViet, @HoTen, @NgaySinh, @GioiTinh)
+
+            -- Lấy TaiKhoan_ID vừa tự tăng
+            set @TaiKhoan_ID = SCOPE_IDENTITY()
+
+            -- Nếu là bác sĩ thì lưu thêm ảnh, trình độ và chuyên khoa
+            if @VaiTro = 'doctor'
+            begin
+                insert into BacSi (TaiKhoan_ID, AnhDaiDien, TrinhDo, ChuyenKhoa_ID)
+                values (@TaiKhoan_ID, @AnhDaiDien, @TrinhDo, @ChuyenKhoa_ID)
+            end
+
+            else if @VaiTro = N'staff'
+            begin
+                insert into LeTan (TaiKhoan_ID)
+                values (@TaiKhoan_ID)
+            end
+
+        commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
+go
+
+-- Cập nhật tài khoản
+create procedure SP_CapNhatTaiKhoan
+    @TaiKhoan_ID int,
+    @HoTen nvarchar(100),
+    @SoDienThoai varchar(15),
+    @MaKhau varchar(100),
+    @VaiTro nvarchar(30),
+    @TrangThai nvarchar(50),
+    @NgaySinh date,
+    @GioiTinh bit,
+    @ChuyenKhoa_ID int,
+    @TrinhDo nvarchar(50),
+    @AnhDaiDien varchar(255)
+as
+begin
+    begin try
+        begin tran
+            update TaiKhoan
+                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThai, VaiTro = @VaiTro, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
+                where TaiKhoan_ID = @TaiKhoan_ID
+
+                if @MaKhau is not null and @MaKhau <> ''
+                begin
+                    update TaiKhoan set MatKhau = @MaKhau where TaiKhoan_ID = @TaiKhoan_ID
+                end
+                update BacSi
+                    set ChuyenKhoa_ID = @ChuyenKhoa_ID, TrinhDo = @TrinhDo, AnhDaiDien = @AnhDaiDien
+                    where TaiKhoan_ID = @TaiKhoan_ID
+
+                commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
+go
+
+-- Xóa tài khoản
+create procedure SP_XoaTaiKhoan
+    @TaiKhoan_ID int
+as
+begin
+    begin try
+        begin tran
+            delete from BacSi where TaiKhoan_ID = @TaiKhoan_ID
+            delete from LeTan where TaiKhoan_ID = @TaiKhoan_ID
+            delete from BenhNhan where TaiKhoan_ID = @TaiKhoan_ID
+
+        commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
