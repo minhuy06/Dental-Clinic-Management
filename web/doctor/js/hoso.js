@@ -16,8 +16,8 @@ const DENTAL_SERVICES = [
 
 // ======================= CỜ HIỆU MOCK/REAL + DATA SOURCE =======================
 const DOCTOR_HOSO_CONFIG = {
-    USE_MOCK: true,
-    API_BASE: '/api/doctor',
+    USE_MOCK: false,
+    API_BASE: '/Dental_Clinic_Management/api/doctor',
     MOCK_DELAY_MS: 120
 };
 
@@ -66,40 +66,6 @@ function formatVND(amount) {
     return amount.toLocaleString('vi-VN') + 'đ';
 }
 
-// Cập nhật đơn giá & thành tiền cho một dòng
-function updateRowPrices(row) {
-    const serviceSelect = row.querySelector('.service-select');
-    const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
-    const price = parseInt(selectedOption.getAttribute('data-price')) || 0;
-    const quantity = parseInt(row.querySelector('.quantity-input').value) || 1;
-    const total = price * quantity;
-    
-    const priceCell = row.querySelector('.price-cell');
-    const totalCell = row.querySelector('.total-cell');
-    if (priceCell) priceCell.innerText = formatVND(price);
-    if (totalCell) totalCell.innerText = formatVND(total);
-}
-
-// Gắn sự kiện cho một dòng (thay đổi dịch vụ, số lượng, focus)
-function attachRowEvents(row) {
-    const serviceSelect = row.querySelector('.service-select');
-    const quantityInput = row.querySelector('.quantity-input');
-    const toothInput = row.querySelector('.tooth-number-input');
-    
-    if (serviceSelect) {
-        serviceSelect.removeEventListener('change', () => updateRowPrices(row));
-        serviceSelect.addEventListener('change', () => updateRowPrices(row));
-    }
-    if (quantityInput) {
-        quantityInput.removeEventListener('input', () => updateRowPrices(row));
-        quantityInput.addEventListener('input', () => updateRowPrices(row));
-    }
-    if (toothInput) {
-        toothInput.removeEventListener('focus', () => { window.currentActiveRow = row; });
-        toothInput.addEventListener('focus', () => { window.currentActiveRow = row; });
-    }
-}
-
 // Xóa dòng (giữ ít nhất 1 dòng)
 function attachDeleteEvents() {
     document.querySelectorAll('.delete-row').forEach(btn => {
@@ -125,34 +91,6 @@ function deleteHandler(e) {
     }
 }
 
-// Thêm dòng mới (có thể truyền số răng mặc định)
-function addNewRow(toothNumber = '') {
-    const tbody = document.getElementById('treatmentBody');
-    const newRow = document.createElement('tr');
-    // Tạo dropdown dịch vụ từ DENTAL_SERVICES
-    let serviceOptions = '<option value="">-- Chọn dịch vụ --</option>';
-    DENTAL_SERVICES.forEach(s => {
-        serviceOptions += `<option value="${s.name}" data-price="${s.price}">${s.name} - ${formatVND(s.price)}</option>`;
-    });
-    
-    newRow.innerHTML = `
-        <td><select class="service-select">${serviceOptions}</select></td>
-        <td><input type="text" class="tooth-number-input" value="${toothNumber}" placeholder="Số răng" style="width: 80px;"></td>
-        <td><input type="number" class="quantity-input" value="1" min="1" step="1" style="width: 70px;"></td>
-        <td class="price-cell">0đ</td>
-        <td class="total-cell">0đ</td>
-        <td><input type="text" class="note-input" placeholder="Ghi chú..." style="width: 100%;"></td>
-        <td><button class="delete-row" type="button"><i class="fa-solid fa-trash"></i></button></td>
-    `;
-    tbody.appendChild(newRow);
-    attachRowEvents(newRow);
-    attachDeleteEvents();
-    updateRowPrices(newRow);
-    // Focus vào ô răng số của dòng mới để chuẩn bị click sơ đồ
-    const toothInput = newRow.querySelector('.tooth-number-input');
-    if (toothInput) toothInput.focus();
-}
-
 // Toast thông báo
 function showToast(message, duration = 3000) {
     let toast = document.getElementById('toastMessage');
@@ -172,13 +110,6 @@ function showToast(message, duration = 3000) {
 // ========== XỬ LÝ SƠ ĐỒ RĂNG ==========
 let currentSelectedTooth = null;
 
-function initTeethMap() {
-    const teeth = document.querySelectorAll('.tooth');
-    teeth.forEach(tooth => {
-        tooth.removeEventListener('click', toothClickHandler);
-        tooth.addEventListener('click', toothClickHandler);
-    });
-}
 
 function toothClickHandler() {
     // Cập nhật giao diện chọn răng
@@ -206,51 +137,16 @@ function toothClickHandler() {
 }
 
 // ========== LƯU DỮ LIỆU ==========
-async function saveExamination() {
-    const treatments = [];
-    const rows = document.querySelectorAll('#treatmentBody tr');
-    rows.forEach(row => {
-        const serviceSelect = row.querySelector('.service-select');
-        treatments.push({
-            serviceName: serviceSelect ? serviceSelect.value : '',
-            toothNum: row.querySelector('.tooth-number-input')?.value || '',
-            quantity: row.querySelector('.quantity-input')?.value || 1,
-            price: row.querySelector('.price-cell')?.innerText || '0',
-            total: row.querySelector('.total-cell')?.innerText || '0',
-            note: row.querySelector('.note-input')?.value || ''
-        });
-    });
-    const queryPatientName = decodeURIComponent(getQueryParam('name') || '');
-    const queryAppointmentId = parseInt(getQueryParam('id') || '0');
-    const examData = {
-        appointmentId: queryAppointmentId || null,
-        patientName: queryPatientName || 'Nguyễn Văn Hiển',
-        patientId: getQueryParam('patientId') || 'BN001234',
-        doctor: getQueryParam('doctor') || 'BS. Nguyễn Hoàng',
-        date: new Date().toLocaleString('vi-VN'),
-        symptoms: document.getElementById('symptoms')?.value || '',
-        diagnosis: document.getElementById('diagnosis')?.value || '',
-        prescription: document.getElementById('prescription')?.value || '',
-        treatments: treatments
-    };
-    try {
-        const res = await hosoDataSource.saveExam(examData);
-        if (res && res.success === false) {
-            showToast('❌ ' + (res.message || 'Không thể lưu hồ sơ khám'), 3000);
-            return;
-        }
-        showToast('✅ Đã lưu thông tin thành công!', 3000);
-    } catch (error) {
-        console.error('[doctor/hoso] save error:', error);
-        showToast('❌ ' + (error.message || 'Lỗi kết nối khi lưu hồ sơ'), 3000);
-    }
-}
 
 // ========== IN ĐƠN THUỐC ==========
 function printPrescription() {
     const prescription = document.getElementById('prescription')?.value || '';
-    const patientName = 'Nguyễn Văn Hiển';
-    const doctorName = 'BS. NGUYỄN HOÀNG';
+    const patientName = document.getElementById('patientNameUI')?.innerText?.trim()
+        || (window.DOCTOR_HOSO_BOOTSTRAP && window.DOCTOR_HOSO_BOOTSTRAP.patientName)
+        || '';
+    const doctorName = (window.DOCTOR_HOSO_BOOTSTRAP && window.DOCTOR_HOSO_BOOTSTRAP.doctorName)
+        || (document.querySelector('.doctor-info')?.textContent || '').replace(/^[\s\S]*?-\s*/, '').trim()
+        || 'Bác sĩ';
     const printWindow = window.open('', '_blank');
     printWindow.document.write(`
         <html>
@@ -307,12 +203,22 @@ function init() {
     
     // Gắn nút thêm dịch vụ
     const addBtn = document.getElementById('addServiceBtn');
-    if (addBtn) addBtn.addEventListener('click', () => addNewRow(''));
-    
-    // Các nút chức năng
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) saveBtn.addEventListener('click', saveExamination);
-    
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            // Giả sử trong file hoso.jsp bạn có một thẻ <select id="serviceSelect"> chứa danh sách dịch vụ
+            const serviceSelect = document.getElementById('serviceSelect');
+            
+            if (serviceSelect && serviceSelect.value) {
+                // Thêm dịch vụ bác sĩ vừa chọn vào bảng
+                addClinicalService(serviceSelect.value);
+            } else {
+                // NẾU NHÓM BẠN CHƯA LÀM THẺ <select> TRÊN GIAO DIỆN, CHẠY TẠM DÒNG NÀY ĐỂ TEST:
+                // Nó sẽ tự động thêm dịch vụ ID = 1 ("Thăm khám & tư vấn") mỗi khi ấn nút
+                addClinicalService(1); 
+            }
+        });
+    }
+        
     const printBtn = document.getElementById('printBtn');
     if (printBtn) printBtn.addEventListener('click', printPrescription);
     
@@ -325,7 +231,7 @@ function init() {
     if (xrayBtn) xrayBtn.addEventListener('click', () => showToast('📷 Chức năng X-Quang đang phát triển', 2000));
     
     // Khởi tạo sơ đồ răng
-    initTeethMap();
+    // initTeethMap();
     
     // Đặt dòng active mặc định là dòng đầu tiên
     const firstRow = document.querySelector('#treatmentBody tr');
@@ -344,7 +250,7 @@ function init() {
 // === LOGIC DÀNH RIÊNG CHO MÀN HÌNH KHÁM LÂM SÀNG (LƯU DATABASE THỰC TẾ) ===
 // =========================================================================
 
-let danhSachDichVuTuDB = svcList20; // Tạm thời dùng list ảo, sau này gọi API gán lại
+let danhSachDichVuTuDB = DENTAL_SERVICES; // Tạm thời dùng list ảo, sau này gọi API gán lại
 let clinicalSelectedServices = [];  
 let currentSelectedTeeth = [];      
 
@@ -524,5 +430,81 @@ async function luuPhieuKhamLamSang(lichHenId, bacSiId, phongId) {
     }
 }
 
-// Chạy sau khi DOM tải xong
-document.addEventListener('DOMContentLoaded', init);
+function applyLichHenContextFromQuery() {
+    const reason = getQueryParam('reason');
+    const rec = document.getElementById('receptionNoteUI');
+    if (rec) {
+        rec.textContent = reason ? `"${reason}"` : '—';
+    }
+    const sym = document.getElementById('symptoms');
+    if (sym && reason && !sym.value.trim()) {
+        sym.value = reason;
+    }
+}
+
+// --- HÀM LẤY THÔNG TIN HỒ SƠ ---
+async function loadPatientProfile() {
+    // Lấy ID từ URL (VD: hoso.jsp?id=1)
+    const lichHenId = getQueryParam('id'); 
+    if (!lichHenId) return;
+
+    try {
+        const response = await fetch(`${DOCTOR_HOSO_CONFIG.API_BASE}/patient-profile?id=${encodeURIComponent(lichHenId)}`);
+        const result = await response.json();
+        
+        if (result.success && result.data) {
+            const hs = result.data;
+            if (!hs.benhNhan || !hs.benhNhan.taiKhoan) {
+                console.error('Lỗi từ server: thiếu benhNhan/taiKhoan trong payload');
+                return;
+            }
+            const tk = hs.benhNhan.taiKhoan;
+            const maBN = hs.benhNhan.benhNhanID;
+            
+            // 1. Dịch giới tính 
+            const gioiTinhStr = tk.gioiTinh ? 'Nam' : 'Nữ';
+            
+            // 2. Tính tuổi
+            let tuoi = "Chưa rõ";
+            if (tk.ngaySinh) {
+                const birthYear = new Date(tk.ngaySinh).getFullYear();
+                const currentYear = new Date().getFullYear();
+                tuoi = currentYear - birthYear;
+            }
+            
+            // 3. Đổ dữ liệu vào giao diện (Đảm bảo hoso.jsp của bạn có các ID thẻ HTML này)
+            const nameEl = document.getElementById('patientNameUI');
+            if(nameEl) nameEl.innerText = tk.hoTen;
+            
+            const ageEl = document.getElementById('patientAgeGenderUI');
+            if(ageEl) ageEl.innerText = `${gioiTinhStr} | ${tuoi} Tuổi`;
+            
+            const phoneEl = document.getElementById('patientPhoneUI');
+            if(phoneEl) phoneEl.innerText = tk.soDienThoai;
+            
+            // Hiển thị mã bệnh nhân (VD: #BN00005)
+            const codeEl = document.getElementById('patientCodeUI');
+            if(codeEl) codeEl.innerText = `#BN${maBN.toString().padStart(5, '0')}`;
+            
+            const diUngEl = document.getElementById('diUngThuocUI');
+            if(diUngEl) diUngEl.innerText = hs.diUngThuoc;
+            
+            const tienSuEl = document.getElementById('tienSuBenhUI');
+            if(tienSuEl) tienSuEl.innerText = hs.tienSuBenh;
+            
+        } else {
+            console.error("Lỗi từ server:", result.message);
+            showToast(result.message || 'Không tải được hồ sơ bệnh nhân', 3500);
+        }
+    } catch (error) {
+        console.error("Lỗi khi tải hồ sơ: ", error);
+        showToast('Không tải được hồ sơ bệnh nhân', 3500);
+    }
+}
+
+// Gọi hàm này ngay khi trang load xong
+document.addEventListener('DOMContentLoaded', function() {
+    applyLichHenContextFromQuery();
+    loadPatientProfile();
+    init();
+});

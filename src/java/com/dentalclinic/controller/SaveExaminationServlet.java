@@ -26,16 +26,20 @@ public class SaveExaminationServlet extends HttpServlet {
         try{
             // Đọc dữ liệu JSON gửi từ Servlet
             BufferedReader reader = request.getReader();
-            StringBuilder sb = new StringBuilder();
-            String line;
-            while((line = reader.readLine()) != null){
-                sb.append(line);
-            }
-            String jsonPayload = sb.toString();
             
             // Dùng GSON biến json thành đối tượng PhieuKham
             Gson gson = new Gson();
-            PhieuKham phieukham = gson.fromJson(jsonPayload, PhieuKham.class);
+            PhieuKham phieukham = gson.fromJson(reader, PhieuKham.class);
+            
+            // Validate            
+            if (phieukham.getLichHenID() <= 0){
+                out.print("{\"success\": false, \"message\": \"Lỗi: Không xác định được Lịch Hẹn!\"}");
+                return;
+            }
+            if (phieukham.getDanhSachDichVu() == null || phieukham.getDanhSachDichVu().isEmpty()){
+                out.print("{\"success\": false, \"message\": \"Vui lòng chỉ định ít nhất một dịch vụ lâm sàng!\"}");
+                return;
+            }
             
             // Đưa đối tượng xuống Db
             PhieuKhamDAO dao = new PhieuKhamDAO();

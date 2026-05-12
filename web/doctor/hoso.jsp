@@ -34,22 +34,21 @@
         <div class="card">
             <div class="patient-info-header">
                 <div class="patient-avatar"><i class="fa-solid fa-user-large"></i></div>
-                <h3 class="patient-name"><%= patientName %></h3>
-                <p class="patient-detail"><i class="fa-regular fa-venus-mars"></i> Nam | 28 Tuổi</p>
-                <p class="patient-detail"><i class="fa-solid fa-phone"></i> <%= patientPhone %></p>
-                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: #<%= patientId %></p>
+                <h3 class="patient-name" id="patientNameUI"><%= patientName %></h3>
+                <p class="patient-detail"><i class="fa-regular fa-venus-mars"></i> <span id="patientAgeGenderUI">Đang tải…</span></p>
+                <p class="patient-detail"><i class="fa-solid fa-phone"></i> <span id="patientPhoneUI"><%= patientPhone %></span></p>
+                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: <span id="patientCodeUI">#<%= patientId %></span></p>
             </div>
             <div class="medical-history">
                 <div class="section-title"><i class="fa-solid fa-circle-exclamation"></i> CẢNH BÁO Y TẾ</div>
-                <span class="allergy-tag"><i class="fa-solid fa-syringe"></i> Dị ứng Penicillin</span>
+                <span class="allergy-tag"><i class="fa-solid fa-syringe"></i> <span id="diUngThuocUI">Đang tải…</span></span>
                 <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> TIỀN SỬ BỆNH LÝ</div>
-                <div class="history-item"><strong>15/01/2024:</strong> Nhổ răng số 38 (răng khôn). Lành thương tốt.</div>
-                <div class="history-item"><strong>10/10/2023:</strong> Hàn răng sâu số 46.</div>
+                <div class="history-item" id="tienSuBenhUI" style="white-space: pre-wrap;">Đang tải…</div>
             </div>
         </div>
         <div class="card">
             <div class="section-title"><i class="fa-regular fa-note-sticky"></i> GHI CHÚ CỦA LỄ TÂN</div>
-            <p class="note-from-reception">"Bệnh nhân đau buốt vùng răng hàm dưới bên trái khi uống nước lạnh 2 ngày nay."</p>
+            <p class="note-from-reception" id="receptionNoteUI">—</p>
         </div>
     </aside>
 
@@ -82,11 +81,11 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
                     <label><i class="fa-regular fa-message"></i> LÝ DO KHÁM</label>
-                    <textarea id="symptoms" rows="2">Đau buốt khi ăn đồ lạnh, ê buốt răng số 46</textarea>
+                    <textarea id="symptoms" rows="2" placeholder="Lý do khám / triệu chứng…"></textarea>
                 </div>
                 <div class="form-group">
                     <label><i class="fa-regular fa-clipboard"></i> CHẨN ĐOÁN</label>
-                    <textarea id="diagnosis" rows="2">Sâu răng độ 3 (gần tủy) - Răng 46</textarea>
+                    <textarea id="diagnosis" rows="2" placeholder="Chẩn đoán…"></textarea>
                 </div>
             </div>
 
@@ -112,9 +111,7 @@
 
         <div class="card">
             <label><i class="fa-solid fa-prescription-bottle"></i> ĐƠN THUỐC / DẶN DÒ</label>
-            <textarea id="prescription" rows="3">- Amoxicillin 500mg: 2 lần/ngày x 5 ngày
-- Paracetamol 500mg: khi đau
-- Dặn dò: Tránh nhai bên điều trị, vệ sinh nhẹ nhàng</textarea>
+            <textarea id="prescription" rows="3" placeholder="Đơn thuốc / dặn dò…"></textarea>
         </div>
 
         <div class="action-bar">

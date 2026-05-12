@@ -4,86 +4,46 @@ import com.dentalclinic.model.ChiTietDichVu;
 import com.dentalclinic.model.PhieuKham;
 import com.dentalclinic.utils.DBConnection;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.sql.Types;
+import com.microsoft.sqlserver.jdbc.SQLServerDataTable;
+import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 
 public class PhieuKhamDAO {
     
-    public boolean luuPhieuKhamLamSang(PhieuKham pk){
-        Connection conn = null;
-        PreparedStatement psPhieuKham = null;
-        PreparedStatement psChiTiet = null;
-        ResultSet rs = null;
-        boolean isSuccess = false;
-        
-        try{
-            conn = DBConnection.getConnection();
-            conn.setAutoCommit(false); // Bắt đầu transaction
+    public boolean luuPhieuKhamLamSang(PhieuKham pk){  
+        String sqlPhieuKham = "{call SP_LuuPhieuKham (?, ?, ?, ?, ?)}";
+        try (Connection conn = DBConnection.getConnection();
+            SQLServerCallableStatement cs = (SQLServerCallableStatement) conn.prepareCall(sqlPhieuKham)){
             
-            String sqlPhieuKham = "Insert into PhieuKham (LichHen_ID, ChanDoan, NgayTao, LyDoKham, GhiChu, BacSi_ID, Phong_ID)" + " values (?, ?, getdate(), ?, ?, ?, ?)"; 
-            psPhieuKham = conn.prepareStatement(sqlPhieuKham, Statement.RETURN_GENERATED_KEYS);
-            psPhieuKham.setInt(1, pk.getLichHenID());
-            psPhieuKham.setString(2, pk.getChanDoan());
-            psPhieuKham.setString(4, pk.getLyDoKham());
-            psPhieuKham.setString(5, pk.getGhiChu());
-            psPhieuKham.setInt(6, pk.getBacSiID());
-            psPhieuKham.setInt(7, pk.getPhongID());
+            cs.setInt(1, pk.getLichHenID());
+            cs.setNString(2, pk.getChanDoan());
+            cs.setNString(3, pk.getLyDoKham());
+            cs.setNString(4, pk.getGhiChu());
             
-            int affectedRows = psPhieuKham.executeUpdate();
-            if(affectedRows > 0){
-                rs = psPhieuKham.getGeneratedKeys();
-                if(rs.next()){
-                    int newPhieuKhamID = rs.getInt(1);
-                    
-                    // Thêm vào ChiTietDichVu
-                    if(pk.getDanhSachDichVu() != null && !pk.getDanhSachDichVu().isEmpty()){
-                        String sqlChiTiet = "Insert into ChiTietDichVu (PhieuKham_ID, DichVu_ID, ViTriRang, SoLuong, DonGia)" + "values (?, ?, ?, ?, ?)";
-                        psChiTiet = conn.prepareStatement(sqlChiTiet);
-                        for (ChiTietDichVu ctdv : pk.getDanhSachDichVu()){
-                            psChiTiet.setInt(1, newPhieuKhamID);
-                            psChiTiet.setInt(2, ctdv.getDichVuID());
-                            
-                            // Xử lý NULL cho dịch vụ toàn hàm
-                            if(ctdv.getViTriRang() == 0){
-                               psChiTiet.setInt(3, Types.INTEGER);
-                            }
-                            else
-                                 psChiTiet.setInt(3, ctdv.getViTriRang());
-                            
-                            psChiTiet.setInt(4, ctdv.getSoLuong());
-                            psChiTiet.setDouble(5, ctdv.getDonGia());
-                            
-                            psChiTiet.addBatch(); // Đưa vào hàng đợi
-                        }
-                        psChiTiet.executeBatch();
-                    }
-                    conn.commit();
-                    isSuccess = true;
-                }
+            // Tạo Table-Valued Parameter cho ChiTietDichVu
+            SQLServerDataTable tvpTable = new SQLServerDataTable();
+            tvpTable.addColumnMetadata("DichVu_ID", Types.INTEGER);
+            tvpTable.addColumnMetadata("DonGia", Types.DOUBLE);
+            tvpTable.addColumnMetadata("ViTriRang", Types.INTEGER);
+            tvpTable.addColumnMetadata("SoLuong", Types.INTEGER);
+            
+            // Đổ danh sách dịch vụ từ Model vào bảng TVP
+            for(ChiTietDichVu ctdv : pk.getDanhSachDichVu()){
+                tvpTable.addRow(
+                    ctdv.getDichVuID(),
+                    ctdv.getDonGia(),
+                    ctdv.getViTriRang(),
+                    ctdv.getSoLuong());
             }
+            
+            // Gắn TVP vào tham số thứ 5 của Stored Procedure
+            cs.setStructured(5, "Type_ChiTietDichVu", tvpTable);
+            int rowAffected = cs.executeUpdate();
+            return rowAffected > 0;
+            
         } catch(Exception e){
             e.printStackTrace();
-            try{
-                // Có lỗi -> hủy bỏ toàn bộ
-                if(conn != null) conn.rollback();
-            } catch(Exception ex){
-                ex.printStackTrace();
-            }
-        } finally{
-            try{
-                if (rs != null) rs.close();
-                if(psChiTiet != null) psChiTiet.close();
-                if(psPhieuKham != null) psPhieuKham.close();
-                if(conn != null){
-                    conn.setAutoCommit(true);
-                    conn.close();
-                }
-            } catch (Exception ex){
-                ex.printStackTrace();
-            }
+            return false;
         }
-        return isSuccess;
     }
 }
