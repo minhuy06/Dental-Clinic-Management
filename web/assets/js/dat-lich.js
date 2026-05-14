@@ -1,30 +1,98 @@
-var FALLBACK_SERVICES = [
-    {id:'1',  name:'Khám tổng quát',              desc:'Kiểm tra răng miệng toàn diện',         time:'20 phút',      price:100000,  cat:'kham',      perUnit:false},
-    {id:'2',  name:'Cạo vôi răng',                desc:'Loại bỏ mảng bám, vôi răng',            time:'30 phút',      price:200000,  cat:'kham',      perUnit:false},
-    {id:'3',  name:'Trám răng Composite',          desc:'Trám thẩm mỹ Composite',                time:'30 phút',      price:300000,  cat:'kham',      perUnit:true,  unit:'răng'},
-    {id:'4',  name:'Nhổ răng sữa',                desc:'Nhổ răng sữa cho trẻ em',               time:'15 phút',      price:100000,  cat:'tre-em',    perUnit:true,  unit:'răng'},
-    {id:'5',  name:'Nhổ răng khôn mọc thẳng',     desc:'Nhổ răng khôn không phẫu thuật',        time:'30 phút',      price:1000000, cat:'phau-thuat',perUnit:true,  unit:'răng'},
-    {id:'6',  name:'Nhổ răng khôn mọc ngầm',      desc:'Tiểu phẫu nhổ răng khôn phức tạp',     time:'60 phút',      price:3000000, cat:'phau-thuat',perUnit:true,  unit:'răng'},
-    {id:'7',  name:'Tẩy trắng răng Laser',         desc:'Tẩy trắng bằng công nghệ Laser',        time:'45 phút',      price:2500000, cat:'tham-my',   perUnit:false},
-    {id:'8',  name:'Tẩy trắng răng tại nhà',       desc:'Máng tẩy trắng tại nhà',                time:'20 phút',      price:1500000, cat:'tham-my',   perUnit:false},
-    {id:'9',  name:'Lấy tủy răng cửa',             desc:'Điều trị tủy răng cửa',                 time:'45 phút',      price:800000,  cat:'kham',      perUnit:true,  unit:'răng'},
-    {id:'10', name:'Lấy tủy răng hàm',             desc:'Điều trị tủy răng hàm',                 time:'60 phút',      price:1500000, cat:'kham',      perUnit:true,  unit:'răng'},
-    {id:'11', name:'Bọc răng sứ Titan',            desc:'Răng sứ Titan tiêu chuẩn',              time:'45 phút/răng', price:2000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
-    {id:'12', name:'Bọc răng sứ Cercon',           desc:'Răng sứ Cercon Đức',                    time:'45 phút/răng', price:5000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
-    {id:'13', name:'Bọc răng sứ Zirconia',         desc:'Răng sứ Zirconia nguyên khối',          time:'45 phút/răng', price:6000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
-    {id:'14', name:'Mặt dán sứ Veneer',            desc:'Dán sứ siêu mỏng thẩm mỹ',             time:'60 phút/răng', price:7000000, cat:'tham-my',   perUnit:true,  unit:'răng'},
-    {id:'15', name:'Cấy ghép Implant tiêu chuẩn', desc:'Trụ Implant Titanium',                  time:'60-90 phút',   price:15000000,cat:'phau-thuat',perUnit:true,  unit:'trụ'},
-    {id:'16', name:'Cấy ghép Implant cao cấp',    desc:'Trụ Implant cao cấp Châu Âu',           time:'60-90 phút',   price:30000000,cat:'phau-thuat',perUnit:true,  unit:'trụ'},
-    {id:'17', name:'Niềng răng mắc cài kim loại', desc:'Chỉnh nha mắc cài kim loại',            time:'60 phút/lần',  price:25000000,cat:'chinh-nha', perUnit:false},
-    {id:'18', name:'Niềng răng mắc cài sứ',       desc:'Chỉnh nha mắc cài sứ',                 time:'60 phút/lần',  price:35000000,cat:'chinh-nha', perUnit:false},
-    {id:'19', name:'Niềng răng Invisalign',        desc:'Khay trong suốt chỉnh nha',             time:'45 phút/lần',  price:80000000,cat:'chinh-nha', perUnit:false},
-    {id:'20', name:'Điều trị viêm nha chu',        desc:'Điều trị viêm nướu nha chu',            time:'30 phút',      price:500000,  cat:'kham',      perUnit:false}
-];
+var BOOKING_CONFIG = {
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
 
-// Dùng data từ DB nếu có (inject qua JSP → window.allServices), không thì dùng fallback
+function bookingDelay(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+function bookingClone(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function bookingRequest(path, options) {
+    var opts = options || {};
+    var method = opts.method || 'GET';
+    var body = opts.body;
+    var headers = opts.headers || {};
+    var fetchOptions = {
+        method: method,
+        headers: Object.assign({'Content-Type': 'application/json'}, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    var res = await fetch(BOOKING_CONFIG.API_BASE + '/' + path, fetchOptions);
+    var json = null;
+    try { json = await res.json(); } catch (e) { json = null; }
+    if (!res.ok) throw new Error((json && json.message) ? json.message : ('Lỗi HTTP: ' + res.status));
+    return json;
+}
+
+function normalizeBookingList(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+var mockBookingSource = {
+    servicesList: async function() {
+        return bookingClone(window.allServices || []);
+    },
+    createBooking: async function(payload) {
+        await bookingDelay(BOOKING_CONFIG.MOCK_DELAY_MS);
+        console.info('[dat-lich] mock booking created:', payload);
+        return {success:true};
+    }
+};
+
+var apiBookingSource = {
+    servicesList: async function() { return normalizeBookingList(await bookingRequest('services')); },
+    createBooking: async function(payload) { return bookingRequest('appointments/add', {method:'POST', body:payload}); }
+};
+
+var bookingSource = BOOKING_CONFIG.USE_MOCK ? mockBookingSource : apiBookingSource;
+
+async function withBookingGuard(action, successMsg) {
+    try {
+        var res = await action();
+        if (res && res.success === false) {
+            alert(res.message || 'Không thể xử lý đặt lịch');
+            return null;
+        }
+        if (successMsg) alert(successMsg);
+        return res || {success:true};
+    } catch (error) {
+        console.error('[dat-lich] data error:', error);
+        alert(error.message || 'Có lỗi kết nối dữ liệu!');
+        return null;
+    }
+}
+
+// Dùng data được inject từ backend (BookingServlet)
 var allServices = (window.allServices && window.allServices.length > 0)
     ? window.allServices
-    : FALLBACK_SERVICES;
+    : [];
+
+function normalizeServiceItem(s) {
+    if (!s) return null;
+    var id = String(s.id != null ? s.id : '');
+    if (!id) return null;
+    return {
+        id: id,
+        name: s.name || '',
+        desc: s.desc || s.name || '',
+        time: s.time || '',
+        price: Number(s.price || 0),
+        cat: s.cat || 'all',
+        perUnit: Boolean(s.perUnit),
+        unit: s.unit || ''
+    };
+}
+
+allServices = allServices.map(normalizeServiceItem).filter(function(s) { return s !== null; });
 
 
 // === RENDER BANG DICH VU ===
@@ -77,12 +145,13 @@ function buildCheckboxGrid() {
 buildCheckboxGrid();
 
 function onSvcCheck(cb, id) {
-    var svc = allServices.find(function(s) { return s.id === id; });
+    var idStr = String(id);
+    var svc = allServices.find(function(s) { return String(s.id) === idStr; });
     if (!svc) return;
     if (cb.checked) {
         selectedList.push({id: svc.id, name: svc.name, price: svc.price, time: svc.time, qty: 1, perUnit: svc.perUnit, unit: svc.unit || ''});
     } else {
-        selectedList = selectedList.filter(function(s) { return s.id !== id; });
+        selectedList = selectedList.filter(function(s) { return String(s.id) !== idStr; });
     }
     renderNbSelected();
     document.getElementById('serviceGroup').classList.remove('error');
@@ -96,8 +165,9 @@ function changeQty(id, delta) {
 }
 
 function removeNbItem(id) {
-    selectedList = selectedList.filter(function(s) { return s.id !== id; });
-    var cb = document.querySelector('#svcCheckboxGrid input[value="' + id + '"]');
+    var idStr = String(id);
+    selectedList = selectedList.filter(function(s) { return String(s.id) !== idStr; });
+    var cb = document.querySelector('#svcCheckboxGrid input[value="' + idStr + '"]');
     if (cb) cb.checked = false;
     renderNbSelected();
 }
@@ -176,12 +246,6 @@ function resetBookingForm() {
 }
 
 function handleBooking() {
-    // Kiem tra dang nhap — neu chua login thi hien popup, khong xu ly tiep
-    if (!window.IS_LOGGED_IN) {
-        document.getElementById('loginRequiredModal').classList.add('show');
-        return;
-    }
-
     var ok = true;
     if (selectedList.length === 0) {
         document.getElementById('serviceGroup').classList.add('error');
@@ -198,16 +262,46 @@ function handleBooking() {
         ok = false;
     } else document.getElementById('timeGroup').classList.remove('error');
 
-    if (ok) {
-        alert('✅ Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận trong 30 phút.');
-        resetBookingForm();
-    }
+    if (ok) submitBooking();
 }
 
-// === POPUP DANG NHAP ===
-function closeLoginModal() {
-    document.getElementById('loginRequiredModal').classList.remove('show');
+async function submitBooking() {
+    var bookingDate = document.getElementById('bookingDate').value;
+    var bookingTime = document.getElementById('bookingTimeSelect').value;
+    var bookingNote = document.getElementById('bookingNote').value.trim();
+    var totalAmount = selectedList.reduce(function(sum, s){ return sum + (s.price * s.qty); }, 0);
+
+    var payload = {
+        date: bookingDate,
+        time: bookingTime,
+        note: bookingNote,
+        services: selectedList.map(function(s) {
+            return {
+                id: s.id,
+                name: s.name,
+                price: s.price,
+                quantity: s.qty
+            };
+        }),
+        totalAmount: totalAmount
+    };
+
+    var res = await withBookingGuard(
+        function() { return bookingSource.createBooking(payload); },
+        '✅ Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận trong 30 phút.'
+    );
+    if (res) resetBookingForm();
 }
-function goToLogin() {
-    window.location.href = window.CONTEXT_PATH + '/account/login.jsp';
+
+async function loadServicesForBooking() {
+    var list = await withBookingGuard(function() { return bookingSource.servicesList(); });
+    if (!list) return;
+    allServices = normalizeBookingList(list).map(normalizeServiceItem).filter(function(s) { return s !== null; });
+    renderServiceTable(allServices, false);
+    buildCheckboxGrid();
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.info('[dat-lich] mode:', BOOKING_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    loadServicesForBooking();
+});

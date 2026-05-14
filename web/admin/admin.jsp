@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -69,7 +70,7 @@
             <div class="service-grid" id="serviceGrid"></div>
             <div class="pagination" id="svcPagination"></div>
         </div>
-
+         
         <!-- ==================== TAB: LỊCH LÀM VIỆC ==================== -->
         <div class="tab-panel" id="panel-schedule">
             <!-- Stats -->
@@ -161,7 +162,7 @@
             </div>
             <div class="table-container">
                 <table>
-                    <thead><tr><th>ID</th><th>Họ tên</th><th>Loại TK</th><th>Chuyên khoa</th><th>Số điện thoại</th><th>Ngày tạo</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+                    <thead><tr><th>ID</th><th>Họ tên</th><th>Loại TK</th><th>Chuyên khoa</th><th>Số điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
                     <tbody id="accTableBody"></tbody>
                 </table>
             </div>
@@ -489,13 +490,11 @@
                     <div class="form-group" id="accSpecialtyGroup"><label>Chuyên khoa</label>
                         <select id="accSpecialty">
                             <option value="">-- Chọn chuyên khoa --</option>
-                            <option value="Răng tổng quát">Răng tổng quát</option>
-                            <option value="Chỉnh nha">Chỉnh nha</option>
-                            <option value="Phục hình">Phục hình</option>
-                            <option value="Thẩm mỹ nha">Thẩm mỹ nha</option>
-                            <option value="Phẫu thuật miệng">Phẫu thuật miệng</option>
-                            <option value="Nha chu">Nha chu</option>
-                            <option value="Răng trẻ em">Răng trẻ em</option>
+                            <option value="Răng tổng quát">Khám & Chẩn đoán</option>
+                            <option value="Chỉnh nha">Thẩm mỹ</option>
+                            <option value="Phục hình">Chỉnh nha</option>
+                            <option value="Thẩm mỹ nha">Phẫu thuật</option>
+                            <option value="Phẫu thuật miệng">Trẻ em</option>
                         </select>
                     </div>
                     <div class="form-group" id="accDegreeGroup"><label>Bằng cấp / Học vị</label>
@@ -522,25 +521,11 @@
     </div>
 
     <script>
-    (function() {
-        var ctx = '${pageContext.request.contextPath}';
-
-        // ── DỊCH VỤ ──────────────────────────────────────────────────
-        var svcJson = '${not empty adminServicesJson ? adminServicesJson : ""}';
-        if (svcJson) { try { window.__ADMIN_SERVICES__ = JSON.parse(svcJson); } catch(e) { console.warn('adminServicesJson parse error', e); } }
-
-        // ── TÀI KHOẢN ────────────────────────────────────────────────
-        var accJson = '${not empty adminAccountsJson ? adminAccountsJson : ""}';
-        if (accJson) { try { window.__ADMIN_ACCOUNTS__ = JSON.parse(accJson); } catch(e) { console.warn('adminAccountsJson parse error', e); } }
-
-        // ── CA LÀM VIỆC ──────────────────────────────────────────────
-        var shiftJson = '${not empty adminShiftsJson ? adminShiftsJson : ""}';
-        if (shiftJson) { try { window.__ADMIN_SHIFTS__ = JSON.parse(shiftJson); } catch(e) { console.warn('adminShiftsJson parse error', e); } }
-
-        // ── DOANH THU ────────────────────────────────────────────────
-        var revJson = '${not empty adminRevenueJson ? adminRevenueJson : ""}';
-        if (revJson) { try { window.__ADMIN_REVENUE__ = JSON.parse(revJson); } catch(e) { console.warn('adminRevenueJson parse error', e); } }
-    })();
+        window.ADMIN_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.__ADMIN_SERVICES__ = <c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/>;
+        window.__ADMIN_ACCOUNTS__ = <c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/>;
+        window.__ADMIN_SHIFTS__ = <c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/>;
+        window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
     </script>
 
     <script src="${pageContext.request.contextPath}/assets/js/admin.js"></script>

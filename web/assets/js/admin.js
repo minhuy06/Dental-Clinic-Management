@@ -2,30 +2,8 @@
  * ==================== NHA KHOA 5AE - ADMIN.JS ====================
  */
 
-// ==================== DỮ LIỆU MẪU ====================
-
-var services = [
-    {id:1, name:'Khám tổng quát', desc:'Kiểm tra răng miệng toàn diện', time:'20 phút', price:100000, cat:'kham', perUnit:false, unit:'', status:'active'},
-    {id:2, name:'Cạo vôi răng', desc:'Loại bỏ mảng bám, vôi răng', time:'30 phút', price:200000, cat:'kham', perUnit:false, unit:'', status:'active'},
-    {id:3, name:'Trám răng Composite', desc:'Trám thẩm mỹ Composite cao cấp', time:'30 phút', price:300000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:4, name:'Nhổ răng sữa', desc:'Nhổ răng sữa cho trẻ em', time:'15 phút', price:100000, cat:'tre-em', perUnit:true, unit:'răng', status:'active'},
-    {id:5, name:'Nhổ răng khôn mọc thẳng', desc:'Nhổ răng khôn không phẫu thuật', time:'30 phút', price:1000000, cat:'phau-thuat', perUnit:true, unit:'răng', status:'active'},
-    {id:6, name:'Nhổ răng khôn mọc ngầm', desc:'Tiểu phẫu nhổ răng khôn phức tạp', time:'60 phút', price:3000000, cat:'phau-thuat', perUnit:true, unit:'răng', status:'active'},
-    {id:7, name:'Tẩy trắng răng Laser', desc:'Tẩy trắng bằng công nghệ Laser hiện đại', time:'45 phút', price:2500000, cat:'tham-my', perUnit:false, unit:'', status:'active'},
-    {id:8, name:'Tẩy trắng răng tại nhà', desc:'Máng tẩy trắng tại nhà tiện lợi', time:'20 phút', price:1500000, cat:'tham-my', perUnit:false, unit:'', status:'active'},
-    {id:9, name:'Lấy tủy răng cửa', desc:'Điều trị tủy răng cửa', time:'45 phút', price:800000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:10, name:'Lấy tủy răng hàm', desc:'Điều trị tủy răng hàm', time:'60 phút', price:1500000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:11, name:'Bọc răng sứ Titan', desc:'Răng sứ Titan tiêu chuẩn', time:'45 phút/răng', price:2000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:12, name:'Bọc răng sứ Cercon', desc:'Răng sứ Cercon Đức chính hãng', time:'45 phút/răng', price:5000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:13, name:'Bọc răng sứ Zirconia', desc:'Răng sứ Zirconia nguyên khối cao cấp', time:'45 phút/răng', price:6000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:14, name:'Mặt dán sứ Veneer', desc:'Dán sứ siêu mỏng thẩm mỹ', time:'60 phút/răng', price:7000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:15, name:'Cấy ghép Implant tiêu chuẩn', desc:'Trụ Implant Titanium nhập khẩu', time:'60-90 phút', price:15000000, cat:'phau-thuat', perUnit:true, unit:'trụ', status:'active'},
-    {id:16, name:'Cấy ghép Implant cao cấp', desc:'Trụ Implant cao cấp Châu Âu', time:'60-90 phút', price:30000000, cat:'phau-thuat', perUnit:true, unit:'trụ', status:'active'},
-    {id:17, name:'Niềng răng mắc cài kim loại', desc:'Chỉnh nha mắc cài kim loại chuẩn', time:'60 phút/lần', price:25000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:18, name:'Niềng răng mắc cài sứ', desc:'Chỉnh nha mắc cài sứ thẩm mỹ', time:'60 phút/lần', price:35000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:19, name:'Niềng răng Invisalign', desc:'Khay trong suốt chỉnh nha tiên tiến', time:'45 phút/lần', price:80000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:20, name:'Điều trị viêm nha chu', desc:'Điều trị viêm nướu nha chu chuyên sâu', time:'30 phút', price:500000, cat:'kham', perUnit:false, unit:'', status:'inactive'}
-];
+// ==================== DỮ LIỆU ====================
+var services = [];
 
 var staffList = [
     {id:1, name:'BS. Nguyễn Hải', role:'doctor', specialty:'Răng tổng quát', degree:'CKI', phone:'0901234561', startDate:'2020-01-10', status:'active'},
@@ -100,6 +78,7 @@ var shifts = [
 var svcFilter = 'all', svcPage = 1, svcPerPage = 6, editingSvcId = null;
 var accFilter = 'all', accPage = 1, accPerPage = 8, editingAccId = null;
 var staffInfoCurrentId = null;
+var ADMIN_LAST_TAB_KEY = 'admin:lastTab';
 
 // Schedule state
 var schCurrentDate = new Date();
@@ -109,7 +88,7 @@ var editingShiftId = null;
 // JSP inject vào window.__ADMIN_*__ trước khi load file này.
 // Nếu có thì dùng, không thì giữ nguyên demo data ở trên.
 (function() {
-    if (window.__ADMIN_SERVICES__ && window.__ADMIN_SERVICES__.length > 0) {
+    if (Array.isArray(window.__ADMIN_SERVICES__)) {
         services = window.__ADMIN_SERVICES__;
         console.info('[admin] services loaded from DB:', services.length);
     }
@@ -174,12 +153,238 @@ function renderPagination(containerId, total, perPage, currentPage, onClickFn) {
     el.innerHTML = html;
 }
 
+// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
+var ADMIN_CONFIG = {
+    // true: dùng dữ liệu giả (mảng local), false: gọi backend thật
+    USE_MOCK: true,
+    API_BASE: '/api',
+    MOCK_DELAY_MS: 120
+};
+
+function waitMs(ms) {
+    return new Promise(function(resolve) { setTimeout(resolve, ms); });
+}
+
+function cloneData(data) {
+    return JSON.parse(JSON.stringify(data));
+}
+
+async function requestApi(path, options) {
+    var opts = options || {};
+    var method = opts.method || 'GET';
+    var body = opts.body;
+    var headers = opts.headers || {};
+    var fetchOptions = {
+        method: method,
+        headers: Object.assign({'Content-Type': 'application/json'}, headers)
+    };
+    if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
+
+    var response = await fetch(ADMIN_CONFIG.API_BASE + '/' + path, fetchOptions);
+    var json = null;
+    try { json = await response.json(); } catch (e) { json = null; }
+    if (!response.ok) {
+        var msg = (json && json.message) ? json.message : ('Lỗi HTTP: ' + response.status);
+        throw new Error(msg);
+    }
+    return json;
+}
+
+function normalizeListRes(res) {
+    if (!res) return [];
+    if (Array.isArray(res)) return res;
+    if (Array.isArray(res.data)) return res.data;
+    return [];
+}
+
+var mockDataSource = {
+    services: {
+        list: async function() {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            return cloneData(services);
+        },
+        create: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var newId = services.length ? Math.max.apply(null, services.map(function(s){ return s.id; })) + 1 : 1;
+            services.push(Object.assign({id:newId}, payload));
+            return {success:true};
+        },
+        update: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var idx = services.findIndex(function(s){ return s.id === payload.id; });
+            if (idx === -1) return {success:false, message:'Không tìm thấy dịch vụ'};
+            services[idx] = Object.assign({}, services[idx], payload);
+            return {success:true};
+        },
+        remove: async function(id) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            services = services.filter(function(s){ return s.id !== id; });
+            return {success:true};
+        },
+        toggleStatus: async function(id, status) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var s = services.find(function(x){ return x.id === id; });
+            if (!s) return {success:false};
+            s.status = status;
+            return {success:true};
+        }
+    },
+    accounts: {
+        list: async function() {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            return cloneData(accounts);
+        },
+        create: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var newId = accounts.length ? Math.max.apply(null, accounts.map(function(a){ return a.id; })) + 1 : 1;
+            accounts.push(Object.assign({id:newId}, payload));
+            return {success:true};
+        },
+        update: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var idx = accounts.findIndex(function(a){ return a.id === payload.id; });
+            if (idx === -1) return {success:false, message:'Không tìm thấy tài khoản'};
+            accounts[idx] = Object.assign({}, accounts[idx], payload);
+            return {success:true};
+        },
+        remove: async function(id) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            accounts = accounts.filter(function(a){ return a.id !== id; });
+            return {success:true};
+        },
+        toggleStatus: async function(id, status) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var a = accounts.find(function(x){ return x.id === id; });
+            if (!a) return {success:false};
+            a.status = status;
+            return {success:true};
+        }
+    },
+    shifts: {
+        list: async function() {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            return cloneData(shifts);
+        },
+        create: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var newId = shifts.length ? Math.max.apply(null, shifts.map(function(s){ return s.id; })) + 1 : 1;
+            shifts.push(Object.assign({id:newId}, payload));
+            return {success:true};
+        },
+        update: async function(payload) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            var idx = shifts.findIndex(function(s){ return s.id === payload.id; });
+            if (idx === -1) return {success:false, message:'Không tìm thấy ca làm'};
+            shifts[idx] = Object.assign({}, shifts[idx], payload);
+            return {success:true};
+        },
+        remove: async function(id) {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            shifts = shifts.filter(function(s){ return s.id !== id; });
+            return {success:true};
+        }
+    },
+    revenue: {
+        summary: async function() {
+            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
+            return {
+                months: cloneData(revenueMonths),
+                byCat: cloneData(revenueByCat),
+                topServices: cloneData(revenueTopServices),
+                payments: cloneData(revenuePayments),
+                txns: cloneData(revenueTxns),
+                allTxns: cloneData(allTxns)
+            };
+        }
+    }
+};
+
+var apiDataSource = {
+    services: {
+        list: async function() { return normalizeListRes(await requestApi('services')); },
+        create: async function(payload) { return requestApi('services/add', {method:'POST', body:payload}); },
+        update: async function(payload) { return requestApi('services/update', {method:'PUT', body:payload}); },
+        remove: async function(id) { return requestApi('services/delete?id=' + id, {method:'DELETE'}); },
+        toggleStatus: async function(id, status) { return requestApi('services/toggle-status', {method:'PUT', body:{id:id, status:status}}); }
+    },
+    accounts: {
+        list: async function() { return normalizeListRes(await requestApi('accounts')); },
+        create: async function(payload) { return requestApi('accounts/add', {method:'POST', body:payload}); },
+        update: async function(payload) { return requestApi('accounts/update', {method:'PUT', body:payload}); },
+        remove: async function(id) { return requestApi('accounts/delete?id=' + id, {method:'DELETE'}); },
+        toggleStatus: async function(id, status) { return requestApi('accounts/toggle-status', {method:'PUT', body:{id:id, status:status}}); }
+    },
+    shifts: {
+        list: async function() { return normalizeListRes(await requestApi('shifts')); },
+        create: async function(payload) { return requestApi('shifts/add', {method:'POST', body:payload}); },
+        update: async function(payload) { return requestApi('shifts/update', {method:'PUT', body:payload}); },
+        remove: async function(id) { return requestApi('shifts/delete?id=' + id, {method:'DELETE'}); }
+    },
+    revenue: {
+        summary: async function() { return requestApi('revenue/summary'); }
+    }
+};
+
+var dataSource = ADMIN_CONFIG.USE_MOCK ? mockDataSource : apiDataSource;
+
+async function withApiGuard(action, successMsg) {
+    try {
+        var res = await action();
+        if (res && res.success === false) {
+            showToast(res.message || 'Thao tác thất bại!', 'error');
+            return null;
+        }
+        if (successMsg) showToast(successMsg);
+        return res || {success:true};
+    } catch (error) {
+        console.error('Admin data error:', error);
+        showToast(error.message || 'Có lỗi xảy ra khi kết nối server!', 'error');
+        return null;
+    }
+}
+
+async function loadServicesFromServer() {
+    var list = await withApiGuard(function() { return dataSource.services.list(); });
+    if (!list) return;
+    services = normalizeListRes(list);
+    renderServices();
+    updateSvcStats();
+}
+
+async function loadAccountsFromServer() {
+    var list = await withApiGuard(function() { return dataSource.accounts.list(); });
+    if (!list) return;
+    accounts = normalizeListRes(list);
+    renderAccounts();
+    updateAccStats();
+}
+
+async function loadShiftsFromServer() {
+    var list = await withApiGuard(function() { return dataSource.shifts.list(); });
+    if (!list) return;
+    shifts = normalizeListRes(list);
+    renderSchedule();
+}
+
+async function loadRevenueFromServer() {
+    var r = await withApiGuard(function() { return dataSource.revenue.summary(); });
+    if (!r) return;
+    if (r.months) revenueMonths = r.months;
+    if (r.byCat) revenueByCat = r.byCat;
+    if (r.topServices) revenueTopServices = r.topServices;
+    if (r.payments) revenuePayments = r.payments;
+    if (r.txns) revenueTxns = r.txns;
+    if (r.allTxns) allTxns = r.allTxns;
+    renderRevenue();
+}
+
 // ==================== TAB SWITCHING ====================
 function switchTab(tab, el) {
     document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
     document.querySelectorAll('.nav-menu a').forEach(function(a) { a.classList.remove('active'); });
     document.getElementById('panel-' + tab).classList.add('active');
     if (el) el.classList.add('active');
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, tab); } catch (e) {}
     if (tab === 'services')  renderServices();
     if (tab === 'schedule')  renderSchedule();
     if (tab === 'accounts')  renderAccounts();
@@ -254,7 +459,7 @@ function updateSvcStats() {
     var total = services.reduce(function(a,s){return a+s.price;}, 0);
     var avg = services.length ? Math.round(total/services.length) : 0;
     document.getElementById('statAvgPrice').innerText = formatPrice(avg);
-    var maxPrice = Math.max.apply(null, services.map(function(s){return s.price;}));
+    var maxPrice = services.length ? Math.max.apply(null, services.map(function(s){return s.price;})) : 0;
     document.getElementById('statMaxPrice').innerText = formatPrice(maxPrice);
 }
 
@@ -298,46 +503,116 @@ function editService(id) {
 
 function closeServiceModal() { document.getElementById('serviceModal').style.display = 'none'; }
 
-function saveService() {
+async function saveService() {
     var name = document.getElementById('svcName').value.trim();
     var price = parseInt(document.getElementById('svcPrice').value);
-    if (!name || !price) { showToast('Vui lòng điền đầy đủ tên và giá dịch vụ!', 'error'); return; }
+    
+    if (!name || !price) { 
+        showToast('Vui lòng điền đầy đủ tên và giá dịch vụ!', 'error'); 
+        return; 
+    }
+    
     var perUnit = document.getElementById('svcPerUnit').value === 'true';
     var data = {
         name: name,
         cat: document.getElementById('svcCat').value,
-        desc: '',
+        desc: '', 
         price: price,
         time: document.getElementById('svcTime').value.trim() || 'Liên hệ',
         perUnit: perUnit,
         unit: perUnit ? document.getElementById('svcUnit').value.trim() : '',
-        status: 'active'
+        status: editingSvcId ? services.find(s => s.id === editingSvcId).status : 'active'
     };
+
     if (editingSvcId) {
-        var idx = services.findIndex(function(s){return s.id===editingSvcId;});
-        if (idx > -1) { services[idx] = Object.assign({}, services[idx], data); showToast('Đã cập nhật dịch vụ'); }
+        data.id = editingSvcId;
+        var updateRes = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('action', 'update');
+            params.append('id', String(data.id));
+            params.append('name', data.name);
+            params.append('cat', data.cat);
+            params.append('price', String(data.price));
+            params.append('time', data.time);
+            params.append('perUnit', String(data.perUnit));
+            const res = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            var json = null;
+            try { json = await res.json(); } catch (e) { json = null; }
+            if (!res.ok || (json && json.success === false)) {
+                throw new Error((json && json.message) ? json.message : 'Không cập nhật được dịch vụ');
+            }
+            return { success: true };
+        }, 'Đã cập nhật dịch vụ');
+        if (updateRes) window.location.reload();
     } else {
-        var newId = Math.max.apply(null, services.map(function(s){return s.id;})) + 1;
-        services.push(Object.assign({id: newId}, data));
-        showToast('Đã thêm dịch vụ mới');
+        var createRes = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('name', data.name);
+            params.append('cat', data.cat);
+            params.append('price', String(data.price));
+            params.append('time', data.time);
+            params.append('perUnit', String(data.perUnit));
+            const res = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            var json = null;
+            try { json = await res.json(); } catch (e) { json = null; }
+            if (!res.ok || (json && json.success === false)) {
+                throw new Error((json && json.message) ? json.message : 'Không thêm được dịch vụ');
+            }
+            return { success: true };
+        }, 'Đã thêm dịch vụ mới');
+        if (createRes) window.location.reload();
     }
+    
     closeServiceModal();
-    renderServices();
 }
 
-function deleteService(id) {
+async function deleteService(id) {
     if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
-    services = services.filter(function(s){return s.id!==id;});
-    renderServices();
-    showToast('Đã xóa dịch vụ');
+    var res = await withApiGuard(async function() {
+        var params = new URLSearchParams();
+        params.append('action', 'delete');
+        params.append('id', String(id));
+        const response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không xóa được dịch vụ');
+        }
+        return { success: true };
+    }, 'Đã xóa dịch vụ');
+    if (res) window.location.reload();
 }
 
-function toggleServiceStatus(id) {
-    var s = services.find(function(x){return x.id===id;});
+async function toggleServiceStatus(id) {
+    var s = services.find(x => x.id === id);
     if (!s) return;
-    s.status = s.status === 'active' ? 'inactive' : 'active';
-    renderServices();
-    showToast(s.status === 'active' ? 'Đã kích hoạt dịch vụ' : 'Đã tạm ngưng dịch vụ');
+    
+    var newStatus = s.status === 'active' ? 'inactive' : 'active';
+    
+    var msg = newStatus === 'active' ? 'Đã kích hoạt dịch vụ' : 'Đã tạm ngưng dịch vụ';
+    var res = await withApiGuard(function() { return dataSource.services.toggleStatus(id, newStatus); }, msg);
+    if (res) await loadServicesFromServer();
 }
 
 // ==================== LỊCH LÀM VIỆC ====================
@@ -559,7 +834,7 @@ function populateShiftStaff(id) { schPopulateStaff(id); }
 
 function closeShiftModal() { document.getElementById('shiftModal').style.display = 'none'; }
 
-function saveShift() {
+async function saveShift() {
     var staffId  = parseInt(document.getElementById('shiftStaff').value);
     var date     = document.getElementById('shiftDate').value;
     var type     = document.getElementById('shiftType').value;
@@ -589,16 +864,41 @@ function saveShift() {
 
     var data = { staffId: staffId, staffName: staffAcc.name, shiftType: type, date: date, room: room, note: '' };
 
-    if (editingShiftId) {
-        var idx = shifts.findIndex(function(s) { return s.id === editingShiftId; });
-        if (idx > -1) { shifts[idx] = Object.assign({}, shifts[idx], data); showToast('Đã cập nhật ca làm'); }
-    } else {
-        var newId = shifts.length > 0 ? Math.max.apply(null, shifts.map(function(s) { return s.id; })) + 1 : 1;
-        shifts.push(Object.assign({ id: newId }, data));
-        showToast('Đã phân công ca làm');
+    async function saveShiftToServer(payload, isUpdate) {
+        var params = new URLSearchParams();
+        params.append('action', isUpdate ? 'update' : 'create');
+        if (isUpdate) params.append('id', String(payload.id));
+        params.append('staffId', String(payload.staffId));
+        params.append('shiftType', payload.shiftType);
+        params.append('date', payload.date);
+        params.append('room', payload.room || '');
+        var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/shifts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không thể lưu ca làm việc');
+        }
+        return json || {success:true};
     }
+
+    var res = null;
+    if (editingShiftId) {
+        data.id = editingShiftId;
+        res = await withApiGuard(function() { return saveShiftToServer(data, true); }, 'Đã cập nhật ca làm');
+    } else {
+        res = await withApiGuard(function() { return saveShiftToServer(data, false); }, 'Đã phân công ca làm');
+    }
+    if (!res) return;
     closeShiftModal();
-    renderSchedule();
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}
+    window.location.reload();
 }
 
 // ===== CHI TIẾT CA LÀM =====
@@ -662,13 +962,34 @@ function closeShiftDetailModal() {
     viewingShiftId = null;
 }
 
-function deleteShiftFromDetail() {
+async function deleteShiftFromDetail() {
     if (!viewingShiftId) return;
     if (!confirm('Xóa ca làm này?')) return;
-    shifts = shifts.filter(function(s) { return s.id !== viewingShiftId; });
+    async function deleteShiftOnServer(id) {
+        var params = new URLSearchParams();
+        params.append('action', 'delete');
+        params.append('id', String(id));
+        var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/shifts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không thể xóa ca làm');
+        }
+        return json || {success:true};
+    }
+
+    var res = await withApiGuard(function() { return deleteShiftOnServer(viewingShiftId); }, 'Đã xóa ca làm');
+    if (!res) return;
     closeShiftDetailModal();
-    renderSchedule();
-    showToast('Đã xóa ca làm');
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}
+    window.location.reload();
 }
 
 function editShiftFromDetail() {
@@ -730,7 +1051,6 @@ function renderAccounts() {
                 '<td><span class="badge ' + rc.badge + '">' + rc.label + '</span></td>' +
                 '<td style="font-size:0.82rem">' + specialty + '</td>' +
                 '<td>' + (a.phone || '—') + '</td>' +
-                '<td style="color:var(--text-sub);font-size:0.82rem">' + formatDate(a.createdDate) + '</td>' +
                 '<td>' + statusBadge + '</td>' +
                 '<td onclick="event.stopPropagation()"><div class="action-btns">' +
                     '<button class="btn-action btn-edit" onclick="editAccount(' + a.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
@@ -844,7 +1164,7 @@ function onAvatarChange(input) {
 
 function closeAccountModal() { document.getElementById('accountModal').style.display = 'none'; }
 
-function saveAccount() {
+async function saveAccount() {
     var name = document.getElementById('accName').value.trim();
     var phone = document.getElementById('accPhone').value.trim();
     if (!name || !phone) { showToast('Vui lòng điền đủ họ tên và số điện thoại!', 'error'); return; }
@@ -855,7 +1175,7 @@ function saveAccount() {
     var prevSrc = document.getElementById('accAvatarPreview').src;
     var avatar = (prevSrc && prevSrc.indexOf('data:') === 0) ? prevSrc : (editingAccId ? (accounts.find(function(a){return a.id===editingAccId;})||{}).avatar||'' : '');
     var data = {
-        name: name, role: role, phone: phone, username: phone,
+        name: name, role: role, phone: phone,
         dob: document.getElementById('accDob').value,
         gender: document.getElementById('accGender').value,
         specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
@@ -863,17 +1183,16 @@ function saveAccount() {
         avatar: avatar,
         status: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
+    var res = null;
     if (editingAccId) {
-        var idx = accounts.findIndex(function(a){return a.id===editingAccId;});
-        if (idx > -1) { accounts[idx] = Object.assign({}, accounts[idx], data); showToast('Đã cập nhật tài khoản'); }
+        data.id = editingAccId;
+        res = await withApiGuard(function() { return dataSource.accounts.update(data); }, 'Đã cập nhật tài khoản');
     } else {
-        var newId = Math.max.apply(null, accounts.map(function(a){return a.id;})) + 1;
-        var today = new Date().toISOString().split('T')[0];
-        accounts.push(Object.assign({id:newId, createdDate:today}, data));
-        showToast('Đã thêm tài khoản mới');
+        res = await withApiGuard(function() { return dataSource.accounts.create(data); }, 'Đã thêm tài khoản mới');
     }
+    if (!res) return;
     closeAccountModal();
-    renderAccounts();
+    await loadAccountsFromServer();
 }
 
 // ===== POPUP THÔNG TIN NHÂN SỰ =====
@@ -930,19 +1249,19 @@ function editAccountFromInfo() { closeStaffInfoModal(); if (staffInfoCurrentId) 
 
 
 
-function toggleAccStatus(id) {
+async function toggleAccStatus(id) {
     var a = accounts.find(function(x){return x.id===id;});
     if (!a) return;
-    a.status = a.status === 'active' ? 'inactive' : 'active';
-    renderAccounts();
-    showToast(a.status === 'active' ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản');
+    var newStatus = a.status === 'active' ? 'inactive' : 'active';
+    var msg = newStatus === 'active' ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản';
+    var res = await withApiGuard(function() { return dataSource.accounts.toggleStatus(id, newStatus); }, msg);
+    if (res) await loadAccountsFromServer();
 }
 
-function deleteAccount(id) {
+async function deleteAccount(id) {
     if (!confirm('Bạn có chắc muốn xóa tài khoản này?')) return;
-    accounts = accounts.filter(function(a){return a.id!==id;});
-    renderAccounts();
-    showToast('Đã xóa tài khoản');
+    var res = await withApiGuard(function() { return dataSource.accounts.remove(id); }, 'Đã xóa tài khoản');
+    if (res) await loadAccountsFromServer();
 }
 
 // ==================== DOANH THU ====================
@@ -1320,9 +1639,21 @@ window.onclick = function(e) {
 };
 
 // ==================== KHỞI TẠO ====================
-document.addEventListener('DOMContentLoaded', function() {
-    renderServices();
-    renderSchedule();
-    renderAccounts();
-    renderRevenue();
+document.addEventListener('DOMContentLoaded', async function() {
+    if (ADMIN_CONFIG.USE_MOCK) {
+        console.info('[admin] mode: MOCK data');
+    } else {
+        console.info('[admin] mode: REAL API');
+    }
+    await loadServicesFromServer();
+    await loadShiftsFromServer();
+    await loadAccountsFromServer();
+    await loadRevenueFromServer();
+    try {
+        var lastTab = localStorage.getItem(ADMIN_LAST_TAB_KEY);
+        if (lastTab && ['services', 'schedule', 'accounts', 'revenue'].indexOf(lastTab) !== -1) {
+            var targetLink = document.querySelector('.nav-menu a[onclick*="switchTab(\'' + lastTab + '\'"]');
+            switchTab(lastTab, targetLink || null);
+        }
+    } catch (e) {}
 });

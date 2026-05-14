@@ -7,21 +7,21 @@ public class BacSi {
     private int taiKhoanID;   // Khớp với TaiKhoan_ID (FK)
     private String anhDaiDien;
     private String trinhDo;
+    private int chuyenKhoaID;
     
     // Đối tượng quan hệ (Dùng để chứa dữ liệu sau khi JOIN)
-    private TaiKhoan taiKhoan;  // ???
-    private List<BacSiChuyenKhoa> danhSachChuyenKhoa;
+    private TaiKhoan taiKhoan;
+    private ChuyenKhoa chuyenKhoa;
     private List<LichHen> danhSachLichHen;
-    private List<PhieuKham> danhSachPhieuKham;
-    private List<ChiTietDichVu> danhSachChiTietDichVu;
     
     public BacSi() {}
 
-    public BacSi(int bacSiID, int taiKhoanID, String anhDaiDien, String trinhDo) {
+    public BacSi(int bacSiID, int taiKhoanID, String anhDaiDien, String trinhDo, int chuyenKhoaID) {
         this.bacSiID = bacSiID;
-        this.taiKhoanID = taiKhoanID; //???? 
+        this.taiKhoanID = taiKhoanID;
         this.anhDaiDien = anhDaiDien;
         this.trinhDo = trinhDo;
+        this.chuyenKhoaID = chuyenKhoaID;
     }
 
     // Getters and Setters
@@ -36,20 +36,16 @@ public class BacSi {
 
     public String getTrinhDo() { return trinhDo; }
     public void setTrinhDo(String trinhDo) { this.trinhDo = trinhDo; }
+    
+    public int getChuyenKhoaID(){return chuyenKhoaID;}
+    public void setChuyenKhoaID(int chuyenKhoaID){this.chuyenKhoaID = chuyenKhoaID;}
 
     public TaiKhoan getTaiKhoan() { return taiKhoan; }
     public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
+    
+    public ChuyenKhoa getChuyenKhoa(){return chuyenKhoa;}
+    public void setChuyenKhoa(ChuyenKhoa chuyenKhoa){this.chuyenKhoa = chuyenKhoa;}
 
-    public List<BacSiChuyenKhoa> getDanhSachChuyenKhoa() { return danhSachChuyenKhoa; }
-    public void setDanhSachChuyenKhoa(List<BacSiChuyenKhoa> danhSachChuyenKhoa) { 
-    this.danhSachChuyenKhoa = danhSachChuyenKhoa; 
-    }
     public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
     public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }
-
-    public List<PhieuKham> getDanhSachPhieuKham() { return danhSachPhieuKham; }
-    public void setDanhSachPhieuKham(List<PhieuKham> danhSachPhieuKham) { this.danhSachPhieuKham = danhSachPhieuKham; }
-
-    public List<ChiTietDichVu> getDanhSachChiTietDichVu() { return danhSachChiTietDichVu; }
-    public void setDanhSachChiTietDichVu(List<ChiTietDichVu> danhSachChiTietDichVu) { this.danhSachChiTietDichVu = danhSachChiTietDichVu; }
 }

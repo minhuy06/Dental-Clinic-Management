@@ -1,13 +1,4 @@
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<<<<<<< HEAD
-<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-=======
-<%
-    String loggedInUser = (String) session.getAttribute("loggedInUser");
-    boolean isLoggedIn  = (loggedInUser != null);
-%>
->>>>>>> main
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -34,6 +25,7 @@
             <div class="container">
                 <div class="section-title"><h2>Đặt lịch khám</h2></div>
                 <p class="section-intro">Chọn dịch vụ, ngày giờ phù hợp. Phòng khám sẽ phân bác sĩ và liên hệ xác nhận trong 30 phút.</p>
+
                 <div class="new-booking-card">
                     <!-- Ngay + Gio -->
                     <div class="nb-row-2">
@@ -134,50 +126,10 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
-    <!-- POPUP YEU CAU DANG NHAP -->
-    <div class="system-modal-overlay" id="loginRequiredModal" onclick="if(event.target===this)closeLoginModal()">
-        <div class="system-modal">
-            <span class="sys-icon">🔐</span>
-            <div class="sys-title">Yêu cầu đăng nhập</div>
-            <div class="sys-msg">Bạn cần đăng nhập để đặt lịch khám. Vui lòng đăng nhập hoặc đăng ký tài khoản để tiếp tục.</div>
-            <div style="display:flex;gap:12px;justify-content:center;">
-                <button class="sys-close" onclick="goToLogin()">🔑 Đăng nhập</button>
-                <button class="sys-close" style="background:var(--text-muted);" onclick="closeLoginModal()">Hủy</button>
-            </div>
-        </div>
-    </div>
-
-    <script>window.IS_LOGGED_IN = <%= isLoggedIn %>;</script>
-
-    <%-- ================================================================
-         DATA INJECTION — Backend đặt các attribute vào request scope:
-           request.setAttribute("serviceListJson", "[{...}, {...}]");
-           request.setAttribute("doctorListJson",  "[{...}, {...}]");
-
-         Mỗi service object cần: id, name, desc, time, price, cat, perUnit, unit
-         Mỗi doctor object cần:  name, specialty, degree, imgUrl
-
-         Nếu tên field trong DB khác, map lại trong Servlet/Controller trước khi
-         set attribute — KHÔNG cần sửa file JS.
-    ================================================================= --%>
     <script>
     (function() {
-        // ── DỊCH VỤ ──────────────────────────────────────────────────
-        // Backend inject: request.setAttribute("serviceListJson", jsonString);
-        var injectedServices = '${not empty serviceListJson ? serviceListJson : ""}';
+        window.allServices = <%= request.getAttribute("serviceListJson") == null ? "[]" : request.getAttribute("serviceListJson") %>;
 
-        if (injectedServices && injectedServices !== '') {
-            try {
-                window.allServices = JSON.parse(injectedServices);
-            } catch(e) {
-                console.warn('[dat-lich] serviceListJson parse error:', e);
-                window.allServices = null;
-            }
-        }
-        // Nếu backend chưa inject thì allServices sẽ dùng fallback trong dat-lich.js
-
-        // ── BÁC SĨ ───────────────────────────────────────────────────
-        // Backend inject: request.setAttribute("doctorListJson", jsonString);
         var injectedDoctors = '${not empty doctorListJson ? doctorListJson : ""}';
         var doctors = null;
 
@@ -189,17 +141,7 @@
             }
         }
 
-        // Fallback: dữ liệu mẫu nếu backend chưa inject
-        if (!doctors || doctors.length === 0) {
-            doctors = [
-                {name:'BS. Nguyễn Hải',  specialty:'Tổng quát',        degree:'CKI',    imgUrl:'assets/img/doctors/bs-nguyen-hai.jpg'},
-                {name:'BS. Trần Tâm',    specialty:'Chỉnh nha',         degree:'Thạc sĩ',imgUrl:'assets/img/doctors/bs-tran-tam.jpg'},
-                {name:'BS. Lê Quang',    specialty:'Phục hình răng',    degree:'Tiến sĩ',imgUrl:'assets/img/doctors/bs-le-quang.jpg'},
-                {name:'BS. Phạm Hương',  specialty:'Thẩm mỹ',           degree:'CKI',    imgUrl:'assets/img/doctors/bs-pham-huong.jpg'},
-                {name:'BS. Hoàng Quân',  specialty:'Phẫu thuật miệng',  degree:'CKII',   imgUrl:'assets/img/doctors/bs-hoang-quan.jpg'},
-                {name:'BS. Đặng Ngân',   specialty:'Nhổ răng',           degree:'Cử nhân',imgUrl:'assets/img/doctors/bs-dang-ngan.jpg'}
-            ];
-        }
+        if (!doctors || doctors.length === 0) return;
 
         // Render doctor cards
         var grid = document.getElementById('doctorsGrid');

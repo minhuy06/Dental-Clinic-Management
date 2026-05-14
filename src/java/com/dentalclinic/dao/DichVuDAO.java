@@ -1,90 +1,109 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package com.dentalclinic.dao;
 
-import com.dentalclinic.model.ChuyenKhoa;
-import com.dentalclinic.model.DichVu;
-import com.dentalclinic.model.PhongKham;
-import com.dentalclinic.model.PhongKhamDichVu;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import com.dentalclinic.utils.DBConnection;
-import java.sql.ResultSet;
+import com.dentalclinic.model.DichVu;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-/**
- *
- * @author kinhm
- */
+import java.util.stream.Collectors;
+
 public class DichVuDAO {
-    //Chỉ lấy thông tin cơ bản của dịch vụ
-    public DichVu getDVByID(int id){
-        DichVu dv = null;
-        String sql = "SELECT * FROM Dichvu WHERE Dichvu_ID = ?";
-        try(Connection cn = DBConnection.getConnection(); PreparedStatement ps = cn.prepareStatement(sql)){
-            ps.setInt(1, id);
-            
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()){
-                dv.setDichVuID(id);
-                dv.setChuyenKhoaID(rs.getInt("Chuyenkhoa_ID"));
-                dv.setGiaTien(rs.getDouble("Giatien"));
-                dv.setTenDichVu(rs.getString("Tendichvu"));
-                dv.setThoiLuongDuKien(rs.getInt("Thoiluongdukien"));
-            }
-        } catch (Exception e){
-            System.out.println("Loi truy xuat:" + e.getMessage());
+
+    private static boolean hasColumn(ResultSetMetaData md, String col) throws SQLException {
+        for (int i = 1; i <= md.getColumnCount(); i++) {
+            String label = md.getColumnLabel(i);
+            if (label != null && label.equalsIgnoreCase(col)) return true;
         }
-        return dv;
+        return false;
     }
-    
-    public List<PhongKhamDichVu> getDSPhongKhamByDichVuID(int id){
-        List<PhongKhamDichVu> ds = new ArrayList();
-        String sql = "SELECT dv.*, pk.* FROM PhongKhamDichVu pkdv join PhongKham pk on pkdv.PhongKham_ID = pk.PhongKham_ID join DichVu dv on dv.DichVu_ID = pkdv.DichVu_ID WHERE dv.DichVu_ID = ?";
-        
-        try (Connection cn=DBConnection.getConnection();PreparedStatement ps = cn.prepareStatement(sql)){
-            ps.setInt(1, id);
-            
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
-                PhongKhamDichVu pkdv = new PhongKhamDichVu();
-                PhongKham pk = new PhongKham();
-                pkdv.setDichVuID(id);
-                pk.setPhongID(rs.getInt("pk.PhongKham_ID"));
-                pk.setTenPhong(rs.getString("pk.Tenphong"));
-                pk.setTrangThai(rs.getString("pk.Trangthai"));
-                pkdv.setPhongKham(pk);
-                ds.add(pkdv);
-            }
-        } catch (Exception e){
-            
-        }
-        return ds;
-    }
-    public List<DichVu> getAllDichVu(){
-        List<DichVu> ds = new ArrayList();
-        
-        String sql = "SELECT * From Dichvu dv join ChuyenKhoa ck on dv.ChuyenKhoa_ID = ck.ChuyenKhoa_ID";
-        
-        try(Connection cn = DBConnection.getConnection();PreparedStatement ps = cn.prepareStatement(sql)){
-            ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+
+    public List<DichVu> getAll() {
+        List<DichVu> list = new ArrayList<>();
+        String sql = "SELECT DichVu_ID, TenDichVu, GiaTien, ThoiLuongDuKien, ChuyenKhoa_ID, TinhTheoRang FROM DichVu";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            ResultSetMetaData md = rs.getMetaData();
+            while (rs.next()) {
                 DichVu dv = new DichVu();
-                ChuyenKhoa ck = new ChuyenKhoa();
-                ck.setTenChuyenKhoa(rs.getString("TenChuyenKhoa"));
                 dv.setDichVuID(rs.getInt("DichVu_ID"));
+                dv.setTenDichVu(rs.getNString("TenDichVu"));
                 dv.setGiaTien(rs.getDouble("GiaTien"));
-                dv.setTenDichVu(rs.getString("TenDichVu"));
-                dv.setThoiLuongDuKien(rs.getInt("ThoiLuongDuKien"));
-                dv.setChuyenKhoaID(rs.getInt("ChuyenKhoa_ID"));
-                dv.setChuyenKhoa(ck);
-                ds.add(dv);
+                dv.setThoiLuongDuKien(hasColumn(md, "ThoiLuongDuKien") ? rs.getInt("ThoiLuongDuKien") : 30);
+                dv.setChuyenKhoaID(hasColumn(md, "ChuyenKhoa_ID") ? rs.getInt("ChuyenKhoa_ID") : 0);
+                dv.setTinhTheoRang(hasColumn(md, "TinhTheoRang") && rs.getBoolean("TinhTheoRang"));
+                list.add(dv);
             }
-        } catch (Exception e){
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        return ds;
+        return list;
+    }
+
+    public int getTotalDurationMinutesByIds(List<Integer> dichVuIds) {
+        if (dichVuIds == null || dichVuIds.isEmpty()) return 0;
+        String placeholders = dichVuIds.stream().map(x -> "?").collect(Collectors.joining(","));
+        String sql = "SELECT SUM(ISNULL(ThoiLuongDuKien, 30)) AS TotalMinutes FROM DichVu WHERE DichVu_ID IN (" + placeholders + ")";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            int idx = 1;
+            for (Integer id : dichVuIds) {
+                ps.setInt(idx++, id);
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int total = rs.getInt("TotalMinutes");
+                    return total > 0 ? total : 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public boolean createFromAdmin(String tenDichVu, double giaTien, int thoiLuongDuKien, int chuyenKhoaId, boolean tinhTheoRang) {
+        String sql = "INSERT INTO DichVu (TenDichVu, GiaTien, ThoiLuongDuKien, ChuyenKhoa_ID, TinhTheoRang) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, tenDichVu);
+            ps.setDouble(2, giaTien);
+            ps.setInt(3, thoiLuongDuKien);
+            ps.setInt(4, chuyenKhoaId);
+            ps.setBoolean(5, tinhTheoRang);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean deleteById(int dichVuId) {
+        String sql = "DELETE FROM DichVu WHERE DichVu_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, dichVuId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean updateFromAdmin(int dichVuId, String tenDichVu, double giaTien, int thoiLuongDuKien, int chuyenKhoaId, boolean tinhTheoRang) {
+        String sql = "UPDATE DichVu SET TenDichVu = ?, GiaTien = ?, ThoiLuongDuKien = ?, ChuyenKhoa_ID = ?, TinhTheoRang = ? WHERE DichVu_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, tenDichVu);
+            ps.setDouble(2, giaTien);
+            ps.setInt(3, thoiLuongDuKien);
+            ps.setInt(4, chuyenKhoaId);
+            ps.setBoolean(5, tinhTheoRang);
+            ps.setInt(6, dichVuId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

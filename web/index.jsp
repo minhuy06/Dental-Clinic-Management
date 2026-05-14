@@ -1,4 +1,7 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="com.dentalclinic.dao.DichVuDAO" %>
+<%@ page import="com.dentalclinic.model.DichVu" %>
+<%@ page import="java.util.List" %>
 <%
     if ("true".equals(request.getParameter("loginSuccess"))) {
         session.setAttribute("loggedInUser", "Khách hàng");
@@ -9,6 +12,7 @@
         return;
     }
     String loggedInUser = (String) session.getAttribute("loggedInUser");
+    List<DichVu> homeServices = new DichVuDAO().getAll();
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -69,12 +73,19 @@
         <section class="services-section" id="services"><div class="container">
             <div class="section-title fade-in"><h2>Dịch vụ nổi bật</h2><p>Đa dạng dịch vụ nha khoa chất lượng cao</p></div>
             <div class="services-grid">
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">💎</div><h3>Bọc răng Sứ</h3><p>Răng sứ Cercon, Zirconia, Veneer mang lại nụ cười hoàn hảo.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">😁</div><h3>Niềng răng</h3><p>Chỉnh nha mắc cài kim loại, sứ hoặc Invisalign.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">🦷</div><h3>Trồng răng Implant</h3><p>Phục hồi răng mất bằng trụ Implant Titanium trọn đời.</p></div>
-                <div class="service-card fade-in" onclick="showSystemModal()" style="cursor:pointer;"><div class="service-icon">✨</div><h3>Tẩy trắng răng</h3><p>Công nghệ Laser an toàn, trắng sáng chỉ sau 1 buổi.</p></div>
+                <% 
+                    int serviceLimit = Math.min(4, homeServices.size());
+                    for (int i = 0; i < serviceLimit; i++) {
+                        DichVu dv = homeServices.get(i);
+                %>
+                <div class="service-card fade-in">
+                    <div class="service-icon">🦷</div>
+                    <h3><%= dv.getTenDichVu() %></h3>
+                    <p>Thời lượng dự kiến: <%= dv.getThoiLuongDuKien() %> phút.</p>
+                </div>
+                <% } %>
             </div>
-            <div class="text-center mt-3"><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
+            <div class="text-center mt-3"><a href="${pageContext.request.contextPath}/dat-lich#dichvu" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
         </div></section>
 
         <!-- REVIEWS -->
@@ -118,7 +129,17 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
-    <script>window.LOGGED_USER = '<%= loggedInUser != null ? loggedInUser : "" %>';</script>
+    <script>
+        window.LOGGED_USER = '<%= loggedInUser != null ? loggedInUser : "" %>';
+        window.SERVICE_LIST_FROM_DB = [
+            <% for (int i = 0; i < homeServices.size(); i++) {
+                   DichVu dv = homeServices.get(i);
+                   String safeName = dv.getTenDichVu() == null ? "" : dv.getTenDichVu().replace("\\", "\\\\").replace("\"", "\\\"");
+            %>
+            {"id":<%= dv.getDichVuID() %>,"name":"<%= safeName %>","price":<%= (long) dv.getGiaTien() %>,"time":"<%= dv.getThoiLuongDuKien() %> phút","perUnit":<%= dv.isTinhTheoRang() %>}<%= (i < homeServices.size() - 1) ? "," : "" %>
+            <% } %>
+        ];
+    </script>
     <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
 </body>
 </html>

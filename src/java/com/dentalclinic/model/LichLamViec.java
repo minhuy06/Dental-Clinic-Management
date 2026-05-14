@@ -9,7 +9,6 @@ public class LichLamViec {
     private int caID;           // Khớp cột Ca_Id (FK)
     private Date ngayLam;       // Khớp cột NgayLam
     private int phongID;        // Khớp cột Phong_ID (FK)
-    private String trangThai;   // Khớp cột TrangThai (VD: Sắp tới, Đã hoàn thành, Nghỉ phép)
 
     // --- Các đối tượng quan hệ (Dùng để hứng dữ liệu JOIN và hiển thị lên giao diện Admin) ---
     private TaiKhoan taiKhoan;  
@@ -20,13 +19,12 @@ public class LichLamViec {
     public LichLamViec() {}
 
     // Constructor đầy đủ tham số cơ bản
-    public LichLamViec(int lichID, int taiKhoanID, int caID, Date ngayLam, int phongID, String trangThai) {
+    public LichLamViec(int lichID, int taiKhoanID, int caID, Date ngayLam, int phongID) {
         this.lichID = lichID;
         this.taiKhoanID = taiKhoanID;
         this.caID = caID;
         this.ngayLam = ngayLam;
         this.phongID = phongID;
-        this.trangThai = trangThai;
     }
 
     // ================= GETTERS VÀ SETTERS =================
@@ -45,9 +43,6 @@ public class LichLamViec {
 
     public int getPhongID() { return phongID; }
     public void setPhongID(int phongID) { this.phongID = phongID; }
-
-    public String getTrangThai() { return trangThai; }
-    public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
 
     // --- Getters / Setters cho Đối tượng quan hệ ---
     

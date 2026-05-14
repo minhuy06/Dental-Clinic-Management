@@ -14,6 +14,9 @@ public class LichHen {
     private Time gioKham;       // Khớp cột GioKham
     private String ghiChu;      // Khớp cột GhiChu (Triệu chứng, yêu cầu thêm...)
     private String trangThai;   // Khớp cột TrangThai (Chờ xác nhận, Đã xác nhận, Đã hủy, Hoàn thành)
+    private int phongID;
+    /** Tên phòng sau JOIN (hiển thị UI, không map trực tiếp một cột LichHen) */
+    private String tenPhong;
 
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
@@ -23,7 +26,7 @@ public class LichHen {
     public LichHen() {}
 
     // Constructor đầy đủ tham số cơ bản (Dành cho lúc INSERT/UPDATE)
-    public LichHen(int lichHenID, int benhNhanID, int bacSiID, Date ngayKham, Time gioKham, String ghiChu, String trangThai) {
+    public LichHen(int lichHenID, int benhNhanID, int bacSiID, Date ngayKham, Time gioKham, String ghiChu, String trangThai, int phongID) {
         this.lichHenID = lichHenID;
         this.benhNhanID = benhNhanID;
         this.bacSiID = bacSiID;
@@ -31,6 +34,7 @@ public class LichHen {
         this.gioKham = gioKham;
         this.ghiChu = ghiChu;
         this.trangThai = trangThai;
+        this.phongID = phongID;
     }
 
     // ================= GETTERS VÀ SETTERS =================
@@ -55,6 +59,12 @@ public class LichHen {
 
     public String getTrangThai() { return trangThai; }
     public void setTrangThai(String trangThai) { this.trangThai = trangThai; }
+    
+    public int getPhongID(){return phongID;}
+    public void setPhongID(int phongID){this.phongID = phongID;}
+
+    public String getTenPhong() { return tenPhong; }
+    public void setTenPhong(String tenPhong) { this.tenPhong = tenPhong; }
 
     // --- Getters / Setters cho Đối tượng quan hệ ---
     

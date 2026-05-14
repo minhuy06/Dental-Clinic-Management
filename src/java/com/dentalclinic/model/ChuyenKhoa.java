@@ -7,8 +7,9 @@ public class ChuyenKhoa {
     private String tenChuyenKhoa;
 
     // Đối tượng quan hệ (dùng sau khi JOIN)
-    private List<BacSiChuyenKhoa> danhSachBacSi;
     private List<DichVu> danhSachDichVu;
+    private List<BacSi> danhSachBacSi;
+    
     public ChuyenKhoa() {}
 
     public ChuyenKhoa(int chuyenKhoaID, String tenChuyenKhoa) {
@@ -22,13 +23,13 @@ public class ChuyenKhoa {
     public String getTenChuyenKhoa() { return tenChuyenKhoa; }
     public void setTenChuyenKhoa(String tenChuyenKhoa) { this.tenChuyenKhoa = tenChuyenKhoa; }
 
-    public List<BacSiChuyenKhoa> getDanhSachBacSi() { return danhSachBacSi; }
-    public void setDanhSachBacSi(List<BacSiChuyenKhoa> danhSachBacSi) { 
-        this.danhSachBacSi = danhSachBacSi; 
-    }
-    
     public List<DichVu> getDanhSachDichVu(){return danhSachDichVu;}
     public void setDanhSachDichVu(List<DichVu> danhSachDichVu){
         this.danhSachDichVu = danhSachDichVu;
     }
+    
+    public List<BacSi> getDanhSachBacSi(){return danhSachBacSi;}
+    public void setDanhSachBacSi(List<BacSi> danhSachBacSi){
+        this.danhSachBacSi = danhSachBacSi;
+    } 
 }
