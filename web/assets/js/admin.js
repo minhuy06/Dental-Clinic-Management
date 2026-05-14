@@ -2,30 +2,8 @@
  * ==================== NHA KHOA 5AE - ADMIN.JS ====================
  */
 
-// ==================== DỮ LIỆU MẪU ====================
-
-var services = [
-    {id:1, name:'Khám tổng quát', desc:'Kiểm tra răng miệng toàn diện', time:'20 phút', price:100000, cat:'kham', perUnit:false, unit:'', status:'active'},
-    {id:2, name:'Cạo vôi răng', desc:'Loại bỏ mảng bám, vôi răng', time:'30 phút', price:200000, cat:'kham', perUnit:false, unit:'', status:'active'},
-    {id:3, name:'Trám răng Composite', desc:'Trám thẩm mỹ Composite cao cấp', time:'30 phút', price:300000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:4, name:'Nhổ răng sữa', desc:'Nhổ răng sữa cho trẻ em', time:'15 phút', price:100000, cat:'tre-em', perUnit:true, unit:'răng', status:'active'},
-    {id:5, name:'Nhổ răng khôn mọc thẳng', desc:'Nhổ răng khôn không phẫu thuật', time:'30 phút', price:1000000, cat:'phau-thuat', perUnit:true, unit:'răng', status:'active'},
-    {id:6, name:'Nhổ răng khôn mọc ngầm', desc:'Tiểu phẫu nhổ răng khôn phức tạp', time:'60 phút', price:3000000, cat:'phau-thuat', perUnit:true, unit:'răng', status:'active'},
-    {id:7, name:'Tẩy trắng răng Laser', desc:'Tẩy trắng bằng công nghệ Laser hiện đại', time:'45 phút', price:2500000, cat:'tham-my', perUnit:false, unit:'', status:'active'},
-    {id:8, name:'Tẩy trắng răng tại nhà', desc:'Máng tẩy trắng tại nhà tiện lợi', time:'20 phút', price:1500000, cat:'tham-my', perUnit:false, unit:'', status:'active'},
-    {id:9, name:'Lấy tủy răng cửa', desc:'Điều trị tủy răng cửa', time:'45 phút', price:800000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:10, name:'Lấy tủy răng hàm', desc:'Điều trị tủy răng hàm', time:'60 phút', price:1500000, cat:'kham', perUnit:true, unit:'răng', status:'active'},
-    {id:11, name:'Bọc răng sứ Titan', desc:'Răng sứ Titan tiêu chuẩn', time:'45 phút/răng', price:2000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:12, name:'Bọc răng sứ Cercon', desc:'Răng sứ Cercon Đức chính hãng', time:'45 phút/răng', price:5000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:13, name:'Bọc răng sứ Zirconia', desc:'Răng sứ Zirconia nguyên khối cao cấp', time:'45 phút/răng', price:6000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:14, name:'Mặt dán sứ Veneer', desc:'Dán sứ siêu mỏng thẩm mỹ', time:'60 phút/răng', price:7000000, cat:'tham-my', perUnit:true, unit:'răng', status:'active'},
-    {id:15, name:'Cấy ghép Implant tiêu chuẩn', desc:'Trụ Implant Titanium nhập khẩu', time:'60-90 phút', price:15000000, cat:'phau-thuat', perUnit:true, unit:'trụ', status:'active'},
-    {id:16, name:'Cấy ghép Implant cao cấp', desc:'Trụ Implant cao cấp Châu Âu', time:'60-90 phút', price:30000000, cat:'phau-thuat', perUnit:true, unit:'trụ', status:'active'},
-    {id:17, name:'Niềng răng mắc cài kim loại', desc:'Chỉnh nha mắc cài kim loại chuẩn', time:'60 phút/lần', price:25000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:18, name:'Niềng răng mắc cài sứ', desc:'Chỉnh nha mắc cài sứ thẩm mỹ', time:'60 phút/lần', price:35000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:19, name:'Niềng răng Invisalign', desc:'Khay trong suốt chỉnh nha tiên tiến', time:'45 phút/lần', price:80000000, cat:'chinh-nha', perUnit:false, unit:'', status:'active'},
-    {id:20, name:'Điều trị viêm nha chu', desc:'Điều trị viêm nướu nha chu chuyên sâu', time:'30 phút', price:500000, cat:'kham', perUnit:false, unit:'', status:'inactive'}
-];
+// ==================== DỮ LIỆU ====================
+var services = [];
 
 var staffList = [
     {id:1, name:'BS. Nguyễn Hải', role:'doctor', specialty:'Răng tổng quát', degree:'CKI', phone:'0901234561', startDate:'2020-01-10', status:'active'},
@@ -100,6 +78,7 @@ var shifts = [
 var svcFilter = 'all', svcPage = 1, svcPerPage = 6, editingSvcId = null;
 var accFilter = 'all', accPage = 1, accPerPage = 8, editingAccId = null;
 var staffInfoCurrentId = null;
+var ADMIN_LAST_TAB_KEY = 'admin:lastTab';
 
 // Schedule state
 var schCurrentDate = new Date();
@@ -109,7 +88,7 @@ var editingShiftId = null;
 // JSP inject vào window.__ADMIN_*__ trước khi load file này.
 // Nếu có thì dùng, không thì giữ nguyên demo data ở trên.
 (function() {
-    if (window.__ADMIN_SERVICES__ && window.__ADMIN_SERVICES__.length > 0) {
+    if (Array.isArray(window.__ADMIN_SERVICES__)) {
         services = window.__ADMIN_SERVICES__;
         console.info('[admin] services loaded from DB:', services.length);
     }
@@ -405,6 +384,7 @@ function switchTab(tab, el) {
     document.querySelectorAll('.nav-menu a').forEach(function(a) { a.classList.remove('active'); });
     document.getElementById('panel-' + tab).classList.add('active');
     if (el) el.classList.add('active');
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, tab); } catch (e) {}
     if (tab === 'services')  renderServices();
     if (tab === 'schedule')  renderSchedule();
     if (tab === 'accounts')  renderAccounts();
@@ -479,7 +459,7 @@ function updateSvcStats() {
     var total = services.reduce(function(a,s){return a+s.price;}, 0);
     var avg = services.length ? Math.round(total/services.length) : 0;
     document.getElementById('statAvgPrice').innerText = formatPrice(avg);
-    var maxPrice = Math.max.apply(null, services.map(function(s){return s.price;}));
+    var maxPrice = services.length ? Math.max.apply(null, services.map(function(s){return s.price;})) : 0;
     document.getElementById('statMaxPrice').innerText = formatPrice(maxPrice);
 }
 
@@ -546,11 +526,55 @@ async function saveService() {
 
     if (editingSvcId) {
         data.id = editingSvcId;
-        var updateRes = await withApiGuard(function() { return dataSource.services.update(data); }, 'Đã cập nhật dịch vụ');
-        if (updateRes) await loadServicesFromServer();
+        var updateRes = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('action', 'update');
+            params.append('id', String(data.id));
+            params.append('name', data.name);
+            params.append('cat', data.cat);
+            params.append('price', String(data.price));
+            params.append('time', data.time);
+            params.append('perUnit', String(data.perUnit));
+            const res = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            var json = null;
+            try { json = await res.json(); } catch (e) { json = null; }
+            if (!res.ok || (json && json.success === false)) {
+                throw new Error((json && json.message) ? json.message : 'Không cập nhật được dịch vụ');
+            }
+            return { success: true };
+        }, 'Đã cập nhật dịch vụ');
+        if (updateRes) window.location.reload();
     } else {
-        var createRes = await withApiGuard(function() { return dataSource.services.create(data); }, 'Đã thêm dịch vụ mới');
-        if (createRes) await loadServicesFromServer();
+        var createRes = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('name', data.name);
+            params.append('cat', data.cat);
+            params.append('price', String(data.price));
+            params.append('time', data.time);
+            params.append('perUnit', String(data.perUnit));
+            const res = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            var json = null;
+            try { json = await res.json(); } catch (e) { json = null; }
+            if (!res.ok || (json && json.success === false)) {
+                throw new Error((json && json.message) ? json.message : 'Không thêm được dịch vụ');
+            }
+            return { success: true };
+        }, 'Đã thêm dịch vụ mới');
+        if (createRes) window.location.reload();
     }
     
     closeServiceModal();
@@ -558,8 +582,26 @@ async function saveService() {
 
 async function deleteService(id) {
     if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
-    var res = await withApiGuard(function() { return dataSource.services.remove(id); }, 'Đã xóa dịch vụ');
-    if (res) await loadServicesFromServer();
+    var res = await withApiGuard(async function() {
+        var params = new URLSearchParams();
+        params.append('action', 'delete');
+        params.append('id', String(id));
+        const response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/services', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không xóa được dịch vụ');
+        }
+        return { success: true };
+    }, 'Đã xóa dịch vụ');
+    if (res) window.location.reload();
 }
 
 async function toggleServiceStatus(id) {
@@ -822,16 +864,41 @@ async function saveShift() {
 
     var data = { staffId: staffId, staffName: staffAcc.name, shiftType: type, date: date, room: room, note: '' };
 
+    async function saveShiftToServer(payload, isUpdate) {
+        var params = new URLSearchParams();
+        params.append('action', isUpdate ? 'update' : 'create');
+        if (isUpdate) params.append('id', String(payload.id));
+        params.append('staffId', String(payload.staffId));
+        params.append('shiftType', payload.shiftType);
+        params.append('date', payload.date);
+        params.append('room', payload.room || '');
+        var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/shifts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không thể lưu ca làm việc');
+        }
+        return json || {success:true};
+    }
+
     var res = null;
     if (editingShiftId) {
         data.id = editingShiftId;
-        res = await withApiGuard(function() { return dataSource.shifts.update(data); }, 'Đã cập nhật ca làm');
+        res = await withApiGuard(function() { return saveShiftToServer(data, true); }, 'Đã cập nhật ca làm');
     } else {
-        res = await withApiGuard(function() { return dataSource.shifts.create(data); }, 'Đã phân công ca làm');
+        res = await withApiGuard(function() { return saveShiftToServer(data, false); }, 'Đã phân công ca làm');
     }
     if (!res) return;
     closeShiftModal();
-    await loadShiftsFromServer();
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}
+    window.location.reload();
 }
 
 // ===== CHI TIẾT CA LÀM =====
@@ -898,10 +965,31 @@ function closeShiftDetailModal() {
 async function deleteShiftFromDetail() {
     if (!viewingShiftId) return;
     if (!confirm('Xóa ca làm này?')) return;
-    var res = await withApiGuard(function() { return dataSource.shifts.remove(viewingShiftId); }, 'Đã xóa ca làm');
+    async function deleteShiftOnServer(id) {
+        var params = new URLSearchParams();
+        params.append('action', 'delete');
+        params.append('id', String(id));
+        var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/shifts', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        var json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không thể xóa ca làm');
+        }
+        return json || {success:true};
+    }
+
+    var res = await withApiGuard(function() { return deleteShiftOnServer(viewingShiftId); }, 'Đã xóa ca làm');
     if (!res) return;
     closeShiftDetailModal();
-    await loadShiftsFromServer();
+    try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}
+    window.location.reload();
 }
 
 function editShiftFromDetail() {
@@ -1561,4 +1649,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadShiftsFromServer();
     await loadAccountsFromServer();
     await loadRevenueFromServer();
+    try {
+        var lastTab = localStorage.getItem(ADMIN_LAST_TAB_KEY);
+        if (lastTab && ['services', 'schedule', 'accounts', 'revenue'].indexOf(lastTab) !== -1) {
+            var targetLink = document.querySelector('.nav-menu a[onclick*="switchTab(\'' + lastTab + '\'"]');
+            switchTab(lastTab, targetLink || null);
+        }
+    } catch (e) {}
 });

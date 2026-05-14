@@ -1,4 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
+<%
+    // Lấy thông tin người dùng từ Session
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
+    String activeTab = request.getParameter("tab");
+    if (activeTab == null) activeTab = "info";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -23,9 +31,28 @@
             <li><a href="#" onclick="switchTab('accounts',this);return false;"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
             <li><a href="#" onclick="switchTab('revenue',this);return false;"><i class="fas fa-chart-line"></i> Quản lý doanh thu</a></li>
         </ul>
-        <div class="user-info">
-            <i class="fas fa-bell" style="color:#bfdbfe;cursor:pointer;"></i>
-            <div class="avatar"><i class="fas fa-user-shield" style="color:white;"></i></div>
+        <div class="user-info dropdown-container">
+            <i class="fas fa-bell" style="color:#a5b4fc;cursor:pointer;font-size:1.2rem;margin-right:10px;"></i>
+            <div class="avatar" id="avatarBtn" onclick="toggleUserDropdown()" style="cursor: pointer; background: #4f46e5; border: 2px solid #818cf8;">
+                <i class="fas fa-user-shield" style="color:white;font-size:1.1rem;"></i>
+            </div>
+
+            <div class="user-dropdown-menu" id="userDropdown">
+                <div class="dropdown-header" style="padding: 15px 20px; border-bottom: 1px solid #f1f5f9;">
+                    <p style="margin:0; font-size:0.85rem; font-weight:700; color:#1e1b4b;"><%= loggedInUser.getHoTen() %></p>
+                    <p style="margin:0; font-size:0.75rem; color:#64748b;">Administrator</p>
+                </div>
+                <a href="${pageContext.request.contextPath}/hoso?tab=info" class="dropdown-item">
+                    <i class="fas fa-id-card"></i> Hồ sơ của tôi
+                </a>
+                <a href="${pageContext.request.contextPath}/hoso?tab=password" class="dropdown-item">
+                    <i class="fas fa-key"></i> Đổi mật khẩu
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="javascript:void(0)" onclick="doLogoutNow()" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+            </div>
         </div>
     </div>
 
@@ -520,25 +547,36 @@
     </div>
 
     <script>
-    (function() {
-        var ctx = '${pageContext.request.contextPath}';
+        window.ADMIN_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.__ADMIN_SERVICES__ = <c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/>;
+        window.__ADMIN_ACCOUNTS__ = <c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/>;
+        window.__ADMIN_SHIFTS__ = <c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/>;
+        window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
+       
+    // Xử lý bật/tắt Dropdown Menu của Admin
+    function toggleUserDropdown() {
+        var menu = document.getElementById("userDropdown");
+        if(menu) {
+            menu.classList.toggle("show");
+        }
+    }
 
-        // ── DỊCH VỤ ──────────────────────────────────────────────────
-        var svcJson = '${not empty adminServicesJson ? adminServicesJson : ""}';
-        if (svcJson) { try { window.__ADMIN_SERVICES__ = JSON.parse(svcJson); } catch(e) { console.warn('adminServicesJson parse error', e); } }
+    // Tự động đóng Dropdown khi click ra ngoài
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('.dropdown-container')) {
+            var dropdown = document.getElementById("userDropdown");
+            if (dropdown && dropdown.classList.contains('show')) {
+                dropdown.classList.remove('show');
+            }
+        }
+    });
 
-        // ── TÀI KHOẢN ────────────────────────────────────────────────
-        var accJson = '${not empty adminAccountsJson ? adminAccountsJson : ""}';
-        if (accJson) { try { window.__ADMIN_ACCOUNTS__ = JSON.parse(accJson); } catch(e) { console.warn('adminAccountsJson parse error', e); } }
-
-        // ── CA LÀM VIỆC ──────────────────────────────────────────────
-        var shiftJson = '${not empty adminShiftsJson ? adminShiftsJson : ""}';
-        if (shiftJson) { try { window.__ADMIN_SHIFTS__ = JSON.parse(shiftJson); } catch(e) { console.warn('adminShiftsJson parse error', e); } }
-
-        // ── DOANH THU ────────────────────────────────────────────────
-        var revJson = '${not empty adminRevenueJson ? adminRevenueJson : ""}';
-        if (revJson) { try { window.__ADMIN_REVENUE__ = JSON.parse(revJson); } catch(e) { console.warn('adminRevenueJson parse error', e); } }
-    })();
+    // Xử lý Đăng xuất
+    function doLogoutNow() {
+        if (confirm('Xác nhận thoát khỏi phiên quản trị?')) {
+            window.location.href = window.ADMIN_CONTEXT_PATH + '/index.jsp?logout=true';
+        }
+    }
     </script>
 
     <script src="${pageContext.request.contextPath}/assets/js/admin.js"></script>

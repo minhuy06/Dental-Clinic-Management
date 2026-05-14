@@ -240,6 +240,6 @@
         }
     })();
     </script>
-    <script src="${pageContext.request.contextPath}/assets/js/hoso.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/hoso.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

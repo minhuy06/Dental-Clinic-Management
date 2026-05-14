@@ -1,34 +1,55 @@
-// ==================== DỮ LIỆU MẪU ====================
-const servicesList = [
-    { id: 1, name: "Khám tổng quát", price: 100000, hasQuantity: false },
-    { id: 2, name: "Cạo vôi răng", price: 200000, hasQuantity: false },
-    { id: 3, name: "Trám răng Composite", price: 300000, hasQuantity: false },
-    { id: 4, name: "Nhổ răng sữa", price: 100000, hasQuantity: true, unit: "răng" },
-    { id: 5, name: "Nhổ răng khôn", price: 1000000, hasQuantity: true, unit: "răng" },
-    { id: 6, name: "Nhổ răng khôn mọc ngầm", price: 3000000, hasQuantity: true, unit: "răng" },
-    { id: 7, name: "Tẩy trắng răng Laser", price: 2500000, hasQuantity: false },
-    { id: 8, name: "Tẩy trắng răng tại nhà", price: 1500000, hasQuantity: false },
-    { id: 9, name: "Lấy tủy răng", price: 800000, hasQuantity: true, unit: "răng" },
-    { id: 10, name: "Bọc răng sứ Titan", price: 2000000, hasQuantity: true, unit: "răng" },
-    { id: 11, name: "Bọc răng sứ Cercon", price: 5000000, hasQuantity: true, unit: "răng" },
-    { id: 12, name: "Bọc răng sứ Zirconia", price: 6000000, hasQuantity: true, unit: "răng" },
-    { id: 13, name: "Mặt dán sứ Veneer", price: 7000000, hasQuantity: true, unit: "răng" },
-    { id: 14, name: "Cấy ghép Implant", price: 15000000, hasQuantity: true, unit: "trụ" },
-    { id: 15, name: "Niềng răng mắc cài kim loại", price: 25000000, hasQuantity: false },
-    { id: 16, name: "Niềng răng Invisalign", price: 80000000, hasQuantity: false },
-    { id: 17, name: "Điều trị viêm nha chu", price: 500000, hasQuantity: false }
-];
+// ==================== DỮ LIỆU TỪ BACKEND ====================
+const servicesList = [];
 
-let appointments = [
-    { id: 1, time: "08:00", patientName: "Nguyễn Văn An", patientPhone: "0901000001", doctor: "BS. Nguyễn Hải", services: [{ id: 1, name: "Khám tổng quát", price: 100000, quantity: 1 }], totalPrice: 100000, room: "Phòng 1", date: "2026-04-22", status: "confirmed", paymentStatus: "paid" },
-    { id: 2, time: "09:00", patientName: "Trần Thị Bích", patientPhone: "0901000002", doctor: "BS. Trần Tâm", services: [{ id: 15, name: "Niềng răng mắc cài kim loại", price: 25000000, quantity: 1 }], totalPrice: 25000000, room: "Phòng 2", date: "2026-04-22", status: "confirmed", paymentStatus: "pending" },
-    { id: 3, time: "10:00", patientName: "Lê Hoàng Nam", patientPhone: "0901000003", doctor: "BS. Lê Quang", services: [{ id: 5, name: "Nhổ răng khôn", price: 1000000, quantity: 2 }], totalPrice: 2000000, room: "Phòng 3", date: "2026-04-22", status: "pending", paymentStatus: "pending" },
-    { id: 4, time: "14:00", patientName: "Phạm Thu Hà", patientPhone: "0901000004", doctor: "BS. Phạm Hương", services: [{ id: 7, name: "Tẩy trắng răng Laser", price: 2500000, quantity: 1 }], totalPrice: 2500000, room: "Phòng 1", date: "2026-04-22", status: "confirmed", paymentStatus: "paid" },
-    { id: 5, time: "15:30", patientName: "Hoàng Vĩnh Khang", patientPhone: "0901000005", doctor: "BS. Hoàng Quân", services: [{ id: 14, name: "Cấy ghép Implant", price: 15000000, quantity: 1 }], totalPrice: 15000000, room: "Phòng 4", date: "2026-04-22", status: "completed", paymentStatus: "pending" },
-    { id: 6, time: "08:30", patientName: "Đặng Phương Hoa", patientPhone: "0901000006", doctor: "BS. Nguyễn Hải", services: [{ id: 4, name: "Nhổ răng sữa", price: 100000, quantity: 3 }, { id: 1, name: "Khám tổng quát", price: 100000, quantity: 1 }], totalPrice: 400000, room: "Phòng 1", date: "2026-04-23", status: "pending", paymentStatus: "pending" },
-    { id: 7, time: "13:30", patientName: "Nguyễn Thị Lan", patientPhone: "0901000007", doctor: "BS. Phạm Hương", services: [{ id: 7, name: "Tẩy trắng răng Laser", price: 2500000, quantity: 1 }], totalPrice: 2500000, room: "Phòng 1", date: "2026-04-21", status: "completed", paymentStatus: "pending" },
-    { id: 8, time: "16:00", patientName: "Trần Văn Nam", patientPhone: "0901000008", doctor: "BS. Nguyễn Hải", services: [{ id: 3, name: "Trám răng Composite", price: 300000, quantity: 2 }], totalPrice: 600000, room: "Phòng 1", date: "2026-04-20", status: "completed", paymentStatus: "paid" }
-];
+function normalizeServiceFromDb(service) {
+    if (!service) return null;
+    const id = Number(service.id || service.dichVuID || 0);
+    const name = String(service.name || service.tenDichVu || '').trim();
+    const price = Number(service.price || service.giaTien || 0);
+    if (!id || !name || price <= 0) return null;
+    const hasQuantity = Boolean(service.perUnit || service.tinhTheoRang);
+    return {
+        id: id,
+        name: name,
+        price: price,
+        hasQuantity: hasQuantity,
+        unit: hasQuantity ? (service.unit || 'răng') : undefined,
+        time: service.time || (service.thoiLuongDuKien ? `${service.thoiLuongDuKien} phút` : '')
+    };
+}
+// Bật/tắt dropdown
+        function toggleUserDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Tự động đóng dropdown khi click ra ngoài màn hình
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                var dropdown = document.getElementById("userDropdown");
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Hàm xử lý đăng xuất
+        function doLogoutNow() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
+                window.location.href = window.CONTEXT_PATH + '/index.jsp?logout=true';
+            }
+        }
+function initServicesList() {
+    const injected = Array.isArray(window.SERVICE_LIST_FROM_DB) ? window.SERVICE_LIST_FROM_DB : null;
+    const source = (injected && injected.length > 0) ? injected : [];
+    const normalized = source
+        .map(normalizeServiceFromDb)
+        .filter(Boolean);
+
+    servicesList.length = 0;
+    normalized.forEach(s => servicesList.push(s));
+}
+
+let appointments = [];
 
 // ==================== BIẾN TOÀN CỤC ====================
 let currentDate = new Date();
@@ -37,6 +58,10 @@ let editingId = null;
 let selectedServices = [];
 let currentStatusFilter = 'all';
 let currentPaymentAppointment = null;
+
+function isReceptionDashboard() {
+    return document.body && document.body.id === 'receptionDashboardPage';
+}
 
 // ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
 let APPOINTMENT_CONFIG = {
@@ -149,18 +174,81 @@ async function withDataGuard(action, successMsg) {
 }
 
 async function loadServicesFromServer() {
-    const list = await withDataGuard(() => dataSource.listServices());
-    if (!list) return;
-    servicesList.length = 0;
-    normalizeList(list).forEach(s => servicesList.push(s));
+    // Reception nhận list dịch vụ trực tiếp từ Servlet, không dùng dữ liệu mock.
     loadServicesGrid();
 }
 
+function initRoomOptions() {
+    const roomSelect = document.getElementById('room');
+    const rooms = Array.isArray(window.ROOM_LIST_FROM_DB) ? window.ROOM_LIST_FROM_DB : [];
+    if (!roomSelect || rooms.length === 0) return;
+    roomSelect.innerHTML = '<option value="">Chọn phòng</option>' +
+        rooms.map(function(room) {
+            return '<option value="' + room.id + '">' + room.name + '</option>';
+        }).join('');
+}
+
 async function loadAppointmentsFromServer() {
+    if (isReceptionDashboard()) return;
     const list = await withDataGuard(() => dataSource.listAppointments());
     if (!list) return;
     appointments = normalizeList(list);
     renderAppointments();
+}
+
+function applyReceptionTableFilters() {
+    const doctor = document.getElementById('filterDoctor')?.value || '';
+    const searchRaw = document.getElementById('searchInput')?.value || '';
+    const search = searchRaw.toLowerCase().trim();
+    document.querySelectorAll('#appointmentTableBody tr[data-lh-id]').forEach(tr => {
+        let ok = true;
+        if (!isReceptionDashboard() && currentStatusFilter !== 'all' && tr.dataset.status !== currentStatusFilter) ok = false;
+        if (doctor && String(tr.dataset.bacsiId) !== String(doctor)) ok = false;
+        if (search) {
+            const pn = (tr.dataset.patientName || '').toLowerCase();
+            const ph = String(tr.dataset.patientPhone || '').replace(/\s/g, '');
+            const term = search.replace(/\s/g, '');
+            if (!pn.includes(search) && !ph.includes(term)) ok = false;
+        }
+        tr.style.display = ok ? '' : 'none';
+    });
+}
+
+/** URL lễ tân: thẻ thống kê không gắn view=tuần; loc≠all chỉ ngày + loc; Tuần/Tháng chỉ khi loc=all không hist. */
+function buildReceptionDashboardUrl(selectedYmd, ctx) {
+    if (!ctx || !ctx.baseUrl) return '';
+    const ngay = encodeURIComponent(selectedYmd);
+    const rawLoc = (ctx.loc == null ? '' : String(ctx.loc)).trim().toLowerCase();
+    const locKey = rawLoc === '' ? 'all' : rawLoc;
+    const loc = encodeURIComponent(locKey);
+    let href = `${ctx.baseUrl}?ngay=${ngay}&loc=${loc}`;
+    const isAllLoc = locKey === 'all';
+    if (!isAllLoc) return href;
+    if (ctx.histTotal === true || ctx.histTotal === 'true') {
+        href += '&hist=1';
+        return href;
+    }
+    href += '&view=' + encodeURIComponent(ctx.viewMode || 'day');
+    return href;
+}
+
+function shiftReceptionDashboardDate(delta) {
+    const ctx = window.RECEPTION_CONTEXT;
+    if (!ctx || !ctx.baseUrl || !ctx.selectedDate) return;
+    const d = new Date(ctx.selectedDate + 'T12:00:00');
+    let vm = ctx.viewMode || 'day';
+    if (ctx.loc === 'all' && (ctx.histTotal === true || ctx.histTotal === 'true')) {
+        vm = 'day';
+    }
+    if (vm === 'day') d.setDate(d.getDate() + delta);
+    else if (vm === 'week') d.setDate(d.getDate() + delta * 7);
+    else if (vm === 'month') d.setMonth(d.getMonth() + delta);
+    else if (vm === 'year') d.setFullYear(d.getFullYear() + delta);
+    else d.setDate(d.getDate() + delta);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    window.location.href = buildReceptionDashboardUrl(`${y}-${m}-${day}`, ctx);
 }
 
 // ==================== HÀM TIỆN ÍCH ====================
@@ -270,6 +358,17 @@ function isInMonth(dateStr, monthDates) { return monthDates.includes(dateStr); }
 
 // ==================== QUẢN LÝ TRẠNG THÁI ====================
 function filterByStatus(status) {
+    if (isReceptionDashboard()) {
+        const ctx = window.RECEPTION_CONTEXT;
+        if (!ctx || !ctx.baseUrl) return;
+        const nm = ctx.selectedDate;
+        const nextCtx = Object.assign({}, ctx, {
+            loc: status === 'all' ? 'all' : status,
+            histTotal: status === 'all'
+        });
+        window.location.href = buildReceptionDashboardUrl(nm, nextCtx);
+        return;
+    }
     currentStatusFilter = status;
     document.querySelectorAll('.stat-card').forEach(card => card.classList.remove('active'));
     if (status === 'all') document.getElementById('statAll').classList.add('active');
@@ -295,6 +394,64 @@ function toggleStatusMenu(id) {
         document.querySelectorAll('.status-menu').forEach(m => m.classList.remove('show'));
         if (!isShow) menu.classList.add('show');
     }
+}
+
+function toggleReceptionStatusMenu(id) {
+    var menu = document.getElementById('statusMenu_' + id);
+    if (!menu) return;
+    var isShow = menu.classList.contains('show');
+    document.querySelectorAll('.status-menu').forEach(function(m) { m.classList.remove('show'); });
+    if (!isShow) menu.classList.add('show');
+}
+
+async function postReceptionAction(action, lichHenId) {
+    const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+    const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+    const params = new URLSearchParams();
+    params.append('action', action);
+    params.append('lichHenId', String(lichHenId));
+    const response = await fetch((contextPath || '') + '/reception-dashboard', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: params.toString()
+    });
+    let json = null;
+    try { json = await response.json(); } catch (e) { json = null; }
+    if (!response.ok || (json && json.success === false)) {
+        throw new Error((json && json.message) ? json.message : 'Không cập nhật được trạng thái');
+    }
+    return { success: true };
+}
+
+async function setReceptionStatus(id, status) {
+    const res = await withDataGuard(async function() {
+        var action = status === 'approved' ? 'set-status' : 'set-status';
+        const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+        const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+        const params = new URLSearchParams();
+        params.append('action', action);
+        params.append('lichHenId', String(id));
+        params.append('status', status);
+        const response = await fetch((contextPath || '') + '/reception-dashboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        let json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không cập nhật được trạng thái');
+        }
+        return { success: true };
+    }, status === 'approved' ? 'Đã duyệt lịch hẹn' : 'Đã chuyển về chờ duyệt');
+    if (!res) return;
+    window.location.reload();
 }
 
 // ==================== THANH TOÁN ====================
@@ -351,6 +508,15 @@ function openPaymentModal(id) {
 
 async function confirmPayment() {
     if (currentPaymentAppointment) {
+        if (isReceptionDashboard()) {
+            const resR = await withDataGuard(async function() {
+                return postReceptionAction('pay', currentPaymentAppointment.id);
+            }, 'Đã thanh toán thành công');
+            if (!resR) return;
+            closePaymentModal();
+            window.location.reload();
+            return;
+        }
         const payload = {
             appointmentId: currentPaymentAppointment.id,
             paymentMethod: document.getElementById('paymentMethod')?.value || 'Tiền mặt',
@@ -365,8 +531,72 @@ async function confirmPayment() {
     }
 }
 
+async function openReceptionPaymentModal(id) {
+    const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+    const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+    const res = await withDataGuard(async function() {
+        const params = new URLSearchParams();
+        params.append('action', 'get-payment-detail');
+        params.append('lichHenId', String(id));
+        const response = await fetch((contextPath || '') + '/reception-dashboard', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        let json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || !json || json.success === false) {
+            throw new Error((json && json.message) ? json.message : 'Không tải được dữ liệu thanh toán');
+        }
+        return json;
+    });
+    if (!res) return;
+
+    const services = Array.isArray(res.items) ? res.items.map(function(it) {
+        return { name: it.name, quantity: Number(it.quantity || 1), price: Number(it.unitPrice || 0) };
+    }) : [];
+    const subtotal = Number(res.subtotal || 0);
+    const vat = Math.floor(subtotal * 0.1);
+    const total = subtotal + vat;
+
+    currentPaymentAppointment = {
+        id: id,
+        patientName: res.patientName || '',
+        patientPhone: res.patientPhone || '',
+        date: res.ngayKham || '',
+        doctor: res.doctorName || '',
+        services: services,
+        totalPrice: subtotal
+    };
+
+    document.getElementById('invoiceId').innerText = generateInvoiceId();
+    document.getElementById('invoiceDate').innerText = formatDisplayDateShort(new Date());
+    document.getElementById('paymentDate').innerText = formatDisplayDateShort(new Date());
+    document.getElementById('paymentPatientName').innerText = currentPaymentAppointment.patientName;
+    document.getElementById('paymentPatientPhone').innerText = currentPaymentAppointment.patientPhone;
+    document.getElementById('paymentAppointmentDate').innerText = (res.ngayKham || '') + ' ' + (res.gioKham || '').substring(0,5);
+    document.getElementById('paymentDoctor').innerText = currentPaymentAppointment.doctor;
+    document.getElementById('invoiceServicesBody').innerHTML = services.map(function(s) {
+        return '<tr>'
+            + '<td class="service-name">' + escapeHtml(s.name) + '</td>'
+            + '<td style="text-align: center;">' + s.quantity + '</td>'
+            + '<td class="service-price">' + formatPrice(s.price) + 'đ</td>'
+            + '<td class="service-price" style="color: #d97706; font-weight: 600;">' + formatPrice(s.price * s.quantity) + 'đ</td>'
+            + '</tr>';
+    }).join('');
+    document.getElementById('subtotal').innerText = formatPrice(subtotal) + 'đ';
+    document.getElementById('vatAmount').innerText = formatPrice(vat) + 'đ';
+    document.getElementById('totalAmountInvoice').innerText = formatPrice(total) + 'đ';
+    document.getElementById('paymentMethod').value = 'Tiền mặt';
+    document.getElementById('paymentModal').style.display = 'flex';
+}
+
 // ==================== HIỂN THỊ DỮ LIỆU ====================
 function renderAppointments() {
+    if (isReceptionDashboard()) return;
     let filterDoctor = document.getElementById('filterDoctor')?.value || '';
     let searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
     
@@ -448,16 +678,22 @@ function updateStats() {
     let pending = appointments.filter(apt => apt.status === 'pending').length;
     let completed = appointments.filter(apt => apt.status === 'completed').length;
     
-    document.getElementById('totalAppointments').innerText = total;
-    document.getElementById('confirmedCount').innerText = confirmed;
-    document.getElementById('pendingCount').innerText = pending;
-    document.getElementById('completedCount').innerText = completed;
 }
 
-function filterAppointments() { renderAppointments(); }
+function filterAppointments() {
+    if (isReceptionDashboard()) {
+        applyReceptionTableFilters();
+        return;
+    }
+    renderAppointments();
+}
 
 // ==================== ĐIỀU KHIỂN NGÀY THÁNG ====================
 function changeDate(delta) {
+    if (isReceptionDashboard()) {
+        shiftReceptionDashboardDate(delta);
+        return;
+    }
     if (currentView === 'day') {
         currentDate.setDate(currentDate.getDate() + delta);
     } else if (currentView === 'week') {
@@ -470,6 +706,8 @@ function changeDate(delta) {
 }
 
 function updateDateDisplay() {
+    const cdEl = document.getElementById('currentDate');
+    if (cdEl && cdEl.dataset.serverFixed === '1') return;
     let displayText = '';
     if (currentView === 'day') {
         displayText = formatDisplayDate(currentDate);
@@ -478,7 +716,8 @@ function updateDateDisplay() {
     } else if (currentView === 'month') {
         displayText = formatMonthYear(currentDate);
     }
-    document.getElementById('currentDate').innerText = displayText;
+    const out = document.getElementById('currentDate');
+    if (out) out.innerText = displayText;
 }
 
 function goToday() {
@@ -668,8 +907,79 @@ async function saveAppointment() {
         return;
     }
     
+    let notes = (document.getElementById('notes') && document.getElementById('notes').value || '').trim();
     let totalPrice = selectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
     
+    if (isReceptionDashboard() && !editingId) {
+        const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+        const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+        const params = new URLSearchParams();
+        params.append('patientName', patientName);
+        params.append('patientPhone', patientPhone);
+        params.append('ngayKham', date);
+        params.append('gioKham', time);
+        params.append('bacSiId', doctor);
+        params.append('phongId', room);
+        params.append('ghiChu', notes || selectedServices.map(s => `${s.name}${s.quantity > 1 ? ` x${s.quantity}` : ''}`).join(', '));
+        selectedServices.forEach(s => params.append('dichVu', String(s.id)));
+
+        const res = await withDataGuard(async () => {
+            const response = await fetch(`${contextPath}/reception-dashboard`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            if (!response.ok) {
+                const msg = await response.text();
+                throw new Error(msg || 'Không tạo được lịch hẹn');
+            }
+            return { success: true };
+        }, 'Đã tạo lịch hẹn mới');
+        if (!res) return;
+        closeModal();
+        window.location.href = `${contextPath}/reception-dashboard`;
+        return;
+    }
+
+    if (isReceptionDashboard() && editingId) {
+        const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+        const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+        const params = new URLSearchParams();
+        params.append('action', 'update-booking');
+        params.append('lichHenId', String(editingId));
+        params.append('patientName', patientName);
+        params.append('patientPhone', patientPhone);
+        params.append('ngayKham', date);
+        params.append('gioKham', time);
+        params.append('bacSiId', doctor);
+        params.append('phongId', room);
+        params.append('ghiChu', notes);
+        selectedServices.forEach(s => params.append('dichVu', String(s.id)));
+        const res = await withDataGuard(async () => {
+            const response = await fetch(`${contextPath}/reception-dashboard`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: params.toString()
+            });
+            let json = null;
+            try { json = await response.json(); } catch (e) { json = null; }
+            if (!response.ok || (json && json.success === false)) {
+                throw new Error((json && json.message) ? json.message : 'Không cập nhật được lịch hẹn');
+            }
+            return { success: true };
+        }, 'Đã cập nhật lịch hẹn');
+        if (!res) return;
+        closeModal();
+        window.location.href = `${contextPath}/reception-dashboard`;
+        return;
+    }
+
     if (editingId) {
         const payload = {
             id: editingId,
@@ -718,12 +1028,86 @@ document.addEventListener('click', function(e) {
     }
 });
 
+function viewDetail(id) {
+    if (!isReceptionDashboard()) {
+        showToast('Chi tiết lịch hẹn #' + id, 'info');
+        return;
+    }
+    const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
+    const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
+    withDataGuard(async function() {
+        const params = new URLSearchParams();
+        params.append('action', 'get-detail');
+        params.append('lichHenId', String(id));
+        const response = await fetch(`${contextPath}/reception-dashboard`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: params.toString()
+        });
+        let json = null;
+        try { json = await response.json(); } catch (e) { json = null; }
+        if (!response.ok || !json || json.success === false) {
+            throw new Error((json && json.message) ? json.message : 'Không tải được chi tiết lịch hẹn');
+        }
+
+        editingId = id;
+        document.getElementById('modalTitle').innerText = 'Chi tiết / Sửa lịch hẹn';
+        document.getElementById('appointmentId').value = id;
+        document.getElementById('patientName').value = json.patientName || '';
+        document.getElementById('patientPhone').value = json.patientPhone || '';
+        document.getElementById('appointmentDate').value = (json.ngayKham || '');
+        document.getElementById('appointmentTime').value = (json.gioKham || '').substring(0,5);
+        document.getElementById('doctorName').value = String(json.bacSiId || '');
+        document.getElementById('room').value = String(json.phongId || '');
+        document.getElementById('notes').value = json.ghiChu || '';
+
+        const selectedIdSet = new Set((json.dichVuIds || []).map(function(x){ return String(x); }));
+        selectedServices = servicesList.filter(function(s){ return selectedIdSet.has(String(s.id)); }).map(function(s){
+            return { id: s.id, name: s.name, price: s.price, quantity: 1, hasQuantity: s.hasQuantity, unit: s.unit };
+        });
+        document.querySelectorAll('.service-checkbox input').forEach(function(cb) {
+            cb.checked = selectedIdSet.has(String(cb.value));
+        });
+        updateSelectedServicesDisplay();
+        document.getElementById('appointmentModal').style.display = 'flex';
+        return { success: true };
+    });
+}
+
+function approveAppointment(id) {
+    showToast('Duyệt lịch #' + id + ' — vui lòng kết nối servlet cập nhật trạng thái.', 'info');
+}
+
+async function deleteReceptionAppointment(id) {
+    if (!confirm('Bạn có chắc muốn xóa lịch hẹn này?')) return;
+    const res = await withDataGuard(async function() {
+        return postReceptionAction('delete', id);
+    }, 'Đã xóa lịch hẹn');
+    if (!res) return;
+    window.location.reload();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initServicesList();
+    initRoomOptions();
     console.info('[script.js] mode:', APPOINTMENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    if (isReceptionDashboard() && window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.selectedDate) {
+        currentDate = new Date(window.RECEPTION_CONTEXT.selectedDate + 'T12:00:00');
+        currentView = 'day';
+    }
     updateDateDisplay();
     loadServicesFromServer();
-    loadAppointmentsFromServer();
-    filterByStatus('all');
+    if (!isReceptionDashboard()) {
+        loadAppointmentsFromServer();
+    }
+    if (isReceptionDashboard()) {
+        applyReceptionTableFilters();
+    } else {
+        filterByStatus('all');
+    }
     
     let today = new Date();
     let todayStr = formatDate(today);
@@ -738,7 +1122,41 @@ document.addEventListener('DOMContentLoaded', () => {
     
     if (prevDayBtn) prevDayBtn.onclick = () => changeDate(-1);
     if (nextDayBtn) nextDayBtn.onclick = () => changeDate(1);
-    if (todayBtn) todayBtn.onclick = goToday;
+    if (todayBtn) {
+        if (isReceptionDashboard()) {
+            const panel = document.getElementById('receptionCalendarPanel');
+            const pick = document.getElementById('receptionDatePick');
+            const applyBtn = document.getElementById('receptionCalendarApply');
+            todayBtn.onclick = (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                if (!panel) return;
+                const open = panel.style.display !== 'none';
+                panel.style.display = open ? 'none' : 'block';
+                if (!open && pick && window.RECEPTION_CONTEXT) pick.value = window.RECEPTION_CONTEXT.selectedDate;
+            };
+            if (applyBtn) {
+                applyBtn.onclick = () => {
+                    const v = pick && pick.value;
+                    if (!v) {
+                        showToast('Vui lòng chọn ngày', 'error');
+                        return;
+                    }
+                    const ctx = window.RECEPTION_CONTEXT;
+                    if (!ctx) return;
+                    window.location.href = buildReceptionDashboardUrl(v, ctx);
+                };
+            }
+            document.addEventListener('click', (e) => {
+                if (!panel || panel.style.display === 'none') return;
+                if (todayBtn.contains(e.target)) return;
+                if (panel.contains(e.target)) return;
+                panel.style.display = 'none';
+            });
+        } else {
+            todayBtn.onclick = goToday;
+        }
+    }
     if (addBtn) addBtn.onclick = openAddModal;
     
     // View options

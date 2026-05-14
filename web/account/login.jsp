@@ -40,6 +40,6 @@
         </div>
     </main>
     <jsp:include page="../components/footer.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/login.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/login.js?v=<%= System.currentTimeMillis() %>"></script>
 </body>
 </html>

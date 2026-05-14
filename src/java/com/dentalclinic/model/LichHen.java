@@ -15,6 +15,8 @@ public class LichHen {
     private String ghiChu;      // Khớp cột GhiChu (Triệu chứng, yêu cầu thêm...)
     private String trangThai;   // Khớp cột TrangThai (Chờ xác nhận, Đã xác nhận, Đã hủy, Hoàn thành)
     private int phongID;
+    /** Tên phòng sau JOIN (hiển thị UI, không map trực tiếp một cột LichHen) */
+    private String tenPhong;
 
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
@@ -60,6 +62,9 @@ public class LichHen {
     
     public int getPhongID(){return phongID;}
     public void setPhongID(int phongID){this.phongID = phongID;}
+
+    public String getTenPhong() { return tenPhong; }
+    public void setTenPhong(String tenPhong) { this.tenPhong = tenPhong; }
 
     // --- Getters / Setters cho Đối tượng quan hệ ---
     

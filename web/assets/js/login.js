@@ -58,18 +58,21 @@ async function handleLogin(e) {
     var acc = document.getElementById('loginAccount').value.trim();
     var pass = document.getElementById('loginPassword').value;
     var submitBtn = e.target.querySelector('button[type="submit"]');
+    
     if (!acc) {
         document.getElementById('accountGroup').classList.add('error');
         ok = false;
     } else {
         document.getElementById('accountGroup').classList.remove('error');
     }
+    
     if (!pass) {
         document.getElementById('passGroup').classList.add('error');
         ok = false;
     } else {
         document.getElementById('passGroup').classList.remove('error');
     }
+    
     if (ok) {
         try {
             if (submitBtn) {
@@ -77,10 +80,22 @@ async function handleLogin(e) {
                 submitBtn.dataset.originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = 'Đang đăng nhập...';
             }
-            var res = await loginDataSource.login({ account: acc, password: pass });
+            
+            var response = await fetch(window.CONTEXT_PATH + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account: acc, password: pass })
+            });
+            
+            if (!response.ok) {
+                throw new Error('Lỗi máy chủ: HTTP ' + response.status);
+            }
+
+            var res = await response.json();
+
             if (res && res.success) {
-                var phone = res.phone || acc;
-                window.location.href = window.CONTEXT_PATH + '/index.jsp?loginSuccess=true&phone=' + encodeURIComponent(phone);
+                // SỬA TẠI ĐÂY: Chỉ chuyển hướng về trang chủ một cách sạch sẽ
+                window.location.href = res.redirectUrl;
             } else {
                 showLoginError((res && res.message) || 'Sai tài khoản hoặc mật khẩu');
             }
@@ -96,10 +111,10 @@ async function handleLogin(e) {
     }
     return false;
 }
-
 document.getElementById('loginAccount').addEventListener('input', function() {
     document.getElementById('accountGroup').classList.remove('error');
 });
 document.getElementById('loginPassword').addEventListener('input', function() {
     document.getElementById('passGroup').classList.remove('error');
 });
+

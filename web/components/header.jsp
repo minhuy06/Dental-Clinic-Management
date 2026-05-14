@@ -1,8 +1,9 @@
 <%-- components/header.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@page import="com.dentalclinic.model.TaiKhoan" %>
 <%
     String currentPage = request.getRequestURI();
-    String loggedInUser = (String) session.getAttribute("loggedInUser");
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
     boolean isIndex = currentPage.endsWith("index.jsp") || currentPage.endsWith("/");
     boolean isDatLich = currentPage.contains("dat-lich");
 %>
@@ -20,7 +21,7 @@
             <a href="${pageContext.request.contextPath}/dat-lich.jsp#bacsi" data-section="bacsi">Bác sĩ</a>
             <div class="nav-mobile-actions">
                 <% if (loggedInUser != null) { %>
-                    <a href="${pageContext.request.contextPath}/patient/hoso.jsp" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser %></a>
+                    <a href="${pageContext.request.contextPath}/hoso" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() %></a>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
                 <% } %>
@@ -31,13 +32,13 @@
                 <div class="user-dropdown-wrapper">
                     <div class="user-avatar-btn" onclick="toggleUserDropdown()">
                         <div class="user-avatar-circle">👤</div>
-                        <span class="user-avatar-name"><%= loggedInUser %></span>
+                        <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
                         <span class="user-arrow">▼</span>
                     </div>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=info" class="user-dropdown-item">📋 Hồ sơ cá nhân</a>
-                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=history" class="user-dropdown-item">📅 Quản lý lịch hẹn</a>
-                        <a href="${pageContext.request.contextPath}/patient/hoso.jsp?tab=password" class="user-dropdown-item">🔒 Bảo mật</a>
+                        <a href="${pageContext.request.contextPath}/hoso?tab=info" class="user-dropdown-item">📋 Hồ sơ cá nhân</a>
+                        <a href="${pageContext.request.contextPath}/hoso?tab=history" class="user-dropdown-item">📅 Quản lý lịch hẹn</a>
+                        <a href="${pageContext.request.contextPath}/hoso?tab=password" class="user-dropdown-item">🔒 Bảo mật</a>
                         <div class="user-dropdown-divider"></div>
                         <a href="javascript:void(0)" onclick="doLogoutNow()" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
                     </div>
