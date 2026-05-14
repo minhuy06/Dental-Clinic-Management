@@ -1,1 +1,0 @@
-# Chứa hình ảnh (logo phòng khám, ảnh đại diện bác sĩ, icon...).
