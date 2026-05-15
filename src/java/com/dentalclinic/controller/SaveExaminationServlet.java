@@ -43,17 +43,15 @@ public class SaveExaminationServlet extends HttpServlet {
             
             // Đưa đối tượng xuống Db
             PhieuKhamDAO dao = new PhieuKhamDAO();
-            boolean isSuccess = dao.luuPhieuKhamLamSang(phieukham);
+            dao.luuPhieuKhamLamSang(phieukham);
             
             // Trả về kết quả cho js
-            if(isSuccess)
-                System.out.print("{\"success\": true, \"message\": \"Lưu phiếu khám thành công!\"}");
-            else
-                System.out.print("{\"success\": false, \"message\": \"Lỗi: Không thể lưu vào CSDL.\"}");
+            out.print("{\"success\": true, \"message\": \"Lưu phiếu khám thành công!\"}");
             
         } catch(Exception e){
             e.printStackTrace();
-            System.out.print("{\"success\": false, \"message\": \"Lỗi Server: " + e.getMessage() + "\"}");
+            String errorMsg = e.getMessage().replace("\"", "'");
+            out.print("{\"success\": false, \"message\": \"Lỗi: " + errorMsg + "\"}");
             
         } finally{
             out.close();

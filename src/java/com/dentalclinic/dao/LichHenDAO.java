@@ -1,5 +1,11 @@
 package com.dentalclinic.dao;
 
+import com.dentalclinic.model.LichHen;
+import com.dentalclinic.model.BenhNhan;
+import com.dentalclinic.model.TaiKhoan;
+import com.dentalclinic.model.BacSi;
+import com.dentalclinic.model.HoSo;
+import com.dentalclinic.model.PhongKham;
 import com.dentalclinic.model.DanhSachLichHenDTO;
 import com.dentalclinic.utils.DBConnection;
 import java.sql.Connection;
@@ -48,7 +54,6 @@ public class LichHenDAO {
         return list;
     }
     
-    // Hàm cập nhật trạng thái thành "Đang khám" khi bác sĩ ấn "Khám ngay"
     public boolean capNhatTrangThaiDangKham(int lichHenID){
         String sql = "Update LichHen Set TrangThai = N'Đang khám' Where LichHen_ID = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -60,5 +65,70 @@ public class LichHenDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    // Lấy thông tin đầy đủ của Lịch Hẹn (bao gồm Bệnh nhân, Hồ sơ, Bác sĩ, Phòng khám)
+    public LichHen layChiTietLichHen(int lichHenID){
+        String sql = "select tk_bn.HoTen, tk_bn.GioiTinh, tk_bn.SoDienThoai, tk_bn.NgaySinh, " +
+                "hs.DiUngThuoc, hs.TienSuBenh, lh.BenhNhan_ID, " +
+                "tk_bs.HoTen as TenBacSi, pk.TenPhong " +
+                "from LichHen as lh " + 
+                "join BenhNhan bn on lh.BenhNhan_ID = bn.BenhNhan_ID " + 
+                "join TaiKhoan tk_bn on bn.TaiKhoan_ID = tk_bn.TaiKhoan_ID " +
+                "left join HoSo hs on bn.BenhNhan_ID = hs.BenhNhan_ID " +
+                "left join BacSi bs on lh.BacSi_ID = bs.BacSi_ID " +
+                "left join TaiKhoan tk_bs on bs.TaiKhoan_ID = tk_bs.TaiKhoan_ID " +
+                "left join PhongKham pk on lh.Phong_ID = pk.Phong_ID " +
+                "where lh.LichHen_ID = ?";
+        
+        try(Connection conn = DBConnection.getConnection();
+            PreparedStatement ps = conn.prepareStatement(sql)){
+            
+            ps.setInt(1, lichHenID);
+            try (ResultSet rs = ps.executeQuery()){
+                if(rs.next()){
+                    // 1. Thông tin tài khoản bệnh nhân
+                    TaiKhoan tkBN = new TaiKhoan();
+                    tkBN.setHoTen(rs.getNString("HoTen"));
+                    tkBN.setGioiTinh(rs.getBoolean("GioiTinh"));
+                    tkBN.setNgaySinh(rs.getDate("NgaySinh"));
+                    tkBN.setSoDienThoai(rs.getString("SoDienThoai"));
+                    
+                    // 2. Thông tin hồ sơ bệnh nhân
+                    HoSo hs = new HoSo();
+                    hs.setDiUngThuoc(rs.getNString("DiUngThuoc") != null ? rs.getNString("DiUngThuoc") : "Không có cảnh báo");
+                    hs.setTienSuBenh(rs.getNString("TienSuBenh") != null ? rs.getNString("TienSuBenh") : "Chưa ghi nhận");
+                    
+                    // 3. Ghép vào Bệnh nhân
+                    BenhNhan bn = new BenhNhan();
+                    bn.setBenhNhanID(rs.getInt("BenhNhan_ID"));
+                    bn.setTaiKhoan(tkBN);
+                    bn.setHoSo(hs);
+                    
+                    // 4. Thông tin bác sĩ
+                    TaiKhoan tkBS = new TaiKhoan();
+                    tkBS.setHoTen(rs.getNString("TenBacSi"));
+                    BacSi bs = new BacSi();
+                    bs.setTaiKhoan(tkBS);
+                    
+                    // 5. Thông tin phòng khám
+                    PhongKham pk = new PhongKham();
+                    pk.setTenPhong(rs.getNString("TenPhong") != null ? rs.getNString("TenPhong") : "Chưa xếp phòng");
+                    
+                    // 6. Ghép tất cả vào Lịch Hẹn
+                    LichHen lh = new LichHen();
+                    lh.setLichHenID(lichHenID);
+                    lh.setBenhNhan(bn);
+                    lh.setBacSi(bs);
+                    lh.setPhongKham(pk);
+                    
+                    return lh;
+                }
+            }
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }

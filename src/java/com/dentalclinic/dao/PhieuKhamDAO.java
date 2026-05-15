@@ -10,7 +10,7 @@ import com.microsoft.sqlserver.jdbc.SQLServerCallableStatement;
 
 public class PhieuKhamDAO {
     
-    public boolean luuPhieuKhamLamSang(PhieuKham pk){  
+    public void luuPhieuKhamLamSang(PhieuKham pk) throws Exception {  
         String sqlPhieuKham = "{call SP_LuuPhieuKham (?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
             SQLServerCallableStatement cs = (SQLServerCallableStatement) conn.prepareCall(sqlPhieuKham)){
@@ -24,7 +24,7 @@ public class PhieuKhamDAO {
             SQLServerDataTable tvpTable = new SQLServerDataTable();
             tvpTable.addColumnMetadata("DichVu_ID", Types.INTEGER);
             tvpTable.addColumnMetadata("DonGia", Types.DOUBLE);
-            tvpTable.addColumnMetadata("ViTriRang", Types.NVARCHAR);
+            tvpTable.addColumnMetadata("ViTriRang", Types.INTEGER);
             tvpTable.addColumnMetadata("SoLuong", Types.INTEGER);
             
             // Đổ danh sách dịch vụ từ Model vào bảng TVP
@@ -38,12 +38,7 @@ public class PhieuKhamDAO {
             
             // Gắn TVP vào tham số thứ 5 của Stored Procedure
             cs.setStructured(5, "Type_ChiTietDichVu", tvpTable);
-            int rowAffected = cs.executeUpdate();
-            return rowAffected > 0;
-            
-        } catch(Exception e){
-            e.printStackTrace();
-            return false;
+            cs.executeUpdate();
         }
     }
 }

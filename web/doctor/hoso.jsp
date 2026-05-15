@@ -25,7 +25,7 @@
 
 <header>
     <a class="btn-back" id="backBtn"  href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
-    <div class="doctor-info"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
+    <div class="doctor-info" id="doctorRoomUI"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
     <div class="appointment-time"><i class="fa-regular fa-calendar"></i> <%= appointmentDateTime %></div>
 </header>
 
@@ -130,6 +130,16 @@
 
 <div id="toastMessage" class="toast-message"></div>
 
+<%@ page import="com.dentalclinic.dao.DichVuDAO" %>
+<%@ page import="com.dentalclinic.model.DichVu" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.google.gson.Gson" %>
+<%
+    // Lấy danh sách dịch vụ từ DB để bác sĩ chọn
+    DichVuDAO dvDAO = new DichVuDAO();
+    List<DichVu> listDV = dvDAO.layDanhSachDichVu();
+    String jsonDV = new Gson().toJson(listDV);
+%>
 <script>
     window.DOCTOR_HOSO_BOOTSTRAP = {
         patientName: '<%= patientName.replace("'", "\\'") %>',
@@ -138,6 +148,8 @@
         doctorName: '<%= doctorName.replace("'", "\\'") %>',
         appointmentDateTime: '<%= appointmentDateTime.replace("'", "\\'") %>'
     };
+    // Biến toàn cục chứa danh sách dịch vụ cho hoso.js sử dụng
+    var danhSachDichVuTuDB = <%= jsonDV %>;
 </script>
 <script src="${pageContext.request.contextPath}/doctor/js/hoso.js"></script>
 </body>

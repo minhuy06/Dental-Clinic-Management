@@ -1442,3 +1442,55 @@ begin
         RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
     end catch
 end
+go
+
+ALTER PROCEDURE [dbo].[SP_LuuPhieuKham]
+    @LichHen_ID int,
+    @ChanDoan nvarchar(200),
+    @LyDoKham nvarchar(100),
+    @GhiChu nvarchar(200),
+    @DanhSachDichVu Type_ChiTietDichVu readonly
+AS
+BEGIN
+    SET XACT_ABORT ON; -- Tự động Rollback nếu có lỗi nghiêm trọng
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRAN
+            -- 1. Kiểm tra tồn tại
+            IF NOT EXISTS (SELECT 1 FROM LichHen WHERE LichHen_ID = @LichHen_ID)
+                THROW 50001, N'Lỗi: Lịch hẹn không tồn tại.', 1;
+
+            -- 2. Kiểm tra trùng lặp (Mỗi lịch hẹn chỉ có 1 phiếu khám)
+            IF EXISTS (SELECT 1 FROM PhieuKham WHERE LichHen_ID = @LichHen_ID)
+                THROW 50002, N'Lỗi: Lịch hẹn này đã có phiếu khám rồi.', 1;
+
+            DECLARE @PhieuKhamMoi_ID int
+
+            -- 3. Lưu phiếu khám
+            INSERT INTO PhieuKham (LichHen_ID, ChanDoan, NgayTao, LyDoKham, GhiChu)
+            VALUES (@LichHen_ID, @ChanDoan, GETDATE(), @LyDoKham, @GhiChu)
+            
+            SET @PhieuKhamMoi_ID = SCOPE_IDENTITY()
+
+            -- 4. Lưu chi tiết dịch vụ (Đã chuẩn hóa mỗi răng 1 dòng)
+            INSERT INTO ChiTietDichVu (PhieuKham_ID, DichVu_ID, DonGia, ViTriRang, SoLuong)
+            SELECT @PhieuKhamMoi_ID, DichVu_ID, DonGia, ViTriRang, SoLuong FROM @DanhSachDichVu
+
+            -- 5. Tạo hóa đơn
+            DECLARE @TongTien money = 0
+            SELECT @TongTien = ISNULL(SUM(DonGia * SoLuong), 0) FROM ChiTietDichVu WHERE PhieuKham_ID = @PhieuKhamMoi_ID
+
+            INSERT INTO HoaDon(PhieuKham_ID, TongTien) VALUES (@PhieuKhamMoi_ID, @TongTien)
+
+            -- 6. Cập nhật trạng thái lịch hẹn
+            UPDATE LichHen SET TrangThai = N'Đã hoàn thành' WHERE LichHen_ID = @LichHen_ID
+
+            COMMIT TRAN
+     END TRY
+     BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@Msg, 16, 1);
+    END CATCH
+END

@@ -19,6 +19,7 @@ public class LichHen {
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
     private BacSi bacSi;
+    private PhongKham phongKham;
     private List<ChiTietLichHen> danhSachDichVuDat;
     // Constructor mặc định
     public LichHen() {}
@@ -68,6 +69,9 @@ public class LichHen {
 
     public BacSi getBacSi() { return bacSi; }
     public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
+
+    public PhongKham getPhongKham() { return phongKham; }
+    public void setPhongKham(PhongKham phongKham) { this.phongKham = phongKham; }
     
     public List<ChiTietLichHen> getDanhSachDichVuDat() {
         return danhSachDichVuDat;
