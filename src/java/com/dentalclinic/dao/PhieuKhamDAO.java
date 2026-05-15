@@ -24,7 +24,7 @@ public class PhieuKhamDAO {
             SQLServerDataTable tvpTable = new SQLServerDataTable();
             tvpTable.addColumnMetadata("DichVu_ID", Types.INTEGER);
             tvpTable.addColumnMetadata("DonGia", Types.DOUBLE);
-            tvpTable.addColumnMetadata("ViTriRang", Types.INTEGER);
+            tvpTable.addColumnMetadata("ViTriRang", Types.NVARCHAR);
             tvpTable.addColumnMetadata("SoLuong", Types.INTEGER);
             
             // Đổ danh sách dịch vụ từ Model vào bảng TVP

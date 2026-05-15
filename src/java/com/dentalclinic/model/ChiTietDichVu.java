@@ -5,7 +5,7 @@ public class ChiTietDichVu {
     private int phieuKhamID;   // FK -> PhieuKham
     private int dichVuID;      // FK -> DichVu
     private double donGia;
-    private int viTriRang;
+    private String viTriRang;
     private int soLuong;
 
     // Đối tượng quan hệ
@@ -15,7 +15,7 @@ public class ChiTietDichVu {
     public ChiTietDichVu() {}
 
     public ChiTietDichVu(int chiTietDichVuID, int phieuKhamID, int dichVuID,
-                          double donGia, int viTriRang, int soLuong) {
+                          double donGia, String viTriRang, int soLuong) {
         this.chiTietDichVuID = chiTietDichVuID;
         this.phieuKhamID = phieuKhamID;
         this.dichVuID = dichVuID;
@@ -36,8 +36,8 @@ public class ChiTietDichVu {
     public double getDonGia() { return donGia; }
     public void setDonGia(double donGia) { this.donGia = donGia; }
 
-    public int getViTriRang() { return viTriRang; }
-    public void setViTriRang(int viTriRang) { this.viTriRang = viTriRang; }
+    public String getViTriRang() { return viTriRang; }
+    public void setViTriRang(String viTriRang) { this.viTriRang = viTriRang; }
     
     public int getSoLuong(){return soLuong;}
     public void setSoLuong(int soLuong){this.soLuong = soLuong;}

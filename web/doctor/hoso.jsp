@@ -106,7 +106,12 @@
                     <tbody id="treatmentBody"></tbody>
                 </table>
             </div>
-            <button id="addServiceBtn" class="btn-add-service"><i class="fa-solid fa-plus"></i> Thêm dịch vụ</button>
+            <div class="service-selection-wrapper" style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+                <select id="serviceSelect" style="max-width: 300px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); outline: none;">
+                    <option value="">-- Chọn dịch vụ để thêm --</option>
+                </select>
+                <button id="addServiceBtn" class="btn-add-service" style="margin-top: 0;"><i class="fa-solid fa-plus"></i> Thêm dịch vụ</button>
+            </div>
         </div>
 
         <div class="card">

@@ -1,17 +1,17 @@
 // ======================= DANH SÁCH DỊCH VỤ =======================
 const DENTAL_SERVICES = [
-    { id: 1, name: "Thăm khám & tư vấn", price: 100000 },
-    { id: 2, name: "Lấy cao răng", price: 200000 },
-    { id: 3, name: "Hàn răng thẩm mỹ (Composit)", price: 500000 },
-    { id: 4, name: "Điều trị tủy", price: 1000000 },
-    { id: 5, name: "Nhổ răng thường", price: 300000 },
-    { id: 6, name: "Nhổ răng khôn phức tạp", price: 1500000 },
-    { id: 7, name: "Bọc răng sứ kim loại", price: 2500000 },
-    { id: 8, name: "Bọc răng toàn sứ", price: 4500000 },
-    { id: 9, name: "Tẩy trắng răng tại phòng", price: 1800000 },
-    { id: 10, name: "Chỉnh nha (niềng răng mắc cài)", price: 25000000 },
-    { id: 11, name: "Chỉnh nha (niềng răng trong suốt)", price: 45000000 },
-    { id: 12, name: "Cấy ghép Implant", price: 18000000 }
+    { id: 1, name: "Thăm khám & tư vấn", price: 100000, perUnit: false },
+    { id: 2, name: "Lấy cao răng", price: 200000, perUnit: false },
+    { id: 3, name: "Hàn răng thẩm mỹ (Composit)", price: 500000, perUnit: true },
+    { id: 4, name: "Điều trị tủy", price: 1000000, perUnit: true },
+    { id: 5, name: "Nhổ răng thường", price: 300000, perUnit: true },
+    { id: 6, name: "Nhổ răng khôn phức tạp", price: 1500000, perUnit: true },
+    { id: 7, name: "Bọc răng sứ kim loại", price: 2500000, perUnit: true },
+    { id: 8, name: "Bọc răng toàn sứ", price: 4500000, perUnit: true },
+    { id: 9, name: "Tẩy trắng răng tại phòng", price: 1800000, perUnit: false },
+    { id: 10, name: "Chỉnh nha (niềng răng mắc cài)", price: 25000000, perUnit: false },
+    { id: 11, name: "Chỉnh nha (niềng răng trong suốt)", price: 45000000, perUnit: false },
+    { id: 12, name: "Cấy ghép Implant", price: 18000000, perUnit: true }
 ];
 
 // ======================= CỜ HIỆU MOCK/REAL + DATA SOURCE =======================
@@ -201,20 +201,30 @@ function init() {
     });
     attachDeleteEvents();
     
-    // Gắn nút thêm dịch vụ
+    // 1. Đổ dữ liệu vào ô Dropdown (serviceSelect)
+    const serviceSelect = document.getElementById('serviceSelect');
+    if (serviceSelect) {
+        // Xóa các option cũ trừ option đầu tiên
+        serviceSelect.innerHTML = '<option value="">-- Chọn dịch vụ để thêm --</option>';
+        danhSachDichVuTuDB.forEach(svc => {
+            const opt = document.createElement('option');
+            opt.value = svc.id;
+            opt.textContent = `${svc.name} (${svc.price.toLocaleString('vi-VN')}đ)`;
+            serviceSelect.appendChild(opt);
+        });
+    }
+
+    // 2. Gắn sự kiện cho nút thêm dịch vụ
     const addBtn = document.getElementById('addServiceBtn');
     if (addBtn) {
         addBtn.addEventListener('click', () => {
-            // Giả sử trong file hoso.jsp bạn có một thẻ <select id="serviceSelect"> chứa danh sách dịch vụ
-            const serviceSelect = document.getElementById('serviceSelect');
-            
             if (serviceSelect && serviceSelect.value) {
                 // Thêm dịch vụ bác sĩ vừa chọn vào bảng
                 addClinicalService(serviceSelect.value);
+                // Reset select về mặc định sau khi thêm (tùy chọn)
+                // serviceSelect.value = "";
             } else {
-                // NẾU NHÓM BẠN CHƯA LÀM THẺ <select> TRÊN GIAO DIỆN, CHẠY TẠM DÒNG NÀY ĐỂ TEST:
-                // Nó sẽ tự động thêm dịch vụ ID = 1 ("Thăm khám & tư vấn") mỗi khi ấn nút
-                addClinicalService(1); 
+                showToast('⚠️ Vui lòng chọn một dịch vụ từ danh sách!', 2500);
             }
         });
     }
@@ -327,15 +337,17 @@ function addClinicalService(serviceId) {
             alert('Vui lòng click chọn ít nhất 1 răng trên sơ đồ trước khi thêm dịch vụ này!');
             return;
         }
-        currentSelectedTeeth.forEach(tooth => {
-            clinicalSelectedServices.push({
-                dichVu_ID: parseInt(svc.id), 
-                viTriRang: tooth,
-                soLuong: 1,
-                donGia: svc.price,
-                name: svc.name 
-            });
+        
+        // Gộp tất cả răng đã chọn vào 1 dòng duy nhất
+        clinicalSelectedServices.push({
+            dichVu_ID: parseInt(svc.id), 
+            viTriRang: currentSelectedTeeth.sort((a, b) => a - b).join(', '),
+            soLuong: currentSelectedTeeth.length,
+            donGia: svc.price,
+            name: svc.name,
+            isPerUnit: true
         });
+        
         currentSelectedTeeth = []; 
         updateOdontogramUI();
     } else { 
@@ -344,7 +356,8 @@ function addClinicalService(serviceId) {
             viTriRang: null, 
             soLuong: 1,      
             donGia: svc.price,
-            name: svc.name 
+            name: svc.name,
+            isPerUnit: false
         });
     }
     renderClinicalTable();
@@ -365,8 +378,12 @@ function renderClinicalTable() {
         html += `
             <tr>
                 <td>${item.name}</td>
-                <td>${item.viTriRang ? item.viTriRang : 'Toàn hàm'}</td>
-                <td><input type="number" style="width: 60px" value="${item.soLuong}" min="1" onchange="clinicalSelectedServices[${index}].soLuong = this.value; renderClinicalTable();"></td>
+                <td>${item.viTriRang ? 'Răng ' + item.viTriRang : 'Toàn hàm'}</td>
+                <td>
+                    <input type="number" style="width: 60px" value="${item.soLuong}" min="1" 
+                        ${!item.isPerUnit ? 'readonly' : ''} 
+                        onchange="clinicalSelectedServices[${index}].soLuong = parseInt(this.value); renderClinicalTable();">
+                </td>
                 <td>${item.donGia.toLocaleString('vi-VN')} đ</td>
                 <td>${thanhTien.toLocaleString('vi-VN')} đ</td>
                 <td><input type="text" placeholder="Ghi chú..." style="width: 100%"></td>
