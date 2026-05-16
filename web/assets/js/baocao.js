@@ -167,11 +167,176 @@ function getDateRange(filter) {
     return { start, end };
 }
 
-function filterTransactionsByDate(transactions, startDate, endDate) {
-    return transactions.filter(t => {
-        let tDate = new Date(t.date);
-        return tDate >= startDate && tDate <= endDate;
+function parseTxDate(dateStr) {
+    if (!dateStr) return null;
+    return new Date(dateStr + 'T12:00:00');
+}
+
+function filterTransactionsByDate(txList, startDate, endDate) {
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+    return txList.filter(function(t) {
+        const tDate = parseTxDate(t.date);
+        if (!tDate) return false;
+        return tDate >= start && tDate <= end;
     });
+}
+
+function getActiveDateRange() {
+    if (currentFilter === 'custom') {
+        const startRaw = document.getElementById('startDate')?.value;
+        const endRaw = document.getElementById('endDate')?.value;
+        if (startRaw && endRaw) {
+            return {
+                mode: 'custom',
+                start: new Date(startRaw + 'T00:00:00'),
+                end: new Date(endRaw + 'T23:59:59')
+            };
+        }
+    }
+    const r = getDateRange(currentFilter);
+    return { mode: currentFilter, start: r.start, end: r.end };
+}
+
+const STAT_COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+function normalizePaymentBucket(method) {
+    if (!method) return 'Tiền mặt';
+    const u = String(method).toUpperCase();
+    if (u.includes('CHUY') || u.includes('CK') || u.includes('TRANSFER')) return 'Chuyển khoản';
+    if (u.includes('VISA') || u.includes('MASTER') || u.includes('THẺ')) return 'Thẻ Visa/Master';
+    return method.trim() || 'Tiền mặt';
+}
+
+function buildStatsFromFiltered(filtered) {
+    const svcTotals = {};
+    const payTotals = {};
+    let grand = 0;
+    filtered.forEach(function(t) {
+        grand += t.amount;
+        const sn = (t.service && t.service.trim()) ? t.service.trim() : 'Khác';
+        svcTotals[sn] = (svcTotals[sn] || 0) + t.amount;
+        const pm = normalizePaymentBucket(t.method);
+        payTotals[pm] = (payTotals[pm] || 0) + t.amount;
+    });
+
+    const svcEntries = Object.keys(svcTotals).map(function(name) {
+        return { name: name, amount: svcTotals[name] };
+    }).sort(function(a, b) { return b.amount - a.amount; });
+
+    const newServiceStats = [];
+    if (grand > 0) {
+        svcEntries.forEach(function(e, i) {
+            newServiceStats.push({
+                name: e.name,
+                percent: Math.round(e.amount / grand * 1000) / 10,
+                amount: Math.round(e.amount),
+                color: STAT_COLORS[i % STAT_COLORS.length]
+            });
+        });
+    }
+
+    const payIcons = ['fas fa-university', 'fas fa-money-bill-wave', 'fas fa-credit-card', 'fas fa-wallet'];
+    const newPaymentStats = [];
+    let pi = 0;
+    Object.keys(payTotals).forEach(function(name) {
+        const amt = payTotals[name];
+        newPaymentStats.push({
+            name: name,
+            icon: payIcons[pi % payIcons.length],
+            amount: Math.round(amt),
+            percent: grand > 0 ? Math.round(amt / grand * 1000) / 10 : 0,
+            color: STAT_COLORS[(pi + 3) % STAT_COLORS.length]
+        });
+        pi++;
+    });
+
+    return { serviceStats: newServiceStats, paymentStats: newPaymentStats };
+}
+
+function getChartTitle(mode, start, end) {
+    if (mode === 'custom') {
+        return 'Doanh thu từ ' + formatDate(start.toISOString().split('T')[0])
+            + ' đến ' + formatDate(end.toISOString().split('T')[0]);
+    }
+    const map = {
+        today: 'Doanh thu theo ngày',
+        week: 'Doanh thu theo tuần',
+        month: 'Doanh thu theo tháng',
+        year: 'Doanh thu theo năm'
+    };
+    return map[mode] || 'Doanh thu';
+}
+
+function getChartAxisLabel(mode) {
+    if (mode === 'year') return 'Tháng';
+    if (mode === 'custom') return 'Khoảng thời gian';
+    return 'Ngày';
+}
+
+function eachDayInRange(start, end) {
+    const days = [];
+    const cur = new Date(start);
+    cur.setHours(0, 0, 0, 0);
+    const last = new Date(end);
+    last.setHours(0, 0, 0, 0);
+    while (cur <= last) {
+        days.push(new Date(cur));
+        cur.setDate(cur.getDate() + 1);
+    }
+    return days;
+}
+
+function getChartData(filtered, mode, start, end) {
+    const buckets = {};
+    const diffDays = eachDayInRange(start, end).length;
+
+    if (mode === 'year') {
+        const y = end.getFullYear();
+        for (let m = 1; m <= 12; m++) {
+            buckets['T' + m + '/' + y] = 0;
+        }
+        filtered.forEach(function(t) {
+            const d = parseTxDate(t.date);
+            if (!d) return;
+            const key = 'T' + (d.getMonth() + 1) + '/' + d.getFullYear();
+            if (buckets[key] !== undefined) buckets[key] += t.amount;
+        });
+    } else if (mode === 'custom' && diffDays > 62) {
+        eachDayInRange(start, end).forEach(function(d) {
+            const key = (d.getMonth() + 1) + '/' + d.getFullYear();
+            if (buckets[key] === undefined) buckets[key] = 0;
+        });
+        filtered.forEach(function(t) {
+            const d = parseTxDate(t.date);
+            if (!d) return;
+            const key = (d.getMonth() + 1) + '/' + d.getFullYear();
+            buckets[key] = (buckets[key] || 0) + t.amount;
+        });
+    } else {
+        eachDayInRange(start, end).forEach(function(d) {
+            const iso = d.toISOString().split('T')[0];
+            buckets[formatDate(iso)] = 0;
+        });
+        filtered.forEach(function(t) {
+            const d = parseTxDate(t.date);
+            if (!d) return;
+            const key = formatDate(t.date);
+            buckets[key] = (buckets[key] || 0) + t.amount;
+        });
+    }
+
+    return {
+        labels: Object.keys(buckets),
+        values: Object.values(buckets)
+    };
+}
+
+function updateChartTitle(mode, start, end) {
+    const el = document.getElementById('chartTitleText');
+    if (el) el.textContent = getChartTitle(mode, start, end);
 }
 
 // ==================== THỐNG KÊ ====================
@@ -192,43 +357,14 @@ function updateStats(filteredTransactions) {
 }
 
 // ==================== BIỂU ĐỒ DOANH THU ====================
-function getDailyRevenue(transactions, days = 7) {
-    let dailyData = {};
-    let today = new Date();
-    let daysOfWeek = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
-    
-    // Khởi tạo 7 ngày gần nhất
-    for (let i = days - 1; i >= 0; i--) {
-        let date = new Date(today);
-        date.setDate(today.getDate() - i);
-        let dayIndex = date.getDay();
-        let dayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1];
-        dailyData[dayName] = 0;
-    }
-    
-    // Cộng dồn doanh thu
-    transactions.forEach(t => {
-        let tDate = new Date(t.date);
-        let dayIndex = tDate.getDay();
-        let dayName = daysOfWeek[dayIndex === 0 ? 6 : dayIndex - 1];
-        if (dailyData[dayName] !== undefined) {
-            dailyData[dayName] += t.amount;
-        }
-    });
-    
-    return {
-        labels: Object.keys(dailyData),
-        values: Object.values(dailyData)
-    };
-}
+function initChart(filteredOverride, rangeInfoOverride) {
+    const rangeInfo = rangeInfoOverride || getActiveDateRange();
+    const filtered = filteredOverride || filterTransactionsByDate(transactions, rangeInfo.start, rangeInfo.end);
+    const chartData = getChartData(filtered, rangeInfo.mode, rangeInfo.start, rangeInfo.end);
+    const axisLabel = getChartAxisLabel(rangeInfo.mode);
 
-function initChart() {
-    // Lấy dữ liệu
-    let range = getDateRange(currentFilter);
-    let filtered = filterTransactionsByDate(transactions, range.start, range.end);
-    let chartData = getDailyRevenue(filtered);
-    
-    console.log("Dữ liệu biểu đồ:", chartData);
+    updateChartTitle(rangeInfo.mode, rangeInfo.start, rangeInfo.end);
+    console.log('[baocao] Biểu đồ:', rangeInfo.mode, chartData);
     
     let canvas = document.getElementById('revenueChart');
     if (!canvas) {
@@ -297,7 +433,7 @@ function initChart() {
                 x: {
                     title: {
                         display: true,
-                        text: 'Ngày trong tuần',
+                        text: axisLabel,
                         font: { size: 12 }
                     }
                 }
@@ -371,8 +507,8 @@ function renderPaymentMethods() {
 
 // ==================== BẢNG GIAO DỊCH ====================
 function renderTransactionTable() {
-    let range = getDateRange(currentFilter);
-    let filtered = filterTransactionsByDate(transactions, range.start, range.end);
+    const rangeInfo = getActiveDateRange();
+    let filtered = filterTransactionsByDate(transactions, rangeInfo.start, rangeInfo.end);
     
     let searchTerm = document.getElementById('searchTransaction')?.value.toLowerCase() || '';
     
@@ -432,38 +568,45 @@ function goToPage(page) {
 
 // ==================== ÁP DỤNG BỘ LỌC ====================
 function applyFilter() {
-    let startDateInput = document.getElementById('startDate')?.value;
-    let endDateInput = document.getElementById('endDate')?.value;
-    
-    if (startDateInput && endDateInput) {
-        // Nếu có ngày tùy chỉnh, cập nhật currentFilter
-        currentFilter = 'custom';
-        document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-    } else {
-        // Cập nhật active cho button filter
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            if (btn.getAttribute('data-filter') === currentFilter) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+    if (currentFilter !== 'custom') {
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-filter') === currentFilter);
         });
     }
-    
+
     currentPage = 1;
-    let range = getDateRange(currentFilter);
-    let filtered = filterTransactionsByDate(transactions, range.start, range.end);
+    const rangeInfo = getActiveDateRange();
+    const filtered = filterTransactionsByDate(transactions, rangeInfo.start, rangeInfo.end);
+    const stats = buildStatsFromFiltered(filtered);
+    serviceStats = stats.serviceStats;
+    paymentStats = stats.paymentStats;
+    servicesExpanded = false;
+
     updateStats(filtered);
-    initChart();
+    initChart(filtered, rangeInfo);
+    renderServices();
+    renderPaymentMethods();
     renderTransactionTable();
+}
+
+function syncDateInputsToFilter() {
+    const rangeInfo = getActiveDateRange();
+    const startInput = document.getElementById('startDate');
+    const endInput = document.getElementById('endDate');
+    if (startInput && endInput && currentFilter !== 'custom') {
+        startInput.value = rangeInfo.start.toISOString().split('T')[0];
+        endInput.value = rangeInfo.end.toISOString().split('T')[0];
+    }
 }
 
 // ==================== XUẤT EXCEL ====================
 function exportToExcel() {
+    const rangeInfo = getActiveDateRange();
+    const filtered = filterTransactionsByDate(transactions, rangeInfo.start, rangeInfo.end);
     let headers = ["Mã đơn", "Khách hàng", "Dịch vụ", "Ngày", "Phương thức thanh toán", "Số tiền"];
     let csvRows = [headers.join(",")];
     
-    transactions.forEach(t => {
+    filtered.forEach(t => {
         let row = [
             `"${t.id}"`,
             `"${t.customer}"`,
@@ -517,32 +660,34 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     await loadReportData();
 
-    // Render các thành phần
-    renderServices();
-    renderPaymentMethods();
-    
-    // Set ngày mặc định
     setDefaultDates();
-    
-    // Áp dụng bộ lọc và vẽ biểu đồ
+    syncDateInputsToFilter();
     applyFilter();
     
     // Gắn sự kiện cho các nút filter
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             currentFilter = this.getAttribute('data-filter');
-            document.getElementById('startDate').value = '';
-            document.getElementById('endDate').value = '';
+            syncDateInputsToFilter();
             applyFilter();
         });
     });
     
-    // Gắn sự kiện cho nút áp dụng
     let applyBtn = document.getElementById('applyDateBtn');
     if (applyBtn) {
         applyBtn.addEventListener('click', function() {
+            const s = document.getElementById('startDate')?.value;
+            const e = document.getElementById('endDate')?.value;
+            if (!s || !e) {
+                showToast('Vui lòng chọn đủ từ ngày và đến ngày', 'info');
+                return;
+            }
+            if (s > e) {
+                showToast('Từ ngày không được sau đến ngày', 'info');
+                return;
+            }
             currentFilter = 'custom';
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
             applyFilter();
         });
     }
@@ -568,7 +713,9 @@ document.addEventListener('DOMContentLoaded', async function() {
             document.querySelectorAll('.chart-btn').forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             currentChartType = this.getAttribute('data-chart');
-            initChart();
+            const rangeInfo = getActiveDateRange();
+            const filtered = filterTransactionsByDate(transactions, rangeInfo.start, rangeInfo.end);
+            initChart(filtered, rangeInfo);
         });
     });
     
