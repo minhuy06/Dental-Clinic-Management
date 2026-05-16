@@ -29,7 +29,7 @@
                         <div class="sidebar-menu-item <%= "info".equals(activeTab)?"active":"" %>" onclick="switchTab('info',this)"><span class="menu-icon">📋</span> Thông tin cá nhân</div>
                         <div class="sidebar-menu-item <%= "history".equals(activeTab)?"active":"" %>" onclick="switchTab('history',this)"><span class="menu-icon">📅</span> Lịch hẹn của tôi</div>
                         <div class="sidebar-menu-item <%= "password".equals(activeTab)?"active":"" %>" onclick="switchTab('password',this)"><span class="menu-icon">🔒</span> Đổi mật khẩu</div>
-                        <div class="sidebar-menu-item logout" onclick="if(confirm('Bạn có chắc muốn đăng xuất?'))window.location.href=window.CONTEXT_PATH+'/index.jsp?logout=true'"><span class="menu-icon">🚪</span> Đăng xuất</div>
+                        <div class="sidebar-menu-item logout" onclick="if(confirm('Bạn có chắc muốn đăng xuất?'))window.location.href=(window.HOME_URL||window.CONTEXT_PATH+'/')+'?logout=true'"><span class="menu-icon">🚪</span> Đăng xuất</div>
                     </div>
                 </div>
 

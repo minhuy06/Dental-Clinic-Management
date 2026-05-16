@@ -61,15 +61,15 @@
 <body>
 
     <header>
-        <div class="header-left">
+        <a href="${pageContext.request.contextPath}/" class="header-left" style="text-decoration:none;color:inherit;">
             <i class="fa-solid fa-tooth"></i>
             <h1>NHA KHOA 5AE</h1>
-        </div>
+        </a>
         <div class="header-right">
-            <div class="doctor-info">
+            <a href="${pageContext.request.contextPath}/doctor/dashboard" class="doctor-info" style="text-decoration:none;color:inherit;" title="Trang bác sĩ">
                 <i class="fa-solid fa-user-doctor"></i>
                 <span><%= doctorHeaderName %></span>
-            </div>
+            </a>
             <div class="date-time" id="currentDateTime"></div>
         </div>
     </header>

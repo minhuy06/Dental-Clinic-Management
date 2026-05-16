@@ -21,7 +21,7 @@
 <c:url var="urlReceptionPeriodYear" value="/reception-dashboard"><c:param name="view" value="year"/><c:param name="ngay" value="${selectedDateNgay}"/><c:param name="loc" value="${rcvLoc}"/></c:url>
     <!-- ==================== HEADER MÀU XANH ==================== -->
     <div class="header">
-        <div class="logo">
+        <a href="${pageContext.request.contextPath}/" class="logo" style="text-decoration:none;color:inherit;">
             <div class="logo-icon">
                 <i class="fas fa-tooth"></i>
             </div>
@@ -29,19 +29,19 @@
                 <h1>NHA KHOA 5AE</h1>
                 <p>HỆ THỐNG QUẢN LÝ</p>
             </div>
-        </div>
+        </a>
         <ul class="nav-menu">
             <li><a href="${pageContext.request.contextPath}/reception-dashboard" class="active">Lịch hẹn</a></li>
             <li><a href="${pageContext.request.contextPath}/reception-patient">Bệnh nhân</a></li>
             <li><a href="${pageContext.request.contextPath}/reception-report">Báo cáo</a></li>
             <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp">CSKH</a></li>
         </ul>
-        <div class="user-info">
+        <a href="${pageContext.request.contextPath}/reception-dashboard" class="user-info" style="text-decoration:none;color:inherit;" title="Trang lễ tân">
             <div class="avatar" id="avatarBtn">
-                <i class="fas fa-user"  style="color: white;"></i>
+                <i class="fas fa-user" style="color: white;"></i>
             </div>
             <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
-        </div>
+        </a>
     </div>
 
     <div class="container">

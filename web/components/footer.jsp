@@ -1,5 +1,9 @@
 <%-- components/footer.jsp --%>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="com.dentalclinic.utils.RoleNavHelper" %>
+<%
+    String footerCtx = request.getContextPath();
+%>
 <footer class="footer" id="contact">
     <div class="container">
         <div class="footer-grid">
@@ -26,10 +30,10 @@
             <div class="footer-col">
                 <h4>Liên kết</h4>
                 <ul>
-                    <li><a href="${pageContext.request.contextPath}/index.jsp">Trang chủ</a></li>
-                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#datlich">Đặt lịch</a></li>
-                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#dichvu">Dịch vụ</a></li>
-                    <li><a href="${pageContext.request.contextPath}/dat-lich.jsp#bacsi">Bác sĩ</a></li>
+                    <li><a href="${pageContext.request.contextPath}/">Trang chủ</a></li>
+                    <li><a href="<%= RoleNavHelper.getScheduleUrl(footerCtx) %>">Đặt lịch</a></li>
+                    <li><a href="<%= RoleNavHelper.getServiceUrl(footerCtx) %>">Dịch vụ</a></li>
+                    <li><a href="<%= RoleNavHelper.getDoctorUrl(footerCtx) %>">Bác sĩ</a></li>
                 </ul>
             </div>
             <div class="footer-col">

@@ -1,9 +1,9 @@
 package com.dentalclinic.controller;
 
-import com.dentalclinic.dao.DichVuDAO;
-import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.LichHen;
 import com.dentalclinic.service.LichHenService;
+import com.dentalclinic.utils.InforPageHelper;
+import com.dentalclinic.utils.RoleNavHelper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,39 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 public class BookingServlet extends HttpServlet {
     
     private final LichHenService lhService = new LichHenService();
-    private final DichVuDAO dichVuDAO = new DichVuDAO();
-
-    private static String jsonEscape(String raw) {
-        if (raw == null) return "";
-        return raw.replace("\\", "\\\\")
-                  .replace("\"", "\\\"")
-                  .replace("\r", "\\r")
-                  .replace("\n", "\\n")
-                  .replace("\t", "\\t");
-    }
-
-    private static String buildServiceListJson(List<DichVu> services) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < services.size(); i++) {
-            DichVu dv = services.get(i);
-            if (i > 0) sb.append(",");
-            sb.append("{")
-              .append("\"id\":").append(dv.getDichVuID()).append(",")
-              .append("\"name\":\"").append(jsonEscape(dv.getTenDichVu())).append("\",")
-              .append("\"desc\":\"").append(jsonEscape(dv.getTenDichVu())).append("\",")
-              .append("\"time\":\"").append(dv.getThoiLuongDuKien()).append(" phút\",")
-              .append("\"price\":").append((long) dv.getGiaTien()).append(",")
-              .append("\"cat\":\"all\",")
-              .append("\"perUnit\":").append(dv.isTinhTheoRang());
-            if (dv.isTinhTheoRang()) {
-                sb.append(",\"unit\":\"răng\"");
-            }
-            sb.append("}");
-        }
-        sb.append("]");
-        return sb.toString();
-    }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) 
@@ -90,29 +57,32 @@ public class BookingServlet extends HttpServlet {
             String result = lhService.createBooking(lh, listDV);
 
             if ("SUCCESS".equals(result)) {
-                response.sendRedirect(request.getContextPath() + "/dat-lich?booked=1");
+                response.sendRedirect(RoleNavHelper.getScheduleUrl(request.getContextPath()) + "?booked=1");
             } else {
-                request.setAttribute("error", result);
-                request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
-                request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
+                forwardScheduleError(request, response, result);
             }
 
         } catch (IllegalArgumentException e) {
-            request.setAttribute("error", "Ngày hoặc giờ khám không hợp lệ!");
-            request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
-            request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
+            forwardScheduleError(request, response, "Ngày hoặc giờ khám không hợp lệ!");
         } catch (Exception e) {
             e.printStackTrace();
-            request.setAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
-            request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
-            request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
+            forwardScheduleError(request, response, "Có lỗi xảy ra: " + e.getMessage());
         }
     }
 
-    @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    private void forwardScheduleError(HttpServletRequest request, HttpServletResponse response, String error)
             throws ServletException, IOException {
-        request.setAttribute("serviceListJson", buildServiceListJson(dichVuDAO.getAll()));
+        request.setAttribute("error", error);
+        request.setAttribute("inforSection", "datlich");
+        request.setAttribute("serviceListJson", InforPageHelper.buildServiceListJson());
+        request.setAttribute("doctorListJson", InforPageHelper.buildDoctorListJson());
+        request.setAttribute("pageTitle", "Đặt lịch khám - Nha Khoa 5AE");
         request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.sendRedirect(RoleNavHelper.getScheduleUrl(request.getContextPath()));
     }
 }

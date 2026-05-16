@@ -17,7 +17,7 @@
         <h1>403</h1>
         <h2>Cấm Truy Cập!</h2>
         <p>Bạn không có quyền xem trang này. Vui lòng quay lại.</p>
-        <a href="${pageContext.request.contextPath}/index.jsp">Về trang chủ</a>
+        <a href="${pageContext.request.contextPath}/">Về trang chủ</a>
     </div>
 </body>
 </html>

@@ -1,22 +1,49 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%
+    String inforSection = (String) request.getAttribute("inforSection");
+    if (inforSection == null || inforSection.isEmpty()) {
+        inforSection = "datlich";
+    }
+    String pageTitleAttr = (String) request.getAttribute("pageTitle");
+    String pageTitle = pageTitleAttr != null ? pageTitleAttr : "Nha Khoa 5AE";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa 5AE</title>
+    <title><%= pageTitle %></title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/datlich.css">
+    <style>
+        body.infor-focus-datlich .services-price-section,
+        body.infor-focus-datlich .doctors-section,
+        body.infor-focus-datlich .infor-divider { display: none !important; }
+        body.infor-focus-dichvu .booking-section,
+        body.infor-focus-dichvu .doctors-section,
+        body.infor-focus-dichvu .infor-divider { display: none !important; }
+        body.infor-focus-bacsi .booking-section,
+        body.infor-focus-bacsi .services-price-section,
+        body.infor-focus-bacsi .infor-divider { display: none !important; }
+    </style>
 </head>
-<body>
+<body class="infor-focus-<%= inforSection %>">
     <jsp:include page="components/header.jsp" />
     <main>
         <section class="page-hero">
             <div class="page-hero-bg"><img src="${pageContext.request.contextPath}/assets/img/cham-soc.jpg" alt="Nha khoa"></div>
             <div class="page-hero-overlay"></div>
             <div class="page-hero-content">
-                <h1>Chăm sóc răng miệng toàn diện</h1>
-                <p>Đặt lịch khám nhanh chóng, dịch vụ đa dạng, bác sĩ chuyên khoa hàng đầu</p>
+                <% if ("dichvu".equals(inforSection)) { %>
+                <h1>Dịch vụ &amp; bảng giá</h1>
+                <p>Giá niêm yết công khai, minh bạch — không phát sinh chi phí ẩn</p>
+                <% } else if ("bacsi".equals(inforSection)) { %>
+                <h1>Đội ngũ bác sĩ</h1>
+                <p>Bác sĩ chuyên khoa giàu kinh nghiệm, tận tâm với từng bệnh nhân</p>
+                <% } else { %>
+                <h1>Đặt lịch khám</h1>
+                <p>Chọn dịch vụ, ngày giờ phù hợp — phòng khám xác nhận trong 30 phút</p>
+                <% } %>
             </div>
         </section>
 
@@ -74,7 +101,7 @@
             </div>
         </section>
 
-        <div style="text-align:center;padding:30px 0;">
+        <div class="infor-divider" style="text-align:center;padding:30px 0;">
             <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
             <div style="margin-top:-10px;display:inline-block;background:white;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
         </div>
@@ -108,7 +135,7 @@
             </div>
         </section>
 
-        <div style="text-align:center;padding:30px 0;">
+        <div class="infor-divider" style="text-align:center;padding:30px 0;">
             <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
             <div style="margin-top:-10px;display:inline-block;background:#f0f4f8;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
         </div>

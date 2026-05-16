@@ -2,6 +2,7 @@ package com.dentalclinic.controller;
 
 import com.dentalclinic.model.TaiKhoan;
 import com.dentalclinic.service.TaiKhoanService;
+import com.dentalclinic.utils.RoleNavHelper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import java.io.BufferedReader;
@@ -49,18 +50,7 @@ public class LoginServlet extends HttpServlet {
 
             if (tk != null) {
                 request.getSession().setAttribute("loggedInUser", tk);
-                String redirectUrl = request.getContextPath() + "/index.jsp";
-                String role = tk.getVaiTro();
-
-                if ("Quản trị viên".equalsIgnoreCase(role)) {
-                    redirectUrl = request.getContextPath() + "/admin";
-                } else if ("Bác sĩ".equalsIgnoreCase(role)) {
-                    redirectUrl = request.getContextPath() + "/doctor/dashboard";
-                } else if ("Lễ tân".equalsIgnoreCase(role)) {
-                    redirectUrl = request.getContextPath() + "/reception-dashboard";
-                } else if ("Bệnh nhân".equalsIgnoreCase(role)) {
-                    redirectUrl = request.getContextPath() + "/hoso";
-                }
+                String redirectUrl = RoleNavHelper.getWorkspaceUrl(request.getContextPath(), tk.getVaiTro());
 
                 jsonResponse.addProperty("success", true);
                 jsonResponse.addProperty("redirectUrl", redirectUrl);

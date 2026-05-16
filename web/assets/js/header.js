@@ -3,7 +3,7 @@ window.addEventListener('scroll', function() {
     if (window.scrollY > 50) h.classList.add('scrolled');
     else h.classList.remove('scrolled');
 
-    if (window.location.pathname.indexOf('dat-lich') > -1) {
+    if (window.location.pathname.indexOf('/Infor/') > -1 || window.location.pathname.indexOf('dat-lich') > -1) {
         var sections = ['datlich', 'dichvu', 'bacsi'];
         var current = '';
         sections.forEach(function(id) {
@@ -56,7 +56,8 @@ document.addEventListener('click', function(e) {
 // Logout
 function doLogoutNow() {
     if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        window.location.href = window.CONTEXT_PATH + '/index.jsp?logout=true';
+        var home = (typeof window.HOME_URL === 'string' && window.HOME_URL) ? window.HOME_URL : (window.CONTEXT_PATH || '') + '/';
+        window.location.href = home + (home.indexOf('?') >= 0 ? '&' : '?') + 'logout=true';
     }
 }
 

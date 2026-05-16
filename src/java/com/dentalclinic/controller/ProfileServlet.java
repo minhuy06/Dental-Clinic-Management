@@ -2,6 +2,7 @@ package com.dentalclinic.controller;
 
 import com.dentalclinic.dao.DichVuDAO;
 import com.dentalclinic.dao.LichHenDAO;
+import com.dentalclinic.dao.LichHenDAO.PatientApptService;
 import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.LichHen;
 import com.dentalclinic.model.TaiKhoan;
@@ -59,9 +60,10 @@ public class ProfileServlet extends HttpServlet {
                 sObj.addProperty("id", String.valueOf(dv.getDichVuID()));
                 sObj.addProperty("name", dv.getTenDichVu());
                 sObj.addProperty("price", dv.getGiaTien());
-                sObj.addProperty("time", dv.getThoiLuongDuKien());
-                sObj.addProperty("perUnit", false);
-                sObj.addProperty("unit", "");
+                sObj.addProperty("time", dv.getThoiLuongDuKien() + " phút");
+                boolean perUnit = dv.isTinhTheoRang();
+                sObj.addProperty("perUnit", perUnit);
+                sObj.addProperty("unit", perUnit ? "răng" : "");
                 servicesJsonArray.add(sObj);
             }
         }
@@ -75,11 +77,8 @@ public class ProfileServlet extends HttpServlet {
                 JsonObject aObj = new JsonObject();
                 aObj.addProperty("id", lh.getLichHenID());
 
-                String dbStatus = lh.getTrangThai();
-                String jsStatus = "pending";
-                if ("Đã xác nhận".equalsIgnoreCase(dbStatus)) jsStatus = "confirmed";
-                else if ("Đã khám".equalsIgnoreCase(dbStatus) || "Hoàn thành".equalsIgnoreCase(dbStatus)) jsStatus = "paid";
-
+                String dbStatus = lh.getTrangThai() != null ? lh.getTrangThai().trim() : "";
+                String jsStatus = mapPatientUiStatus(dbStatus);
                 aObj.addProperty("status", jsStatus);
                 aObj.addProperty("statusText", dbStatus);
 
@@ -94,6 +93,19 @@ public class ProfileServlet extends HttpServlet {
 
                 JsonArray apptServices = new JsonArray();
                 double totalAmount = 0;
+                List<PatientApptService> svcRows = lhDAO.loadPatientServicesForLichHen(lh.getLichHenID());
+                for (PatientApptService s : svcRows) {
+                    JsonObject sObj = new JsonObject();
+                    sObj.addProperty("id", String.valueOf(s.id));
+                    sObj.addProperty("name", s.name);
+                    sObj.addProperty("price", s.price);
+                    sObj.addProperty("qty", s.qty);
+                    sObj.addProperty("perUnit", s.perUnit);
+                    sObj.addProperty("unit", s.unit != null ? s.unit : "");
+                    sObj.addProperty("time", s.time);
+                    apptServices.add(sObj);
+                    totalAmount += s.price * s.qty;
+                }
 
                 aObj.add("services", apptServices);
                 aObj.addProperty("total", totalAmount);
@@ -120,5 +132,26 @@ public class ProfileServlet extends HttpServlet {
         }
 
         request.getRequestDispatcher(targetJSP).forward(request, response);
+    }
+
+    private static String mapPatientUiStatus(String dbStatus) {
+        if (dbStatus == null || dbStatus.isEmpty()) {
+            return "pending";
+        }
+        if ("Chờ xác nhận".equalsIgnoreCase(dbStatus) || "Chờ duyệt".equalsIgnoreCase(dbStatus)) {
+            return "pending";
+        }
+        if ("Đã xác nhận".equalsIgnoreCase(dbStatus) || "Đã duyệt".equalsIgnoreCase(dbStatus)
+                || "Đã đến".equalsIgnoreCase(dbStatus) || "Đang khám".equalsIgnoreCase(dbStatus)) {
+            return "confirmed";
+        }
+        if ("Đã khám".equalsIgnoreCase(dbStatus) || "Đã hoàn thành".equalsIgnoreCase(dbStatus)
+                || "Hoàn thành".equalsIgnoreCase(dbStatus)) {
+            return "paid";
+        }
+        if ("Đã hủy".equalsIgnoreCase(dbStatus)) {
+            return "cancelled";
+        }
+        return "pending";
     }
 }

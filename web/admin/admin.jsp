@@ -14,20 +14,21 @@
 
     <!-- HEADER -->
     <div class="header">
-        <div class="logo">
+        <a href="${pageContext.request.contextPath}/" class="logo" style="text-decoration:none;color:inherit;">
             <div class="logo-icon"><i class="fas fa-tooth"></i></div>
             <div class="logo-text"><h1>NHA KHOA 5AE</h1><p>HỆ THỐNG QUẢN TRỊ</p></div>
-        </div>
+        </a>
         <ul class="nav-menu">
             <li><a href="#" class="active" onclick="switchTab('services',this);return false;"><i class="fas fa-tooth"></i> Quản lý dịch vụ</a></li>
             <li><a href="#" onclick="switchTab('schedule',this);return false;"><i class="fas fa-calendar-alt"></i> Lịch làm việc</a></li>
             <li><a href="#" onclick="switchTab('accounts',this);return false;"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
             <li><a href="#" onclick="switchTab('revenue',this);return false;"><i class="fas fa-chart-line"></i> Quản lý doanh thu</a></li>
         </ul>
-        <div class="user-info">
+        <a href="${pageContext.request.contextPath}/admin" class="user-info" style="text-decoration:none;color:inherit;" title="Trang quản trị">
             <i class="fas fa-bell" style="color:#bfdbfe;cursor:pointer;"></i>
             <div class="avatar"><i class="fas fa-user-shield" style="color:white;"></i></div>
-        </div>
+            <span class="staff-name" style="margin-left:8px;"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Admin"/></span>
+        </a>
     </div>
 
     <div class="container">

@@ -74,7 +74,7 @@ appointmentList.forEach(function(a) { appointmentDetails[a.id] = a; });
 
 // ── CỜ HIỆU MOCK/REAL + DATA SOURCE ──────────────────────────────
 var HOSO_CONFIG = {
-    USE_MOCK: true,
+    USE_MOCK: false,
     API_BASE: (window.CONTEXT_PATH || '') + '/api/hoso',
     MOCK_DELAY_MS: 120
 };
@@ -207,8 +207,8 @@ var hosoDataSource = HOSO_CONFIG.USE_MOCK ? hosoMockApi : hosoApi;
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:#8c8c9a">Bạn chưa có lịch hẹn nào</td></tr>';
         return;
     }
-    tbody.innerHTML = appointmentList.map(function(a, i) {
-        var svcNames = a.services.map(function(s) {
+    tbody.innerHTML = appointmentList.filter(function(a) { return a.status !== 'cancelled'; }).map(function(a, i) {
+        var svcNames = (a.services || []).map(function(s) {
             return s.name + (s.qty > 1 ? ' x' + s.qty : '');
         }).join(', ');
         var canEdit   = a.status === 'pending';
@@ -367,16 +367,14 @@ async function doCancelAppointment() {
     try {
         var data = await hosoDataSource.cancelAppointment({ appointmentId: currentCancelId });
         if (data.success) {
-            // Xóa row khỏi bảng
             var r = document.querySelector('tr[data-id="' + currentCancelId + '"]');
             if (r) r.remove();
-            // Cập nhật STT
+            appointmentList = appointmentList.filter(function(a) { return a.id !== currentCancelId; });
+            delete appointmentDetails[currentCancelId];
             var stt = 1;
             document.querySelectorAll('#historyTbody tr').forEach(function(row) {
                 if (row.style.display !== 'none') row.querySelector('.stt-cell').textContent = stt++;
             });
-            // Xóa khỏi local data
-            delete appointmentDetails[currentCancelId];
             closeCancelModal();
             showHosoToast('✅ Đã hủy lịch hẹn thành công!', 'success');
         } else {
@@ -573,7 +571,7 @@ async function saveEditAppointment() {
         time:     newTime,
         note:     newNote,
         services: editSelectedList.map(function(s) {
-            return { id: s.id, name: s.name, price: s.price, qty: s.qty, perUnit: s.perUnit, unit: s.unit, time: s.time };
+            return { id: parseInt(s.id, 10) || s.id, qty: s.qty || 1 };
         })
     };
 

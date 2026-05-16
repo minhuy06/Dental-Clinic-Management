@@ -1,18 +1,27 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ page import="com.dentalclinic.dao.DichVuDAO" %>
 <%@ page import="com.dentalclinic.model.DichVu" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
+<%@ page import="com.dentalclinic.utils.RoleNavHelper" %>
 <%@ page import="java.util.List" %>
 <%
-    if ("true".equals(request.getParameter("loginSuccess"))) {
-        session.setAttribute("loggedInUser", "Khách hàng");
-    }
     if ("true".equals(request.getParameter("logout"))) {
         session.invalidate();
-        response.sendRedirect(request.getContextPath() + "/index.jsp");
+        response.sendRedirect(request.getContextPath() + "/");
         return;
     }
-    String loggedInUser = (String) session.getAttribute("loggedInUser");
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
+    String loggedInUserName = "";
+    if (loggedInUser != null && loggedInUser.getHoTen() != null) {
+        loggedInUserName = loggedInUser.getHoTen()
+                .replace("\\", "\\\\")
+                .replace("'", "\\'")
+                .replace("\r", "")
+                .replace("\n", " ");
+    }
     List<DichVu> homeServices = new DichVuDAO().getAll();
+    String ctx = request.getContextPath();
+    String inforServiceUrl = RoleNavHelper.getServiceUrl(ctx);
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -85,7 +94,7 @@
                 </div>
                 <% } %>
             </div>
-            <div class="text-center mt-3"><a href="${pageContext.request.contextPath}/dat-lich#dichvu" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
+            <div class="text-center mt-3"><a href="<%= inforServiceUrl %>" class="btn btn-outline btn-lg">Xem tất cả dịch vụ & bảng giá →</a></div>
         </div></section>
 
         <!-- REVIEWS -->
@@ -130,7 +139,7 @@
     <jsp:include page="components/footer.jsp" />
 
     <script>
-        window.LOGGED_USER = '<%= loggedInUser != null ? loggedInUser : "" %>';
+        window.LOGGED_USER = '<%= loggedInUserName %>';
         window.SERVICE_LIST_FROM_DB = [
             <% for (int i = 0; i < homeServices.size(); i++) {
                    DichVu dv = homeServices.get(i);
