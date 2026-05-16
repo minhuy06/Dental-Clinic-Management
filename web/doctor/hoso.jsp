@@ -29,7 +29,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style_1.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/hoso.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/doctor-hoso.css">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
     <jsp:include page="../components/notify-resources.jsp" />
 </head>
 <body>
@@ -167,18 +168,10 @@
         }
     }
 %>
-<script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
-    window.DOCTOR_HOSO_BOOTSTRAP = {
-        patientName: '<%= patientName.replace("'", "\\'") %>',
-        patientId: '<%= patientId.replace("'", "\\'") %>',
-        patientPhone: '<%= patientPhone.replace("'", "\\'") %>',
-        doctorName: '<%= doctorName.replace("'", "\\'") %>',
-        appointmentDateTime: '<%= appointmentDateTime.replace("'", "\\'") %>'
-    };
-    var danhSachDichVuTuDB = <%= jsonDV %>;
-    window.INITIAL_BOOKED_SERVICES = <%= initialBookedJson %>;
-</script>
-<script src="${pageContext.request.contextPath}/doctor/js/hoso.js?v=20260516l"></script>
+<script id="doctorHosoBootstrapJson" type="application/json">{"patientName":"<%= patientName.replace("\\", "\\\\").replace("\"", "\\\"") %>","patientId":"<%= patientId.replace("\\", "\\\\").replace("\"", "\\\"") %>","patientPhone":"<%= patientPhone.replace("\\", "\\\\").replace("\"", "\\\"") %>","doctorName":"<%= doctorName.replace("\\", "\\\\").replace("\"", "\\\"") %>","appointmentDateTime":"<%= appointmentDateTime.replace("\\", "\\\\").replace("\"", "\\\"") %>"}</script>
+<script id="doctorServicesJson" type="application/json"><%= jsonDV %></script>
+<script id="doctorBookedServicesJson" type="application/json"><%= initialBookedJson %></script>
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/doctor-hoso.js?v=20260516m"></script>
 </body>
 </html>

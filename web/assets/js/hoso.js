@@ -64,6 +64,16 @@ var FALLBACK_APPOINTMENTS = [
 ];
 
 // ── Dùng data từ backend nếu có ──────────────────────────────────
+(function initPatientHosoBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var user = AppBootstrap.readJsonScript('hosoUserJson', null);
+    var appts = AppBootstrap.readJsonScript('hosoAppointmentsJson', null);
+    var services = AppBootstrap.readJsonScript('hosoServicesJson', null);
+    if (user) window.__HOSO_USER__ = user;
+    if (Array.isArray(appts)) window.__HOSO_APPOINTMENTS__ = appts;
+    if (Array.isArray(services)) window.__HOSO_SERVICES__ = services;
+})();
+
 var svcList20          = (window.__HOSO_SERVICES__     && window.__HOSO_SERVICES__.length     > 0) ? window.__HOSO_SERVICES__     : FALLBACK_SERVICES_HOSO;
 var currentUser        = window.__HOSO_USER__          || FALLBACK_USER;
 var appointmentList    = (window.__HOSO_APPOINTMENTS__ && window.__HOSO_APPOINTMENTS__.length > 0) ? window.__HOSO_APPOINTMENTS__ : FALLBACK_APPOINTMENTS;

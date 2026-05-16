@@ -174,19 +174,8 @@
     </div>
 
     <script id="reportSeedJson" type="application/json">${empty reportDataJson ? '{}' : reportDataJson}</script>
-    <script>
-        window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';
-        window.BAOCAO_JS_VERSION = '20260517c';
-        window.INITIAL_REPORT_FROM_SERVER = {};
-        try {
-            var reportSeedEl = document.getElementById('reportSeedJson');
-            if (reportSeedEl && reportSeedEl.textContent) {
-                window.INITIAL_REPORT_FROM_SERVER = JSON.parse(reportSeedEl.textContent);
-            }
-        } catch (e) {
-            console.error('[baocao] parse seed JSON', e);
-        }
-    </script>
-    <script src="${pageContext.request.contextPath}/assets/js/baocao.js?v=20260517c"></script>
+    <meta name="context-path" content="${pageContext.request.contextPath}">
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/baocao.js?v=20260517d"></script>
 </body>
 </html>

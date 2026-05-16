@@ -214,32 +214,10 @@
 
     <jsp:include page="../components/footer.jsp" />
 
-    <script>
-    (function() {
-        var ctx = '${pageContext.request.contextPath}';
-
-        // ── THÔNG TIN USER ───────────────────────────────────────────
-        var userJson = '${not empty hosoUserJson ? hosoUserJson : ""}';
-        if (userJson) {
-            try { window.__HOSO_USER__ = JSON.parse(userJson); }
-            catch(e) { console.warn('[hoso] hosoUserJson parse error', e); }
-        }
-
-        // ── LỊCH HẸN ─────────────────────────────────────────────────
-        var apptJson = '${not empty hosoAppointmentsJson ? hosoAppointmentsJson : ""}';
-        if (apptJson) {
-            try { window.__HOSO_APPOINTMENTS__ = JSON.parse(apptJson); }
-            catch(e) { console.warn('[hoso] hosoAppointmentsJson parse error', e); }
-        }
-
-        // ── DỊCH VỤ ──────────────────────────────────────────────────
-        var svcJson = '${not empty hosoServicesJson ? hosoServicesJson : ""}';
-        if (svcJson) {
-            try { window.__HOSO_SERVICES__ = JSON.parse(svcJson); }
-            catch(e) { console.warn('[hoso] hosoServicesJson parse error', e); }
-        }
-    })();
-    </script>
-    <script src="${pageContext.request.contextPath}/assets/js/hoso.js"></script>
+    <script id="hosoUserJson" type="application/json">${empty hosoUserJson ? 'null' : hosoUserJson}</script>
+    <script id="hosoAppointmentsJson" type="application/json">${empty hosoAppointmentsJson ? '[]' : hosoAppointmentsJson}</script>
+    <script id="hosoServicesJson" type="application/json">${empty hosoServicesJson ? '[]' : hosoServicesJson}</script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/hoso.js?v=20260518a"></script>
 </body>
 </html>

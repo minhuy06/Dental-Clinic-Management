@@ -388,7 +388,52 @@ function refreshBookingServicesFromWindow() {
     buildCheckboxGrid();
 }
 
+function initBookingBootstrap() {
+    var body = document.body;
+    if (typeof AppBootstrap !== 'undefined') {
+        var cp = AppBootstrap.getMetaContent('context-path');
+        if (cp) {
+            window.BOOKING_CONTEXT_PATH = cp;
+            window.BOOKING_LOGIN_URL = cp + '/account/login.jsp';
+        }
+        var services = AppBootstrap.readJsonScript('bookingServicesJson', null);
+        if (services !== null) window.allServices = services;
+        var doctors = AppBootstrap.readJsonScript('bookingDoctorsJson', []);
+        renderBookingDoctorsGrid(doctors);
+    }
+    if (body) {
+        window.PATIENT_LOGGED_IN = body.getAttribute('data-patient-logged-in') === 'true';
+        window.BOOKING_SUCCESS = body.getAttribute('data-booking-success') === 'true';
+        var err = body.getAttribute('data-booking-error');
+        window.BOOKING_ERROR = err && err.length ? err : null;
+        var scrollSection = body.getAttribute('data-scroll-section') || '';
+        var hash = window.location.hash ? window.location.hash.replace('#', '') : scrollSection;
+        if (hash) {
+            setTimeout(function () {
+                var el = document.getElementById(hash);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
+        }
+    }
+}
+
+function renderBookingDoctorsGrid(doctors) {
+    var grid = document.getElementById('doctorsGrid');
+    if (!grid || !doctors || !doctors.length) return;
+    var fallbackImg = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop';
+    var tag = 'motionless';
+    grid.innerHTML = doctors.map(function (d) {
+        var img = d.imgUrl || fallbackImg;
+        return '<' + tag + ' class="doctor-card">'
+            + '<' + tag + ' class="doctor-img"><img src="' + img + '" alt="' + d.name + '" loading="lazy" onerror="this.src=\'' + fallbackImg + '\'"></' + tag + '>'
+            + '<' + tag + ' class="doctor-info"><h3>' + d.name + '</h3>'
+            + '<span class="doctor-specialty">' + (d.specialty || '') + '</span>'
+            + '<span class="doctor-degree">' + (d.degree || '') + '</span></' + tag + '></' + tag + '>';
+    }).join('').replace(/motionless/g, 'div');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    initBookingBootstrap();
     console.info('[dat-lich] mode:', BOOKING_CONFIG.USE_MOCK ? 'MOCK' : 'REAL (/dat-lich)');
     refreshBookingServicesFromWindow();
     if (window.BOOKING_SUCCESS) {

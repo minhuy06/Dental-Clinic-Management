@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=20260516k">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
 </head>
 <body>
 
@@ -543,16 +544,13 @@
         <p><i class="fas fa-tooth"></i> NHA KHOA 5AE - Chất lượng tạo niềm tin &nbsp;|&nbsp; © 2026 Hệ thống quản trị Admin</p>
     </div>
 
-    <script>
-        window.ADMIN_CONTEXT_PATH = '${pageContext.request.contextPath}';
-        window.__ADMIN_SERVICES__ = <c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/>;
-        window.__ADMIN_ACCOUNTS__ = <c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/>;
-        window.__ADMIN_SHIFTS__ = <c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/>;
-        window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
-        window.__ADMIN_PENDING_BOOKINGS__ = <c:out value="${empty adminPendingBookingsJson ? '[]' : adminPendingBookingsJson}" escapeXml="false"/>;
-    </script>
-
+    <script id="adminServicesJson" type="application/json"><c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/></script>
+    <script id="adminAccountsJson" type="application/json"><c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/></script>
+    <script id="adminShiftsJson" type="application/json"><c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/></script>
+    <script id="adminRevenueJson" type="application/json"><c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/></script>
+    <script id="adminPendingBookingsJson" type="application/json"><c:out value="${empty adminPendingBookingsJson ? '[]' : adminPendingBookingsJson}" escapeXml="false"/></script>
     <jsp:include page="../components/notify-resources.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516j"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516k"></script>
 </body>
 </html>

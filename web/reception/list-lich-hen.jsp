@@ -5,14 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Kiểm tra danh sách lịch hẹn</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #007bff; color: white; }
-        tr:nth-child(even) { background-color: #f2 f2 f2; }
-        .status { padding: 5px 10px; border-radius: 4px; font-weight: bold; }
-        .pending { background-color: #ffeeba; color: #856404; }
-    </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/list-lich-hen.css">
 </head>
 <body>
 
@@ -49,7 +42,7 @@
             <%-- Hiển thị nếu danh sách trống --%>
             <c:if test="${empty allLichHen}">
                 <tr>
-                    <td colspan="6" style="text-align: center; color: red;">
+                    <td colspan="6" class="empty-row">
                         Không tìm thấy dữ liệu lịch hẹn nào! Hãy kiểm tra lại Servlet hoặc Database.
                     </td>
                 </tr>

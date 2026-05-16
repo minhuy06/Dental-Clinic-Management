@@ -1,6 +1,18 @@
 /**
  * Khám lâm sàng — gọi API context-path
  */
+(function initDoctorHosoBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var cp = AppBootstrap.getMetaContent('context-path');
+    if (cp) window.CONTEXT_PATH = cp;
+    var boot = AppBootstrap.readJsonScript('doctorHosoBootstrapJson', null);
+    if (boot) window.DOCTOR_HOSO_BOOTSTRAP = boot;
+    var services = AppBootstrap.readJsonScript('doctorServicesJson', null);
+    if (services !== null) window.danhSachDichVuTuDB = services;
+    var booked = AppBootstrap.readJsonScript('doctorBookedServicesJson', null);
+    if (booked !== null) window.INITIAL_BOOKED_SERVICES = booked;
+})();
+
 const DOCTOR_HOSO_CONFIG = {
     API_BASE: (typeof window.CONTEXT_PATH !== 'undefined' && window.CONTEXT_PATH ? window.CONTEXT_PATH : '') + '/api/doctor'
 };

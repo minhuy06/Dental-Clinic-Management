@@ -7,6 +7,16 @@
     }
     String pageTitleAttr = (String) request.getAttribute("pageTitle");
     String pageTitle = pageTitleAttr != null ? pageTitleAttr : "Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa 5AE";
+    TaiKhoan bookingUser = (TaiKhoan) session.getAttribute("loggedInUser");
+    boolean patientLoggedIn = bookingUser != null && "Bệnh nhân".equalsIgnoreCase(
+            bookingUser.getVaiTro() != null ? bookingUser.getVaiTro().trim() : "");
+    String bookingErrorAttr = "";
+    if (request.getAttribute("error") != null) {
+        bookingErrorAttr = request.getAttribute("error").toString()
+                .replace("&", "&amp;")
+                .replace("\"", "&quot;")
+                .replace("<", "&lt;");
+    }
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -16,8 +26,12 @@
     <title><%= pageTitle %></title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/datlich.css">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
 </head>
-<body data-scroll-section="<%= scrollSection %>">
+<body data-scroll-section="<%= scrollSection %>"
+      data-patient-logged-in="<%= patientLoggedIn %>"
+      data-booking-success="<%= "1".equals(request.getParameter("booked")) %>"
+      data-booking-error="<%= bookingErrorAttr %>">
     <jsp:include page="components/header.jsp" />
     <main>
         <section class="page-hero">
@@ -127,46 +141,9 @@
     <jsp:include page="components/footer.jsp" />
 
     <jsp:include page="components/notify-resources.jsp" />
-    <script>
-    (function() {
-        window.BOOKING_CONTEXT_PATH = '${pageContext.request.contextPath}';
-        window.BOOKING_LOGIN_URL = '${pageContext.request.contextPath}/account/login.jsp';
-        <%
-            TaiKhoan bookingUser = (TaiKhoan) session.getAttribute("loggedInUser");
-            boolean patientLoggedIn = bookingUser != null && "Bệnh nhân".equalsIgnoreCase(
-                    bookingUser.getVaiTro() != null ? bookingUser.getVaiTro().trim() : "");
-        %>
-        window.PATIENT_LOGGED_IN = <%= patientLoggedIn %>;
-        window.BOOKING_SUCCESS = <%= "1".equals(request.getParameter("booked")) %>;
-        window.BOOKING_ERROR = <%= request.getAttribute("error") != null ? "\"" + request.getAttribute("error").toString().replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", " ") + "\"" : "null" %>;
-        window.allServices = <%= request.getAttribute("serviceListJson") == null ? "[]" : request.getAttribute("serviceListJson") %>;
-
-        var doctors = <%= request.getAttribute("doctorListJson") == null ? "[]" : request.getAttribute("doctorListJson") %>;
-        var grid = document.getElementById('doctorsGrid');
-        if (grid && doctors && doctors.length) {
-            var fallbackImg = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop';
-            grid.innerHTML = doctors.map(function(d) {
-                var img = d.imgUrl || fallbackImg;
-                return '<div class="doctor-card">'
-                    + '<div class="doctor-img"><img src="' + img + '" alt="' + d.name + '" loading="lazy" onerror="this.src=\'' + fallbackImg + '\'"></div>'
-                    + '<div class="doctor-info">'
-                    + '<h3>' + d.name + '</h3>'
-                    + '<span class="doctor-specialty">' + (d.specialty || '') + '</span>'
-                    + '<span class="doctor-degree">' + (d.degree || '') + '</span>'
-                    + '</div></div>';
-            }).join('');
-        }
-
-        var hash = window.location.hash ? window.location.hash.replace('#', '') : '<%= scrollSection %>';
-        if (hash) {
-            setTimeout(function() {
-                var el = document.getElementById(hash);
-                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 200);
-        }
-    })();
-    </script>
-
-    <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js?v=20260518c"></script>
+    <script id="bookingServicesJson" type="application/json"><%= request.getAttribute("serviceListJson") == null ? "[]" : request.getAttribute("serviceListJson") %></script>
+    <script id="bookingDoctorsJson" type="application/json"><%= request.getAttribute("doctorListJson") == null ? "[]" : request.getAttribute("doctorListJson") %></script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js?v=20260518d"></script>
 </body>
 </html>

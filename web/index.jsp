@@ -4,6 +4,10 @@
 <%@ page import="com.dentalclinic.model.TaiKhoan" %>
 <%@ page import="com.dentalclinic.utils.RoleNavHelper" %>
 <%@ page import="java.util.List" %>
+<%@ page import="java.util.ArrayList" %>
+<%@ page import="java.util.HashMap" %>
+<%@ page import="java.util.Map" %>
+<%@ page import="com.google.gson.Gson" %>
 <%
     if ("true".equals(request.getParameter("logout"))) {
         session.invalidate();
@@ -20,6 +24,18 @@
                 .replace("\n", " ");
     }
     List<DichVu> homeServices = new DichVuDAO().getAll();
+    List<Map<String, Object>> homeServiceMaps = new ArrayList<>();
+    for (DichVu dv : homeServices) {
+        Map<String, Object> row = new HashMap<>();
+        row.put("id", dv.getDichVuID());
+        row.put("name", dv.getTenDichVu() == null ? "" : dv.getTenDichVu());
+        row.put("price", (long) dv.getGiaTien());
+        row.put("time", dv.getThoiLuongDuKien() + " phút");
+        row.put("perUnit", dv.isTinhTheoRang());
+        homeServiceMaps.add(row);
+    }
+    String homeServicesJson = new Gson().toJson(homeServiceMaps);
+    String homeUserJson = new Gson().toJson(loggedInUserName);
     String ctx = request.getContextPath();
     String inforServiceUrl = RoleNavHelper.getServiceUrl(ctx);
 %>
@@ -138,17 +154,9 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
-    <script>
-        window.LOGGED_USER = '<%= loggedInUserName %>';
-        window.SERVICE_LIST_FROM_DB = [
-            <% for (int i = 0; i < homeServices.size(); i++) {
-                   DichVu dv = homeServices.get(i);
-                   String safeName = dv.getTenDichVu() == null ? "" : dv.getTenDichVu().replace("\\", "\\\\").replace("\"", "\\\"");
-            %>
-            {"id":<%= dv.getDichVuID() %>,"name":"<%= safeName %>","price":<%= (long) dv.getGiaTien() %>,"time":"<%= dv.getThoiLuongDuKien() %> phút","perUnit":<%= dv.isTinhTheoRang() %>}<%= (i < homeServices.size() - 1) ? "," : "" %>
-            <% } %>
-        ];
-    </script>
-    <script src="${pageContext.request.contextPath}/assets/js/index.js"></script>
+    <script id="homeUserJson" type="application/json"><%= homeUserJson %></script>
+    <script id="homeServicesJson" type="application/json"><%= homeServicesJson %></script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/index.js?v=20260518a"></script>
 </body>
 </html>

@@ -209,20 +209,9 @@
     </div>
 
     <script id="patientSeedJson" type="application/json">${empty patientListJson ? '[]' : patientListJson}</script>
-    <script>
-        window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';
-        window.BENHNHAN_JS_VERSION = '20260516';
-        window.INITIAL_PATIENTS_FROM_SERVER = [];
-        try {
-            var seedEl = document.getElementById('patientSeedJson');
-            if (seedEl && seedEl.textContent) {
-                window.INITIAL_PATIENTS_FROM_SERVER = JSON.parse(seedEl.textContent);
-            }
-        } catch (e) {
-            console.error('[benhnhan] parse seed JSON', e);
-        }
-    </script>
+    <meta name="context-path" content="${pageContext.request.contextPath}">
     <jsp:include page="../components/notify-resources.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260516b"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260516c"></script>
 </body>
 </html>

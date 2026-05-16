@@ -537,3 +537,40 @@ button.btn-complete,
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* Layout overrides (từ doctor/index.jsp) */
+.main-container {
+    display: block;
+    padding: 20px;
+}
+.content {
+    padding: 0;
+}
+.appointment-table .btn-complete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 55%, #4ade80 100%) !important;
+    color: #14532d !important;
+    border: 1px solid #6ee7b7 !important;
+    padding: 8px 14px !important;
+    border-radius: 8px !important;
+    cursor: pointer;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    margin-left: 6px;
+    margin-top: 4px;
+    line-height: 1.2;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(74, 222, 128, 0.35);
+    font-family: 'Inter', system-ui, sans-serif;
+}
+.appointment-table .btn-complete:hover {
+    background: linear-gradient(135deg, #86efac 0%, #4ade80 100%) !important;
+    color: #052e16 !important;
+    transform: translateY(-1px);
+}
+.appointment-table td:last-child .btn-exam {
+    margin-bottom: 4px;
+}

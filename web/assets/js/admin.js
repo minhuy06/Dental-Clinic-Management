@@ -101,8 +101,24 @@ var revMode = 'day';
 })();
 
 // ==================== OVERRIDE DATA TỪ BACKEND ====================
-// JSP inject vào window.__ADMIN_*__ trước khi load file này.
-// Nếu có thì dùng, không thì giữ nguyên demo data ở trên.
+(function initAdminBootstrap() {
+    if (typeof AppBootstrap !== 'undefined') {
+        var cp = AppBootstrap.getMetaContent('context-path');
+        if (cp) window.ADMIN_CONTEXT_PATH = cp;
+        var servicesSeed = AppBootstrap.readJsonScript('adminServicesJson', null);
+        var accountsSeed = AppBootstrap.readJsonScript('adminAccountsJson', null);
+        var shiftsSeed = AppBootstrap.readJsonScript('adminShiftsJson', null);
+        var revenueSeed = AppBootstrap.readJsonScript('adminRevenueJson', null);
+        var pendingSeed = AppBootstrap.readJsonScript('adminPendingBookingsJson', null);
+        if (servicesSeed !== null) window.__ADMIN_SERVICES__ = servicesSeed;
+        if (accountsSeed !== null) window.__ADMIN_ACCOUNTS__ = accountsSeed;
+        if (shiftsSeed !== null) window.__ADMIN_SHIFTS__ = shiftsSeed;
+        if (revenueSeed !== null) window.__ADMIN_REVENUE__ = revenueSeed;
+        if (pendingSeed !== null) window.__ADMIN_PENDING_BOOKINGS__ = pendingSeed;
+    }
+})();
+
+// Nếu có dữ liệu từ server thì dùng, không thì giữ demo data ở trên.
 (function() {
     if (Array.isArray(window.__ADMIN_SERVICES__)) {
         services = window.__ADMIN_SERVICES__;

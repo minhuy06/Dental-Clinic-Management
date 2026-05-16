@@ -67,7 +67,16 @@ function applyPatientList(list) {
     renderTable();
 }
 
+function initBenhnhanBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var cp = AppBootstrap.getMetaContent('context-path');
+    if (cp) window.APP_CONTEXT_PATH = cp;
+    var seeded = AppBootstrap.readJsonScript('patientSeedJson', []);
+    window.INITIAL_PATIENTS_FROM_SERVER = Array.isArray(seeded) ? seeded : [];
+}
+
 async function loadPatientsFromServer() {
+    initBenhnhanBootstrap();
     const seeded = Array.isArray(window.INITIAL_PATIENTS_FROM_SERVER)
         ? window.INITIAL_PATIENTS_FROM_SERVER
         : [];

@@ -1,3 +1,15 @@
+(function initReceptionBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var cp = AppBootstrap.getMetaContent('context-path');
+    if (cp) window.APP_CONTEXT_PATH = cp;
+    var receptionCtx = AppBootstrap.readJsonScript('receptionContextJson', null);
+    if (receptionCtx) window.RECEPTION_CONTEXT = receptionCtx;
+    var servicesSeed = AppBootstrap.readJsonScript('receptionServicesJson', null);
+    if (servicesSeed !== null) window.SERVICE_LIST_FROM_DB = servicesSeed;
+    var roomsSeed = AppBootstrap.readJsonScript('receptionRoomsJson', null);
+    if (roomsSeed !== null) window.ROOM_LIST_FROM_DB = roomsSeed;
+})();
+
 // ==================== DỮ LIỆU TỪ BACKEND ====================
 const servicesList = [];
 

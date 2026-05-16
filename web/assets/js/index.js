@@ -1,3 +1,11 @@
+(function initHomeBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var user = AppBootstrap.readJsonScript('homeUserJson', '');
+    if (user) window.LOGGED_USER = user;
+    var services = AppBootstrap.readJsonScript('homeServicesJson', null);
+    if (Array.isArray(services)) window.SERVICE_LIST_FROM_DB = services;
+})();
+
 var selectedRating = 0;
 var reviewList = [];
 

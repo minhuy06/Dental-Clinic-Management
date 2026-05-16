@@ -28,7 +28,7 @@
     boolean isInforPage = currentPage.contains("/Infor/");
 %>
 
-<header class="header" id="header">
+<header class="header" id="header" data-context-path="${pageContext.request.contextPath}" data-home-url="<%= homeUrl %>">
     <div class="container">
         <a href="<%= homeUrl %>" class="logo">
             <div class="logo-icon">🦷</div>
@@ -128,8 +128,4 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-notify.css">
 <script src="${pageContext.request.contextPath}/assets/js/app-notify.js?v=20260518b"></script>
-<script>
-    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
-    window.HOME_URL = '<%= homeUrl %>';
-</script>
 <script src="${pageContext.request.contextPath}/assets/js/header.js"></script>

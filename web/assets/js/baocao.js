@@ -51,7 +51,16 @@ function applyReportPayload(data) {
     paymentStats = Array.isArray(data.paymentStats) ? data.paymentStats : [];
 }
 
+function initBaocaoBootstrap() {
+    if (typeof AppBootstrap === 'undefined') return;
+    var cp = AppBootstrap.getMetaContent('context-path');
+    if (cp) window.APP_CONTEXT_PATH = cp;
+    var seeded = AppBootstrap.readJsonScript('reportSeedJson', {});
+    window.INITIAL_REPORT_FROM_SERVER = seeded && typeof seeded === 'object' ? seeded : {};
+}
+
 async function loadReportData() {
+    initBaocaoBootstrap();
     const seeded = window.INITIAL_REPORT_FROM_SERVER;
     if (seeded && typeof seeded === 'object' && Object.keys(seeded).length > 0) {
         applyReportPayload(seeded);

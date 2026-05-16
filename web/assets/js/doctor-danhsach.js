@@ -1,3 +1,10 @@
+(function initDoctorDanhsachBootstrap() {
+    if (typeof AppBootstrap !== 'undefined') {
+        var cp = AppBootstrap.getMetaContent('context-path');
+        if (cp) window.CONTEXT_PATH = cp;
+    }
+})();
+
 let appointments = [
     { id: 1, stt: 1, patientName: 'Nguyễn Văn Hiển', patientPhone: '0987 654 321', time: '08:00', doctor: 'BS. Nguyễn Hoàng', reason: 'Đau răng hàm dưới', status: 'waiting' },
     { id: 2, stt: 2, patientName: 'Trần Thị Lan', patientPhone: '0912 345 678', time: '08:30', doctor: 'BS. Nguyễn Hoàng', reason: 'Khám tổng quát', status: 'waiting' },

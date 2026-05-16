@@ -1,3 +1,13 @@
+(function initHeaderBootstrap() {
+    var header = document.getElementById('header');
+    if (header) {
+        var cp = header.getAttribute('data-context-path');
+        var home = header.getAttribute('data-home-url');
+        if (cp) window.CONTEXT_PATH = cp;
+        if (home) window.HOME_URL = home;
+    }
+})();
+
 window.addEventListener('scroll', function() {
     var h = document.getElementById('header');
     if (window.scrollY > 50) h.classList.add('scrolled');
