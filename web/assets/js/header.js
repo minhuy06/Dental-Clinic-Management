@@ -1,9 +1,10 @@
 (function initHeaderBootstrap() {
+    if (typeof AppBootstrap !== 'undefined' && AppBootstrap.resolveContextPath) {
+        AppBootstrap.resolveContextPath();
+    }
     var header = document.getElementById('header');
     if (header) {
-        var cp = header.getAttribute('data-context-path');
         var home = header.getAttribute('data-home-url');
-        if (cp) window.CONTEXT_PATH = cp;
         if (home) window.HOME_URL = home;
     }
 })();

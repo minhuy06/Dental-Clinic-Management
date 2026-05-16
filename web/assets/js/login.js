@@ -1,3 +1,10 @@
+function getLoginContextPath() {
+    if (typeof AppBootstrap !== 'undefined' && AppBootstrap.resolveContextPath) {
+        return AppBootstrap.resolveContextPath();
+    }
+    return window.CONTEXT_PATH || '';
+}
+
 function togglePass(id, btn) {
     var inp = document.getElementById(id);
     inp.type = inp.type === 'password' ? 'text' : 'password';
@@ -78,7 +85,8 @@ async function handleLogin(e) {
                 submitBtn.innerHTML = 'Đang đăng nhập...';
             }
 
-            var response = await fetch((window.CONTEXT_PATH || '') + '/login', {
+            var ctx = getLoginContextPath();
+            var response = await fetch(ctx + '/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ account: acc, password: pass })
@@ -93,7 +101,7 @@ async function handleLogin(e) {
             if (res && res.success) {
                 var qp = new URLSearchParams(window.location.search);
                 if (qp.get('redirect') === 'datlich') {
-                    window.location.href = (window.CONTEXT_PATH || '') + '/Infor/Schedule#datlich';
+                    window.location.href = getLoginContextPath() + '/Infor/Schedule#datlich';
                 } else {
                     window.location.href = res.redirectUrl;
                 }

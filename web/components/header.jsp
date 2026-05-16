@@ -127,5 +127,6 @@
 </div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-notify.css">
+<script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
 <script src="${pageContext.request.contextPath}/assets/js/app-notify.js?v=20260518b"></script>
 <script src="${pageContext.request.contextPath}/assets/js/header.js"></script>

@@ -7,6 +7,7 @@
     <title>Đăng nhập - Nha Khoa 5AE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
 </head>
 <body>
     <jsp:include page="../components/header.jsp" />
@@ -40,6 +41,6 @@
         </div>
     </main>
     <jsp:include page="../components/footer.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/login.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/login.js?v=20260518b"></script>
 </body>
 </html>

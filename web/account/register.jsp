@@ -7,6 +7,7 @@
     <title>Đăng ký - Nha Khoa 5AE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
+    <meta name="context-path" content="${pageContext.request.contextPath}">
 </head>
 <body>
     <jsp:include page="../components/header.jsp" />
