@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng nhập - Nha Khoa Kvone</title>
+    <title>Đăng nhập - Nha Khoa 5AE</title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
 </head>
@@ -15,7 +15,7 @@
             <div class="auth-box">
                 <div class="auth-header">
                     <h2>Đăng nhập</h2>
-                    <p>Chào mừng bạn trở lại Nha Khoa Kvone</p>
+                    <p>Chào mừng bạn trở lại Nha Khoa 5AE</p>
                 </div>
                 <form id="loginForm" onsubmit="return handleLogin(event)">
                     <div class="form-group" id="accountGroup">
