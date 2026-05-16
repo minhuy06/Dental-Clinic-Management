@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
+<%
+    TaiKhoan loggedDoctor = (TaiKhoan) session.getAttribute("loggedInUser");
+    String doctorHeaderName = "Bác sĩ";
+    if (loggedDoctor != null && loggedDoctor.getHoTen() != null && !loggedDoctor.getHoTen().trim().isEmpty()) {
+        doctorHeaderName = loggedDoctor.getHoTen().trim();
+        if (!doctorHeaderName.toLowerCase().startsWith("bs")) {
+            doctorHeaderName = "BS. " + doctorHeaderName;
+        }
+    }
+%>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -16,6 +27,35 @@
         .content {
             padding: 0;
         }
+        /* Nút xác nhận hoàn tất — xanh lá mạ (đảm bảo hiển thị kể cả cache CSS cũ) */
+        .appointment-table .btn-complete {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #bbf7d0 0%, #86efac 55%, #4ade80 100%) !important;
+            color: #14532d !important;
+            border: 1px solid #6ee7b7 !important;
+            padding: 8px 14px !important;
+            border-radius: 8px !important;
+            cursor: pointer;
+            font-size: 0.8rem !important;
+            font-weight: 700 !important;
+            margin-left: 6px;
+            margin-top: 4px;
+            line-height: 1.2;
+            white-space: nowrap;
+            box-shadow: 0 2px 6px rgba(74, 222, 128, 0.35);
+            font-family: 'Inter', system-ui, sans-serif;
+        }
+        .appointment-table .btn-complete:hover {
+            background: linear-gradient(135deg, #86efac 0%, #4ade80 100%) !important;
+            color: #052e16 !important;
+            transform: translateY(-1px);
+        }
+        .appointment-table td:last-child .btn-exam {
+            margin-bottom: 4px;
+        }
     </style>
 </head>
 <body>
@@ -28,7 +68,7 @@
         <div class="header-right">
             <div class="doctor-info">
                 <i class="fa-solid fa-user-doctor"></i>
-                <span>BS. Nguyễn Hoàng</span>
+                <span><%= doctorHeaderName %></span>
             </div>
             <div class="date-time" id="currentDateTime"></div>
         </div>
@@ -97,6 +137,6 @@
     <script>
         window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     </script>
-    <script src="${pageContext.request.contextPath}/doctor/js/danhsach.js"></script>
+    <script src="${pageContext.request.contextPath}/doctor/js/danhsach.js?v=20260516g"></script>
 </body>
 </html>

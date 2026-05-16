@@ -21,7 +21,15 @@ public class LichHen {
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
     private BacSi bacSi;
+    /** Phòng khám (API khám lâm sàng / Gson) */
+    private PhongKham phongKham;
     private List<ChiTietLichHen> danhSachDichVuDat;
+    /** Phiếu khám nháp / đã lưu (nếu có) */
+    private PhieuKham phieuKham;
+    /** Tên dịch vụ đặt (JOIN ChiTietLichHen + DichVu, hiển thị lễ tân) */
+    private List<String> tenDichVuList;
+    /** Trạng thái HoaDon: Chưa thanh toán | Đã thanh toán (null nếu chưa có hóa đơn) */
+    private String trangThaiHoaDon;
     // Constructor mặc định
     public LichHen() {}
 
@@ -73,6 +81,9 @@ public class LichHen {
 
     public BacSi getBacSi() { return bacSi; }
     public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
+
+    public PhongKham getPhongKham() { return phongKham; }
+    public void setPhongKham(PhongKham phongKham) { this.phongKham = phongKham; }
     
     public List<ChiTietLichHen> getDanhSachDichVuDat() {
         return danhSachDichVuDat;
@@ -80,5 +91,29 @@ public class LichHen {
 
     public void setDanhSachDichVuDat(List<ChiTietLichHen> danhSachDichVuDat) {
         this.danhSachDichVuDat = danhSachDichVuDat;
+    }
+
+    public List<String> getTenDichVuList() {
+        return tenDichVuList;
+    }
+
+    public void setTenDichVuList(List<String> tenDichVuList) {
+        this.tenDichVuList = tenDichVuList;
+    }
+
+    public PhieuKham getPhieuKham() {
+        return phieuKham;
+    }
+
+    public void setPhieuKham(PhieuKham phieuKham) {
+        this.phieuKham = phieuKham;
+    }
+
+    public String getTrangThaiHoaDon() {
+        return trangThaiHoaDon;
+    }
+
+    public void setTrangThaiHoaDon(String trangThaiHoaDon) {
+        this.trangThaiHoaDon = trangThaiHoaDon;
     }
 }

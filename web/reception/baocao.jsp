@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -24,16 +25,16 @@
             </div>
         </div>
         <ul class="nav-menu">
-            <li><a href="index.jsp">Lịch hẹn</a></li>
-            <li><a href="benhnhan.jsp">Bệnh nhân</a></li>
-            <li><a href="baocao.jsp" class="active">Báo cáo</a></li>
-            <li><a href="cskh.jsp">CSKH</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-dashboard">Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-patient">Bệnh nhân</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-report" class="active">Báo cáo</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp">CSKH</a></li>
         </ul>
         <div class="user-info">
             <div class="avatar" id="avatarBtn">
-                <i class="fas fa-user" onclick="location.href='hoso.jsp'" style="color: white;"></i>
+                <i class="fas fa-user" onclick="location.href='${pageContext.request.contextPath}/hoso'" style="color: white;"></i>
             </div>
-            <span class="staff-name">Lễ Tân 1 </span>
+            <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
 </div>
     </div>
 
@@ -109,7 +110,7 @@
             <!-- Biểu đồ doanh thu -->
             <div class="card-panel">
                 <div class="panel-header">
-                    <h4><i class="fas fa-chart-line"></i> Doanh thu theo ngày</h4>
+                    <h4 id="chartTitle"><i class="fas fa-chart-line"></i> <span id="chartTitleText">Doanh thu theo ngày</span></h4>
                     <div class="chart-controls">
                         <button class="chart-btn active" data-chart="bar"><i class="fas fa-chart-bar"></i></button>
                         <button class="chart-btn" data-chart="line"><i class="fas fa-chart-line"></i></button>
@@ -172,7 +173,20 @@
         <p>© 2024 Nha Khoa 5AE - Hệ thống quản lý doanh thu thông minh</p>
     </div>
 
-    <!-- File JS của bạn - ĐẶT SAU Chart.js -->
-    <script src="${pageContext.request.contextPath}/assets/js/baocao.js"></script>
+    <script id="reportSeedJson" type="application/json">${empty reportDataJson ? '{}' : reportDataJson}</script>
+    <script>
+        window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.BAOCAO_JS_VERSION = '20260517c';
+        window.INITIAL_REPORT_FROM_SERVER = {};
+        try {
+            var reportSeedEl = document.getElementById('reportSeedJson');
+            if (reportSeedEl && reportSeedEl.textContent) {
+                window.INITIAL_REPORT_FROM_SERVER = JSON.parse(reportSeedEl.textContent);
+            }
+        } catch (e) {
+            console.error('[baocao] parse seed JSON', e);
+        }
+    </script>
+    <script src="${pageContext.request.contextPath}/assets/js/baocao.js?v=20260517c"></script>
 </body>
 </html>

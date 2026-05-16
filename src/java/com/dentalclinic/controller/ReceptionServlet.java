@@ -2,6 +2,7 @@ package com.dentalclinic.controller;
 
 import com.dentalclinic.dao.BacSiDAO;
 import com.dentalclinic.dao.DichVuDAO;
+import com.dentalclinic.dao.LeTanDAO;
 import com.dentalclinic.dao.LichHenDAO;
 import com.dentalclinic.dao.LichHenDAO.ReceptionTotals;
 import com.dentalclinic.dao.PhongKhamDAO;
@@ -9,6 +10,7 @@ import com.dentalclinic.model.BacSi;
 import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.LichHen;
 import com.dentalclinic.model.PhongKham;
+import com.dentalclinic.model.TaiKhoan;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
@@ -31,6 +33,7 @@ public class ReceptionServlet extends HttpServlet {
 
     private final LichHenDAO lhDAO = new LichHenDAO();
     private final BacSiDAO bacSiDAO = new BacSiDAO();
+    private final LeTanDAO leTanDAO = new LeTanDAO();
     private final DichVuDAO dichVuDAO = new DichVuDAO();
     private final PhongKhamDAO phongKhamDAO = new PhongKhamDAO();
     private final LichHenService lichHenService = new LichHenService();
@@ -92,7 +95,12 @@ public class ReceptionServlet extends HttpServlet {
             case "Đã duyệt":
             case "Đã xác nhận":
             case "Đã đến":
+            case "Đang khám":
                 return "confirmed";
+            case "Đã khám":
+                return "examined";
+            case "Đã hoàn thành":
+                return "completed";
             case "Chờ duyệt":
             case "Chờ xác nhận":
                 return "pending";
@@ -103,6 +111,18 @@ public class ReceptionServlet extends HttpServlet {
 
     private static String trimParam(String param) {
         return param == null ? "" : param.trim();
+    }
+
+    private Integer resolveLeTanId(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return null;
+        }
+        TaiKhoan user = (TaiKhoan) session.getAttribute("loggedInUser");
+        if (user == null || user.getTaiKhoanID() <= 0) {
+            return null;
+        }
+        return leTanDAO.findLeTanIdByTaiKhoanId(user.getTaiKhoanID());
     }
 
     private static String firstNonBlank(String... values) {
@@ -229,6 +249,11 @@ public class ReceptionServlet extends HttpServlet {
             }
         }
 
+        if (list != null && !list.isEmpty()) {
+            lhDAO.attachTenDichVuForAppointments(list);
+            lhDAO.attachTrangThaiHoaDonForAppointments(list);
+        }
+
         List<BacSi> doctors = bacSiDAO.getAllForDisplay();
         List<DichVu> services = dichVuDAO.getAll();
         List<PhongKham> rooms = phongKhamDAO.getAll();
@@ -285,6 +310,10 @@ public class ReceptionServlet extends HttpServlet {
                         dbStatus = "Chờ xác nhận";
                     } else if ("approved".equalsIgnoreCase(statusUi) || "confirmed".equalsIgnoreCase(statusUi)) {
                         dbStatus = "Đã xác nhận";
+                    } else if ("arrived".equalsIgnoreCase(statusUi)) {
+                        dbStatus = "Đã đến";
+                    } else if ("cancelled".equalsIgnoreCase(statusUi)) {
+                        dbStatus = "Đã hủy";
                     }
                     boolean ok = lhDAO.updateTrangThai(lichHenId, dbStatus);
                     if (!ok) throw new IllegalStateException("Không cập nhật được trạng thái.");
@@ -293,8 +322,33 @@ public class ReceptionServlet extends HttpServlet {
                 }
                 if ("pay".equalsIgnoreCase(action)) {
                     int lichHenId = Integer.parseInt(trimParam(request.getParameter("lichHenId")));
-                    boolean ok = lhDAO.updateTrangThai(lichHenId, "Đã thanh toán");
-                    if (!ok) throw new IllegalStateException("Không cập nhật được trạng thái thanh toán.");
+                    String paymentMethod = firstNonBlank(
+                            request.getParameter("paymentMethod"),
+                            request.getParameter("phuongThucThanhToan"));
+                    if (paymentMethod.isBlank()) {
+                        paymentMethod = "Tiền mặt";
+                    }
+                    double tongTien = 0;
+                    String tongRaw = firstNonBlank(
+                            request.getParameter("totalAmount"),
+                            request.getParameter("tongTien"));
+                    if (!tongRaw.isBlank()) {
+                        tongTien = Double.parseDouble(tongRaw.replace(",", "").trim());
+                    }
+                    if (tongTien <= 0) {
+                        LichHenDAO.ReceptionPaymentDetail detail = lhDAO.getReceptionPaymentDetail(lichHenId);
+                        if (detail != null) {
+                            tongTien = detail.subtotal * 1.1;
+                        }
+                    }
+                    if (tongTien <= 0) {
+                        throw new IllegalStateException("Không xác định được tổng tiền thanh toán.");
+                    }
+                    Integer leTanId = resolveLeTanId(request);
+                    String payError = lhDAO.xacNhanThanhToan(lichHenId, paymentMethod, tongTien, leTanId);
+                    if (payError != null) {
+                        throw new IllegalStateException(payError);
+                    }
                     response.getWriter().write("{\"success\":true}");
                     return;
                 }
@@ -324,6 +378,12 @@ public class ReceptionServlet extends HttpServlet {
                     for (int i = 0; i < d.dichVuIds.size(); i++) {
                         if (i > 0) sb.append(",");
                         sb.append(d.dichVuIds.get(i));
+                    }
+                    sb.append("],\"dichVuItems\":[");
+                    for (int i = 0; i < d.dichVuItems.size(); i++) {
+                        LichHenDAO.DichVuQty it = d.dichVuItems.get(i);
+                        if (i > 0) sb.append(",");
+                        sb.append("{\"id\":").append(it.id).append(",\"quantity\":").append(it.quantity).append("}");
                     }
                     sb.append("]}");
                     response.getWriter().write(sb.toString());

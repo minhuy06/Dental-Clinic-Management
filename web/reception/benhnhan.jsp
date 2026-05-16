@@ -5,6 +5,7 @@
 --%>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -28,16 +29,16 @@
             </div>
         </div>
         <ul class="nav-menu">
-            <li><a href="index.jsp">Lịch hẹn</a></li>
-            <li><a href="benhnhan.jsp" class="active">Bệnh nhân</a></li>
-            <li><a href="baocao.jsp">Báo cáo</a></li>
-            <li><a href="cskh.jsp">CSKH</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-dashboard">Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-patient" class="active">Bệnh nhân</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-report">Báo cáo</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp">CSKH</a></li>
         </ul>
         <div class="user-info">
             <div class="avatar" id="avatarBtn">
-                <i class="fas fa-user" onclick="location.href='hoso.jsp'" style="color: white;"></i>
+                <i class="fas fa-user" onclick="location.href='${pageContext.request.contextPath}/hoso'" style="color: white;"></i>
             </div>
-            <span class="staff-name">Lễ Tân 1 </span>
+            <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
 </div>
     </div>
 
@@ -114,6 +115,7 @@
             </table>
         </div>
 
+        <p id="patientTableFooter" class="table-footer-hint" style="text-align:center;color:#64748b;font-size:0.85rem;margin:12px 0 4px;"></p>
         <!-- ==================== PAGINATION ==================== -->
         <div class="pagination" id="pagination"></div>
     </div>
@@ -206,6 +208,20 @@
         <p style="font-size: 12px; margin-top: 5px;">© 2024 Nha Khoa 5AE - Hệ thống quản lý bệnh nhân chuyên nghiệp</p>
     </div>
 
-    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js"></script>
+    <script id="patientSeedJson" type="application/json">${empty patientListJson ? '[]' : patientListJson}</script>
+    <script>
+        window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.BENHNHAN_JS_VERSION = '20260516';
+        window.INITIAL_PATIENTS_FROM_SERVER = [];
+        try {
+            var seedEl = document.getElementById('patientSeedJson');
+            if (seedEl && seedEl.textContent) {
+                window.INITIAL_PATIENTS_FROM_SERVER = JSON.parse(seedEl.textContent);
+            }
+        } catch (e) {
+            console.error('[benhnhan] parse seed JSON', e);
+        }
+    </script>
+    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260516b"></script>
 </body>
 </html>

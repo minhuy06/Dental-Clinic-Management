@@ -1,48 +1,18 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/JSP_Servlet/JavaScript.js to edit this template
- */
-
-
 /**
- * ==================== NHA KHOA 5AE - QUẢN LÝ BỆNH NHÂN ====================
- * File: benhnhan.js
+ * NHA KHOA 5AE - Quản lý bệnh nhân (dữ liệu từ API /api/patients)
  */
 
-// ==================== DỮ LIỆU MẪU ====================
-let patients = [
-    { id: 1, fullName: "Nguyễn Văn Hiển", gender: "Nam", phone: "0908123456", birthDate: "1990-05-15", address: "Hà Nội", allergy: "Penicillin", medicalHistory: "Cao huyết áp", status: "active", registerDate: "2024-01-10", notes: "" },
-    { id: 2, fullName: "Trần Thị Thảo", gender: "Nữ", phone: "0918765432", birthDate: "1995-08-20", address: "Hồ Chí Minh", allergy: "Không", medicalHistory: "Hen suyễn", status: "active", registerDate: "2024-02-15", notes: "" },
-    { id: 3, fullName: "Lê Anh Nam", gender: "Nam", phone: "0987654321", birthDate: "1988-12-10", address: "Đà Nẵng", allergy: "Amoxicillin", medicalHistory: "Tiểu đường type 2", status: "completed", registerDate: "2023-11-20", notes: "" },
-    { id: 4, fullName: "Phạm Thu Hà", gender: "Nữ", phone: "0978123456", birthDate: "2000-03-25", address: "Hải Phòng", allergy: "Không", medicalHistory: "Không", status: "followup", registerDate: "2024-03-05", notes: "Cần tái khám sau 1 tháng" },
-    { id: 5, fullName: "Hoàng Văn Tuấn", gender: "Nam", phone: "0965123456", birthDate: "1985-07-30", address: "Bình Dương", allergy: "Paracetamol", medicalHistory: "Viêm gan B", status: "active", registerDate: "2024-01-20", notes: "" },
-    { id: 6, fullName: "Đặng Thị Hoa", gender: "Nữ", phone: "0932123456", birthDate: "1992-11-12", address: "Cần Thơ", allergy: "Không", medicalHistory: "Bệnh tim mạch", status: "completed", registerDate: "2023-12-10", notes: "" },
-    { id: 7, fullName: "Bùi Minh Quân", gender: "Nam", phone: "0945123456", birthDate: "1998-04-18", address: "Huế", allergy: "Ibuprofen", medicalHistory: "Không", status: "followup", registerDate: "2024-02-28", notes: "" },
-    { id: 8, fullName: "Ngô Thị Lan", gender: "Nữ", phone: "0912345678", birthDate: "1993-09-22", address: "Nha Trang", allergy: "Không", medicalHistory: "Suy giáp", status: "active", registerDate: "2024-03-10", notes: "" },
-    { id: 9, fullName: "Vũ Minh Đức", gender: "Nam", phone: "0978123456", birthDate: "1991-07-07", address: "Quảng Ninh", allergy: "Không", medicalHistory: "Không", status: "active", registerDate: "2024-03-15", notes: "" },
-    { id: 10, fullName: "Đinh Bảo Ngọc", gender: "Nữ", phone: "0988123456", birthDate: "1996-11-11", address: "Lạng Sơn", allergy: "Aspirin", medicalHistory: "Thiếu máu", status: "followup", registerDate: "2024-03-20", notes: "" }
-];
+let patients = [];
 
-// ==================== BIẾN TOÀN CỤC ====================
 let currentFilter = 'all';
 let currentPage = 1;
-let rowsPerPage = 5;
+let rowsPerPage = 20;
 let editingId = null;
 
-// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
-let PATIENT_CONFIG = {
-    USE_MOCK: true,
-    API_BASE: '/api',
-    MOCK_DELAY_MS: 120
-};
-
-function delayMs(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function deepClone(data) {
-    return JSON.parse(JSON.stringify(data));
-}
+const PATIENT_API_BASE = (function () {
+    const cp = typeof window.APP_CONTEXT_PATH === 'string' ? window.APP_CONTEXT_PATH : '';
+    return cp + '/api';
+})();
 
 async function requestApi(path, options = {}) {
     const method = options.method || 'GET';
@@ -50,11 +20,12 @@ async function requestApi(path, options = {}) {
     const headers = options.headers || {};
     const fetchOptions = {
         method: method,
+        credentials: 'same-origin',
         headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
     };
     if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
 
-    const res = await fetch(PATIENT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    const res = await fetch(PATIENT_API_BASE + '/' + path, fetchOptions);
     let json = null;
     try { json = await res.json(); } catch (e) { json = null; }
     if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
@@ -68,39 +39,12 @@ function normalizeList(res) {
     return [];
 }
 
-const mockDataSource = {
-    list: async () => {
-        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
-        return deepClone(patients);
-    },
-    create: async (payload) => {
-        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
-        const newId = Math.max(...patients.map(p => p.id), 0) + 1;
-        patients.push(Object.assign({ id: newId }, payload));
-        return { success: true };
-    },
-    update: async (payload) => {
-        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
-        const idx = patients.findIndex(p => p.id === payload.id);
-        if (idx === -1) return { success: false, message: 'Không tìm thấy bệnh nhân' };
-        patients[idx] = Object.assign({}, patients[idx], payload);
-        return { success: true };
-    },
-    remove: async (id) => {
-        await delayMs(PATIENT_CONFIG.MOCK_DELAY_MS);
-        patients = patients.filter(p => p.id !== id);
-        return { success: true };
-    }
-};
-
-const apiDataSource = {
+const patientDataSource = {
     list: async () => normalizeList(await requestApi('patients')),
     create: async (payload) => requestApi('patients/add', { method: 'POST', body: payload }),
     update: async (payload) => requestApi('patients/update', { method: 'PUT', body: payload }),
     remove: async (id) => requestApi('patients/delete?id=' + id, { method: 'DELETE' })
 };
-
-const patientDataSource = PATIENT_CONFIG.USE_MOCK ? mockDataSource : apiDataSource;
 
 async function withDataGuard(action, successMsg) {
     try {
@@ -118,14 +62,36 @@ async function withDataGuard(action, successMsg) {
     }
 }
 
-async function loadPatientsFromServer() {
-    const list = await withDataGuard(() => patientDataSource.list());
-    if (!list) return;
+function applyPatientList(list) {
     patients = normalizeList(list);
     renderTable();
 }
 
-// ==================== HÀM TIỆN ÍCH ====================
+async function loadPatientsFromServer() {
+    const seeded = Array.isArray(window.INITIAL_PATIENTS_FROM_SERVER)
+        ? window.INITIAL_PATIENTS_FROM_SERVER
+        : [];
+    if (seeded.length > 0) {
+        applyPatientList(seeded);
+        console.info('[benhnhan] Seed từ server:', seeded.length, 'bệnh nhân');
+    }
+
+    try {
+        const res = await patientDataSource.list();
+        const apiList = normalizeList(res);
+        if (apiList.length > 0) {
+            applyPatientList(apiList);
+        }
+        console.info('[benhnhan] API:', apiList.length, '| hiển thị:', patients.length);
+    } catch (error) {
+        console.error('[benhnhan] API load error:', error);
+        if (patients.length === 0) {
+            showToast(error.message || 'Không tải được danh sách bệnh nhân. Hãy đăng nhập lễ tân.', 'error');
+            renderTable();
+        }
+    }
+}
+
 function formatDate(dateStr) {
     if (!dateStr) return '';
     let date = new Date(dateStr);
@@ -183,7 +149,54 @@ function escapeHtml(text) {
     return div.innerHTML;
 }
 
-// ==================== THỐNG KÊ ====================
+const RCV_BOOKING_PREFILL_KEY = 'rcv_booking_prefill';
+
+/** Chuyển sang trang lịch hẹn và mở popup đặt lịch (điền sẵn họ tên + SĐT). */
+function gotoBookFromPatient(id) {
+    const patient = patients.find(function (p) {
+        return Number(p.id) === Number(id);
+    });
+    if (!patient) {
+        showToast('Không tìm thấy thông tin bệnh nhân', 'error');
+        return;
+    }
+    const cp = typeof window.APP_CONTEXT_PATH === 'string' ? window.APP_CONTEXT_PATH : '';
+    const patientName = String(patient.fullName || patient.hoTen || '').trim();
+    const patientPhone = String(patient.phone || patient.soDienThoai || '').trim();
+    if (!patientName || !patientPhone) {
+        showToast('Thiếu họ tên hoặc số điện thoại của bệnh nhân', 'error');
+        return;
+    }
+    const notesParts = [];
+    if (patient.notes && String(patient.notes).trim()) {
+        notesParts.push(String(patient.notes).trim());
+    }
+    if (patient.allergy && patient.allergy !== 'Không') {
+        notesParts.push('Dị ứng: ' + patient.allergy);
+    }
+    if (patient.medicalHistory && patient.medicalHistory !== 'Không') {
+        notesParts.push('Tiền sử BN: ' + patient.medicalHistory);
+    }
+    const payload = {
+        patientName: patientName,
+        patientPhone: patientPhone,
+        benhNhanId: patient.id,
+        notes: notesParts.join(' | ')
+    };
+    try {
+        sessionStorage.setItem(RCV_BOOKING_PREFILL_KEY, JSON.stringify(payload));
+    } catch (e) {
+        console.error(e);
+    }
+    const q = new URLSearchParams();
+    q.set('openBooking', '1');
+    q.set('patientName', patientName);
+    q.set('patientPhone', patientPhone);
+    if (patient.id) q.set('benhNhanId', String(patient.id));
+    showToast('Đang mở form đặt lịch cho ' + patientName, 'success');
+    window.location.href = cp + '/reception-dashboard?' + q.toString();
+}
+
 function updateStats() {
     let total = patients.length;
     let active = patients.filter(p => p.status === 'active').length;
@@ -196,7 +209,6 @@ function updateStats() {
     document.getElementById('followupPatients').innerText = followup;
 }
 
-// ==================== LỌC THEO TRẠNG THÁI ====================
 function filterByStatus(status) {
     currentFilter = status;
     currentPage = 1;
@@ -207,16 +219,15 @@ function filterByStatus(status) {
             btn.classList.add('active');
         }
     });
-    
+
     if (status === 'all') document.getElementById('statAll').classList.add('active');
     else if (status === 'active') document.getElementById('statActive').classList.add('active');
     else if (status === 'completed') document.getElementById('statCompleted').classList.add('active');
     else if (status === 'followup') document.getElementById('statFollowup').classList.add('active');
-    
+
     renderTable();
 }
 
-// ==================== HIỂN THỊ BẢNG ====================
 function renderTable() {
     let searchTerm = document.getElementById('searchInput').value.toLowerCase();
 
@@ -228,7 +239,7 @@ function renderTable() {
         return true;
     });
 
-    let totalPages = Math.ceil(filtered.length / rowsPerPage);
+    let totalPages = Math.ceil(filtered.length / rowsPerPage) || 1;
     let start = (currentPage - 1) * rowsPerPage;
     let end = start + rowsPerPage;
     let paginatedPatients = filtered.slice(start, end);
@@ -247,15 +258,31 @@ function renderTable() {
                 <td>${getMedicalHistoryDisplay(patient.medicalHistory)}</td>
                 <td>${getStatusBadge(patient.status)}</td>
                 <td class="action-btns">
-                    <button class="btn-action btn-edit" onclick="editPatient(${patient.id})"><i class="fas fa-edit"></i></button>
-                    <button class="btn-action btn-delete" onclick="deletePatient(${patient.id})"><i class="fas fa-trash"></i></button>
+                    <button type="button" class="btn-action btn-add-appointment" data-book-patient-id="${patient.id}" title="Thêm lịch hẹn">
+                        <i class="fas fa-calendar-plus"></i>
+                    </button>
+                    <button type="button" class="btn-action btn-edit" data-edit-patient-id="${patient.id}" title="Sửa"><i class="fas fa-edit"></i></button>
+                    <button type="button" class="btn-action btn-delete" data-delete-patient-id="${patient.id}" title="Xóa"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
     }
-    
-    renderPagination(totalPages);
+
+    renderPagination(filtered.length > 0 ? totalPages : 0);
     updateStats();
+    updateTableFooter(filtered.length, start, paginatedPatients.length);
+}
+
+function updateTableFooter(totalFiltered, startIndex, pageCount) {
+    let el = document.getElementById('patientTableFooter');
+    if (!el) return;
+    if (totalFiltered === 0) {
+        el.textContent = 'Không có bệnh nhân';
+        return;
+    }
+    const from = startIndex + 1;
+    const to = startIndex + pageCount;
+    el.textContent = 'Hiển thị ' + from + '–' + to + ' / ' + totalFiltered + ' bệnh nhân (tổng DB: ' + patients.length + ')';
 }
 
 function renderPagination(totalPages) {
@@ -264,7 +291,7 @@ function renderPagination(totalPages) {
         paginationDiv.innerHTML = '';
         return;
     }
-    
+
     let html = '';
     for (let i = 1; i <= totalPages; i++) {
         html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
@@ -277,7 +304,6 @@ function goToPage(page) {
     renderTable();
 }
 
-// ==================== CRUD BỆNH NHÂN ====================
 function openAddModal() {
     editingId = null;
     document.getElementById('modalTitle').innerText = 'Thêm bệnh nhân mới';
@@ -327,15 +353,15 @@ async function savePatient() {
     let status = document.getElementById('status').value;
     let registerDate = document.getElementById('registerDate').value;
     let notes = document.getElementById('notes').value.trim();
-    
+
     if (!fullName || !phone) {
         showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
         return;
     }
-    
+
     let finalAllergy = allergy === '' ? 'Không' : allergy;
     let finalMedicalHistory = medicalHistory === '' ? 'Không' : medicalHistory;
-    
+
     if (editingId) {
         const updatePayload = {
             id: editingId, fullName, gender, phone, birthDate, address,
@@ -347,14 +373,14 @@ async function savePatient() {
     } else {
         const createPayload = {
             fullName, gender, phone, birthDate, address,
-            allergy: finalAllergy, medicalHistory: finalMedicalHistory, 
-            status, registerDate: registerDate || new Date().toISOString().split('T')[0], 
+            allergy: finalAllergy, medicalHistory: finalMedicalHistory,
+            status, registerDate: registerDate || new Date().toISOString().split('T')[0],
             notes
         };
         const res = await withDataGuard(() => patientDataSource.create(createPayload), 'Đã thêm bệnh nhân mới');
         if (!res) return;
     }
-    
+
     closeModal();
     await loadPatientsFromServer();
 }
@@ -364,25 +390,49 @@ function closeModal() {
     editingId = null;
 }
 
-// ==================== KHỞI TẠO ====================
+window.gotoBookFromPatient = gotoBookFromPatient;
+
+function bindPatientTableActions() {
+    const tbody = document.getElementById('patientTableBody');
+    if (!tbody || tbody.dataset.actionsBound === '1') return;
+    tbody.dataset.actionsBound = '1';
+    tbody.addEventListener('click', function (e) {
+        const bookBtn = e.target.closest('[data-book-patient-id]');
+        if (bookBtn) {
+            gotoBookFromPatient(bookBtn.getAttribute('data-book-patient-id'));
+            return;
+        }
+        const editBtn = e.target.closest('[data-edit-patient-id]');
+        if (editBtn) {
+            editPatient(Number(editBtn.getAttribute('data-edit-patient-id')));
+            return;
+        }
+        const delBtn = e.target.closest('[data-delete-patient-id]');
+        if (delBtn) {
+            deletePatient(Number(delBtn.getAttribute('data-delete-patient-id')));
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.info('[benhnhan] mode:', PATIENT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
+    console.info('[benhnhan] JS version', window.BENHNHAN_JS_VERSION || 'unknown');
+    bindPatientTableActions();
     loadPatientsFromServer();
-    
+
     document.getElementById('openAddBtn').onclick = openAddModal;
     document.querySelector('.close').onclick = closeModal;
     document.querySelector('.btn-cancel').onclick = closeModal;
     document.querySelector('.btn-save').onclick = savePatient;
-    
+
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.onclick = () => filterByStatus(btn.getAttribute('data-filter'));
     });
-    
+
     document.getElementById('searchInput').onkeyup = () => {
         currentPage = 1;
         renderTable();
     };
-    
+
     window.onclick = (e) => {
         if (e.target === document.getElementById('patientModal')) closeModal();
     };

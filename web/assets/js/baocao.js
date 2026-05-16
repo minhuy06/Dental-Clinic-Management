@@ -5,40 +5,12 @@
  * Cập nhật: Tháng 4/2026
  */
 
-// ==================== DỮ LIỆU MẪU (CẬP NHẬT THÁNG 4/2026) ====================
-let transactions = [
-    { id: "HD-9921", customer: "Nguyễn Văn Hiển", service: "Nhổ răng khôn", date: "2026-04-20", method: "Chuyển khoản", amount: 2500000 },
-    { id: "HD-9922", customer: "Trần Thị Thảo", service: "Lấy cao răng", date: "2026-04-20", method: "Tiền mặt", amount: 350000 },
-    { id: "HD-9923", customer: "Lê Anh Nam", service: "Niềng răng", date: "2026-04-19", method: "Thẻ Visa", amount: 15000000 },
-    { id: "HD-9924", customer: "Phạm Thu Hà", service: "Tẩy trắng răng", date: "2026-04-18", method: "Chuyển khoản", amount: 2500000 },
-    { id: "HD-9925", customer: "Hoàng Văn Tuấn", service: "Cấy ghép Implant", date: "2026-04-17", method: "Tiền mặt", amount: 15000000 },
-    { id: "HD-9926", customer: "Đặng Thị Hoa", service: "Bọc răng sứ", date: "2026-04-16", method: "Thẻ Mastercard", amount: 5000000 },
-    { id: "HD-9927", customer: "Bùi Minh Quân", service: "Trám răng", date: "2026-04-15", method: "Chuyển khoản", amount: 800000 },
-    { id: "HD-9928", customer: "Ngô Thị Lan", service: "Nhổ răng sữa", date: "2026-04-14", method: "Tiền mặt", amount: 200000 },
-    { id: "HD-9929", customer: "Vũ Minh Đức", service: "Khám tổng quát", date: "2026-04-13", method: "Chuyển khoản", amount: 150000 },
-    { id: "HD-9930", customer: "Đinh Bảo Ngọc", service: "Niềng răng", date: "2026-04-12", method: "Thẻ Visa", amount: 10000000 },
-    { id: "HD-9931", customer: "Lý Thảo Ly", service: "Cạo vôi răng", date: "2026-04-11", method: "Tiền mặt", amount: 200000 },
-    { id: "HD-9932", customer: "Trương Công Phát", service: "Trám răng Composite", date: "2026-04-10", method: "Chuyển khoản", amount: 600000 },
-    { id: "HD-9933", customer: "Lâm Bích Ngọc", service: "Tẩy trắng răng", date: "2026-04-09", method: "Thẻ Visa", amount: 2500000 },
-    { id: "HD-9934", customer: "Hồ Quốc Toàn", service: "Nhổ răng khôn", date: "2026-04-08", method: "Tiền mặt", amount: 2500000 },
-    { id: "HD-9935", customer: "Châu Tú Anh", service: "Khám tổng quát", date: "2026-04-07", method: "Chuyển khoản", amount: 150000 }
-];
-
-// Thống kê dịch vụ
-let serviceStats = [
-    { name: "Niềng răng", percent: 40, color: "#2563eb", amount: 25000000 },
-    { name: "Nhổ răng", percent: 25, color: "#10b981", amount: 15625000 },
-    { name: "Tẩy trắng", percent: 15, color: "#f59e0b", amount: 9375000 },
-    { name: "Cấy ghép", percent: 12, color: "#8b5cf6", amount: 7500000 },
-    { name: "Khám tổng quát", percent: 8, color: "#ec4899", amount: 5000000 }
-];
-
-// Thống kê phương thức thanh toán
-let paymentStats = [
-    { name: "Chuyển khoản", icon: "fas fa-university", amount: 20000000, percent: 45, color: "#3b82f6" },
-    { name: "Tiền mặt", icon: "fas fa-money-bill-wave", amount: 15000000, percent: 32, color: "#10b981" },
-    { name: "Thẻ Visa/Master", icon: "fas fa-credit-card", amount: 10000000, percent: 23, color: "#f59e0b" }
-];
+/** Dữ liệu từ API — không dùng mẫu cứng */
+let transactions = [];
+let serviceStats = [];
+let paymentStats = [];
+const TOP_SERVICES_LIMIT = 5;
+let servicesExpanded = false;
 
 // ==================== BIẾN TOÀN CỤC ====================
 let currentFilter = 'week';
@@ -47,20 +19,10 @@ let rowsPerPage = 5;
 let revenueChart = null;
 let currentChartType = 'bar';
 
-// ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
-let REPORT_CONFIG = {
-    USE_MOCK: true,
-    API_BASE: '/api',
-    MOCK_DELAY_MS: 120
-};
-
-function reportDelay(ms) {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function reportClone(data) {
-    return JSON.parse(JSON.stringify(data));
-}
+const REPORT_API_BASE = (function () {
+    const cp = typeof window.APP_CONTEXT_PATH === 'string' ? window.APP_CONTEXT_PATH : '';
+    return cp + '/api';
+})();
 
 async function reportRequest(path, options = {}) {
     const method = options.method || 'GET';
@@ -68,43 +30,43 @@ async function reportRequest(path, options = {}) {
     const headers = options.headers || {};
     const fetchOptions = {
         method: method,
+        credentials: 'same-origin',
         headers: Object.assign({ 'Content-Type': 'application/json' }, headers)
     };
     if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
 
-    const res = await fetch(REPORT_CONFIG.API_BASE + '/' + path, fetchOptions);
+    const res = await fetch(REPORT_API_BASE + '/' + path, fetchOptions);
     let json = null;
     try { json = await res.json(); } catch (e) { json = null; }
     if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
     return json;
 }
 
-const mockReportSource = {
-    getSummary: async () => {
-        await reportDelay(REPORT_CONFIG.MOCK_DELAY_MS);
-        return {
-            transactions: reportClone(transactions),
-            serviceStats: reportClone(serviceStats),
-            paymentStats: reportClone(paymentStats)
-        };
-    }
-};
-
-const apiReportSource = {
-    getSummary: async () => reportRequest('reports/revenue-summary')
-};
-
-const reportSource = REPORT_CONFIG.USE_MOCK ? mockReportSource : apiReportSource;
+function applyReportPayload(data) {
+    if (!data || typeof data !== 'object') return;
+    transactions = Array.isArray(data.transactions) ? data.transactions : [];
+    serviceStats = Array.isArray(data.serviceStats) ? data.serviceStats : [];
+    serviceStats.sort(function(a, b) { return (b.amount || 0) - (a.amount || 0); });
+    servicesExpanded = false;
+    paymentStats = Array.isArray(data.paymentStats) ? data.paymentStats : [];
+}
 
 async function loadReportData() {
+    const seeded = window.INITIAL_REPORT_FROM_SERVER;
+    if (seeded && typeof seeded === 'object' && Object.keys(seeded).length > 0) {
+        applyReportPayload(seeded);
+        console.info('[baocao] Seed từ server:', transactions.length, 'giao dịch');
+    }
+
     try {
-        const data = await reportSource.getSummary();
-        if (data && Array.isArray(data.transactions)) transactions = data.transactions;
-        if (data && Array.isArray(data.serviceStats)) serviceStats = data.serviceStats;
-        if (data && Array.isArray(data.paymentStats)) paymentStats = data.paymentStats;
+        const data = await reportRequest('reports/revenue-summary');
+        applyReportPayload(data);
+        console.info('[baocao] API:', transactions.length, 'giao dịch');
     } catch (error) {
-        console.error('[baocao] data error:', error);
-        showToast(error.message || 'Không tải được dữ liệu báo cáo', 'info');
+        console.error('[baocao] API error:', error);
+        if (transactions.length === 0) {
+            showToast(error.message || 'Không tải được dữ liệu báo cáo. Hãy đăng nhập lễ tân.', 'info');
+        }
     }
 }
 
@@ -218,8 +180,6 @@ function updateStats(filteredTransactions) {
     let uniqueCustomers = [...new Set(filteredTransactions.map(t => t.customer))];
     let newCustomers = uniqueCustomers.length;
     let completedApps = filteredTransactions.length;
-    let growth = 12.5;
-    
     let totalElement = document.getElementById('totalRevenue');
     let newCustomersElement = document.getElementById('newCustomers');
     let completedElement = document.getElementById('completedAppointments');
@@ -228,7 +188,7 @@ function updateStats(filteredTransactions) {
     if (totalElement) totalElement.innerText = formatCurrency(total);
     if (newCustomersElement) newCustomersElement.innerText = newCustomers;
     if (completedElement) completedElement.innerText = completedApps;
-    if (growthElement) growthElement.innerText = `+${growth}%`;
+    if (growthElement) growthElement.innerText = completedApps > 0 ? '—' : '0%';
 }
 
 // ==================== BIỂU ĐỒ DOANH THU ====================
@@ -352,8 +312,15 @@ function initChart() {
 function renderServices() {
     let container = document.getElementById('servicesList');
     if (!container) return;
+
+    if (!serviceStats.length) {
+        container.innerHTML = '<p style="color:#6b7280;font-size:0.85rem;">Chưa có dữ liệu dịch vụ từ hóa đơn.</p>';
+        return;
+    }
     
-    container.innerHTML = serviceStats.map(service => `
+    const total = serviceStats.length;
+    const visible = servicesExpanded ? serviceStats : serviceStats.slice(0, TOP_SERVICES_LIMIT);
+    let servicesHtml = visible.map(service => `
         <div class="service-item" style="margin-bottom: 20px;">
             <div class="service-header" style="display: flex; justify-content: space-between; margin-bottom: 8px;">
                 <span class="service-name" style="font-weight: 600;">${service.name}</span>
@@ -367,12 +334,30 @@ function renderServices() {
             </div>
         </div>
     `).join('');
+    if (total > TOP_SERVICES_LIMIT) {
+        const hidden = total - TOP_SERVICES_LIMIT;
+        const label = servicesExpanded ? 'Thu gọn' : ('Xem thêm (' + hidden + ' dịch vụ)');
+        servicesHtml += '<button type="button" class="btn-services-more" id="btnServicesMore">' + label + '</button>';
+    }
+    container.innerHTML = servicesHtml;
+    const btn = document.getElementById('btnServicesMore');
+    if (btn) {
+        btn.addEventListener('click', function() {
+            servicesExpanded = !servicesExpanded;
+            renderServices();
+        });
+    }
 }
 
 // ==================== PHƯƠNG THỨC THANH TOÁN ====================
 function renderPaymentMethods() {
     let container = document.getElementById('paymentMethods');
     if (!container) return;
+
+    if (!paymentStats.length) {
+        container.innerHTML = '<p style="color:#6b7280;font-size:0.85rem;">Chưa có dữ liệu thanh toán.</p>';
+        return;
+    }
     
     container.innerHTML = paymentStats.map(method => `
         <div class="payment-item" style="text-align: center; padding: 15px; background: #f3f4f6; border-radius: 12px;">
@@ -521,9 +506,8 @@ function setDefaultDates() {
 
 // ==================== KHỞI TẠO ====================
 document.addEventListener('DOMContentLoaded', async function() {
+    console.info('[baocao] JS version', window.BAOCAO_JS_VERSION || 'unknown');
     console.log("Đang khởi tạo trang báo cáo doanh thu...");
-    console.info('[baocao] mode:', REPORT_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
-    
     // Kiểm tra Chart.js đã load chưa
     if (typeof Chart === 'undefined') {
         console.error("Chart.js chưa được tải! Vui lòng kiểm tra lại.");

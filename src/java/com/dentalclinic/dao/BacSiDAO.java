@@ -252,4 +252,22 @@ public class BacSiDAO {
 
         return bs;
     }
+
+    /** Mã bác sĩ theo tài khoản đăng nhập (null nếu không phải bác sĩ). */
+    public Integer findBacSiIdByTaiKhoanId(int taiKhoanId) {
+        if (taiKhoanId <= 0) return null;
+        String sql = "SELECT BacSi_ID FROM BacSi WHERE TaiKhoan_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, taiKhoanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("BacSi_ID");
+                }
+            }
+        } catch (SQLException e) {
+            System.err.println("[BacSiDAO] findBacSiIdByTaiKhoanId: " + e.getMessage());
+        }
+        return null;
+    }
 }

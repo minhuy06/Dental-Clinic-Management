@@ -412,9 +412,22 @@ tr:hover {
 }
 
 /* Action Buttons */
+#patientTable th:last-child,
+#patientTable td.action-btns {
+    min-width: 200px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+#patientTable td.action-btns:empty {
+    min-height: 40px;
+}
+
 .action-btns {
     display: flex;
-    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-action {
@@ -440,6 +453,25 @@ tr:hover {
 
 .btn-delete:hover {
     background: var(--danger);
+}
+
+#patientTable .btn-action.btn-add-appointment {
+    width: 32px !important;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    color: #047857;
+}
+
+#patientTable .btn-action.btn-add-appointment:hover {
+    background: #059669;
+    border-color: #059669;
+    color: #fff;
 }
 
 /* ==================== PAGINATION ==================== */

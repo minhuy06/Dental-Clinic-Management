@@ -5,6 +5,7 @@
 --%>
 
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -28,16 +29,16 @@
             </div>
         </div>
         <ul class="nav-menu">
-            <li><a href="index.jsp">Lịch hẹn</a></li>
-            <li><a href="benhnhan.jsp">Bệnh nhân</a></li>
-            <li><a href="baocao.jsp">Báo cáo</a></li>
-            <li><a href="cskh.jsp" class="active">CSKH</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-dashboard">Lịch hẹn</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-patient">Bệnh nhân</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-report">Báo cáo</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp" class="active">CSKH</a></li>
         </ul>
         <div class="user-info">
             <div class="avatar" id="avatarBtn">
-                <i class="fas fa-user" onclick="location.href='hoso.jsp'" style="color: white;"></i>
+                <i class="fas fa-user" onclick="location.href='${pageContext.request.contextPath}/hoso'" style="color: white;"></i>
             </div>
-            <span class="staff-name">Lễ Tân 1 </span>
+            <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
         </div>
     </div>
 

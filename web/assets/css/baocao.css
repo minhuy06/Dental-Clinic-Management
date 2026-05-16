@@ -391,6 +391,31 @@ body {
     margin-bottom: 10px;
 }
 
+.services-empty {
+    color: #6b7280;
+    font-size: 0.85rem;
+}
+
+.btn-services-more {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px 14px;
+    border: 1px dashed var(--border-color);
+    border-radius: 10px;
+    background: #f8fafc;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-services-more:hover {
+    background: #eff6ff;
+    border-color: var(--primary-color);
+}
+
 .service-header {
     display: flex;
     justify-content: space-between;

@@ -363,6 +363,43 @@ header {
     background: #e2e8f0;
 }
 
+button.btn-complete,
+.btn-complete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #bbf7d0 0%, #86efac 55%, #4ade80 100%);
+    color: #14532d;
+    border: 1px solid #6ee7b7;
+    padding: 8px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-left: 6px;
+    margin-top: 4px;
+    transition: 0.25s ease;
+    white-space: nowrap;
+    box-shadow: 0 2px 6px rgba(74, 222, 128, 0.35);
+    font-family: inherit;
+    line-height: 1.2;
+}
+
+.btn-complete:hover {
+    background: linear-gradient(135deg, #86efac 0%, #4ade80 100%);
+    color: #052e16;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(74, 222, 128, 0.45);
+}
+
+.btn-complete i {
+    margin-right: 4px;
+}
+
+.appointment-table td:last-child {
+    white-space: nowrap;
+}
+
 .patient-info {
     display: flex;
     flex-direction: column;

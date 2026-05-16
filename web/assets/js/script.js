@@ -384,12 +384,18 @@ function toggleReceptionStatusMenu(id) {
     if (!isShow) menu.classList.add('show');
 }
 
-async function postReceptionAction(action, lichHenId) {
+async function postReceptionAction(action, lichHenId, extra) {
     const baseUrl = (window.RECEPTION_CONTEXT && window.RECEPTION_CONTEXT.baseUrl) ? window.RECEPTION_CONTEXT.baseUrl : '';
     const contextPath = baseUrl ? baseUrl.replace(/\/reception-dashboard.*$/, '') : '';
     const params = new URLSearchParams();
     params.append('action', action);
     params.append('lichHenId', String(lichHenId));
+    if (extra && typeof extra === 'object') {
+        if (extra.paymentMethod) params.append('paymentMethod', String(extra.paymentMethod));
+        if (extra.totalAmount != null && extra.totalAmount !== '') {
+            params.append('totalAmount', String(extra.totalAmount));
+        }
+    }
     const response = await fetch((contextPath || '') + '/reception-dashboard', {
         method: 'POST',
         headers: {
@@ -429,7 +435,10 @@ async function setReceptionStatus(id, status) {
             throw new Error((json && json.message) ? json.message : 'Không cập nhật được trạng thái');
         }
         return { success: true };
-    }, status === 'approved' ? 'Đã duyệt lịch hẹn' : 'Đã chuyển về chờ duyệt');
+    }, status === 'approved' ? 'Đã cập nhật trạng thái xác nhận (đã gỡ khỏi hàng chờ bác sĩ nếu trước đó là Đã đến)'
+        : status === 'arrived' ? 'Đã chuyển sang Đã đến — bác sĩ sẽ thấy trong hàng chờ khám'
+        : status === 'cancelled' ? 'Đã hủy lịch hẹn'
+        : 'Đã chuyển về chờ duyệt');
     if (!res) return;
     window.location.reload();
 }
@@ -489,8 +498,14 @@ function openPaymentModal(id) {
 async function confirmPayment() {
     if (currentPaymentAppointment) {
         if (isReceptionDashboard()) {
+            const totalPay = currentPaymentAppointment.totalWithVat
+                || currentPaymentAppointment.totalPrice
+                || 0;
             const resR = await withDataGuard(async function() {
-                return postReceptionAction('pay', currentPaymentAppointment.id);
+                return postReceptionAction('pay', currentPaymentAppointment.id, {
+                    paymentMethod: document.getElementById('paymentMethod')?.value || 'Tiền mặt',
+                    totalAmount: totalPay
+                });
             }, 'Đã thanh toán thành công');
             if (!resR) return;
             closePaymentModal();
@@ -549,7 +564,8 @@ async function openReceptionPaymentModal(id) {
         date: res.ngayKham || '',
         doctor: res.doctorName || '',
         services: services,
-        totalPrice: subtotal
+        totalPrice: subtotal,
+        totalWithVat: total
     };
 
     document.getElementById('invoiceId').innerText = generateInvoiceId();
@@ -830,11 +846,92 @@ function resetForm() {
     updateSelectedServicesDisplay();
 }
 
+/** Đặt lịch từ trang BN: đọc sessionStorage và mở modal (reception-dashboard?openBooking=1). */
+var RCV_BOOKING_PREFILL_KEY = 'rcv_booking_prefill';
+
+function applyBookingPrefillToForm(data) {
+    if (!data) return;
+    var pn = document.getElementById('patientName');
+    var pp = document.getElementById('patientPhone');
+    var nt = document.getElementById('notes');
+    var nameVal = data.patientName != null ? String(data.patientName).trim() : '';
+    var phoneVal = data.patientPhone != null ? String(data.patientPhone).trim() : '';
+    if (pn && nameVal) pn.value = nameVal;
+    if (pp && phoneVal) pp.value = phoneVal;
+    if (nt && data.notes != null) nt.value = data.notes;
+}
+
+function readBookingPrefillPayload() {
+    var params = new URLSearchParams(window.location.search || '');
+    if (!params.get('openBooking')) return null;
+
+    var data = {
+        patientName: params.get('patientName') ? decodeURIComponent(params.get('patientName')) : '',
+        patientPhone: params.get('patientPhone') ? decodeURIComponent(params.get('patientPhone')) : '',
+        notes: ''
+    };
+
+    var raw = null;
+    try { raw = sessionStorage.getItem(RCV_BOOKING_PREFILL_KEY); } catch (e) { raw = null; }
+    if (raw) {
+        try {
+            var stored = JSON.parse(raw);
+            if (stored) {
+                if (!data.patientName && stored.patientName) data.patientName = stored.patientName;
+                if (!data.patientPhone && stored.patientPhone) data.patientPhone = stored.patientPhone;
+                if (stored.notes) data.notes = stored.notes;
+            }
+        } catch (err) { /* noop */ }
+        try { sessionStorage.removeItem(RCV_BOOKING_PREFILL_KEY); } catch (e2) { /* noop */ }
+    }
+
+    if (!data.patientName && !data.patientPhone) return null;
+    return data;
+}
+
+function cleanBookingPrefillFromUrl() {
+    var params = new URLSearchParams(window.location.search || '');
+    params.delete('openBooking');
+    params.delete('patientName');
+    params.delete('patientPhone');
+    params.delete('benhNhanId');
+    var q = params.toString();
+    window.history.replaceState({}, document.title,
+        q ? (window.location.pathname + '?' + q + window.location.hash) : (window.location.pathname + window.location.hash));
+}
+
+function maybeApplyPatientBookingPrefill() {
+    if (!isReceptionDashboard()) return;
+    var data = readBookingPrefillPayload();
+    if (!data) return;
+
+    cleanBookingPrefillFromUrl();
+
+    var title = document.getElementById('modalTitle');
+    if (title && data.patientName) {
+        title.innerText = 'Đặt lịch hẹn mới';
+    }
+
+    openAddModal(data);
+
+    setTimeout(function () {
+        applyBookingPrefillToForm(data);
+    }, 0);
+    setTimeout(function () {
+        applyBookingPrefillToForm(data);
+        var modal = document.getElementById('appointmentModal');
+        if (modal) modal.style.display = 'flex';
+    }, 80);
+}
+
 // ==================== CRUD LỊCH HẸN ====================
-function openAddModal() {
+function openAddModal(prefill) {
     editingId = null;
     document.getElementById('modalTitle').innerText = 'Đặt lịch hẹn mới';
     resetForm();
+    if (prefill) {
+        applyBookingPrefillToForm(prefill);
+    }
     document.getElementById('appointmentModal').style.display = 'flex';
 }
 
@@ -1044,9 +1141,19 @@ function viewDetail(id) {
         document.getElementById('room').value = String(json.phongId || '');
         document.getElementById('notes').value = json.ghiChu || '';
 
+        const qtyById = {};
+        if (Array.isArray(json.dichVuItems)) {
+            json.dichVuItems.forEach(function(it) {
+                if (it && it.id != null) qtyById[String(it.id)] = Math.max(1, Number(it.quantity) || 1);
+            });
+        }
         const selectedIdSet = new Set((json.dichVuIds || []).map(function(x){ return String(x); }));
         selectedServices = servicesList.filter(function(s){ return selectedIdSet.has(String(s.id)); }).map(function(s){
-            return { id: s.id, name: s.name, price: s.price, quantity: 1, hasQuantity: s.hasQuantity, unit: s.unit };
+            return {
+                id: s.id, name: s.name, price: s.price,
+                quantity: qtyById[String(s.id)] || 1,
+                hasQuantity: s.hasQuantity, unit: s.unit
+            };
         });
         document.querySelectorAll('.service-checkbox input').forEach(function(cb) {
             cb.checked = selectedIdSet.has(String(cb.value));
@@ -1139,6 +1246,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (addBtn) addBtn.onclick = openAddModal;
     
+    maybeApplyPatientBookingPrefill();
+
     // View options
     let viewBtns = document.querySelectorAll('.view-options button');
     viewBtns.forEach(btn => {

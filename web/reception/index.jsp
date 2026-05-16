@@ -32,15 +32,15 @@
         </div>
         <ul class="nav-menu">
             <li><a href="${pageContext.request.contextPath}/reception-dashboard" class="active">Lịch hẹn</a></li>
-            <li><a href="benhnhan.jsp">Bệnh nhân</a></li>
-            <li><a href="baocao.jsp">Báo cáo</a></li>
-            <li><a href="cskh.jsp">CSKH</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-patient">Bệnh nhân</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception-report">Báo cáo</a></li>
+            <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp">CSKH</a></li>
         </ul>
         <div class="user-info">
             <div class="avatar" id="avatarBtn">
                 <i class="fas fa-user"  style="color: white;"></i>
             </div>
-            <span class="staff-name">Lễ Tân 1</span>
+            <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
         </div>
     </div>
 
@@ -126,21 +126,21 @@
             </div>
         </div>
 
-        <!-- ==================== SCHEDULE TABLE ==================== -->
-        <div class="schedule-container">
+        <!-- ==================== BẢNG LỊCH HẸN ==================== -->
+        <div class="table-container reception-appointment-table">
             <table id="appointmentTable">
                 <thead>
-                    <tr class="rcv-thead-row">
-                        <th><span class="rcv-th">Ngày</span></th>
-                        <th><span class="rcv-th">Giờ</span></th>
-                        <th><span class="rcv-th">Bệnh nhân</span></th>
-                        <th><span class="rcv-th">SĐT</span></th>
-                        <th><span class="rcv-th">Bác sĩ</span></th>
-                        <th><span class="rcv-th">Dịch vụ</span></th>
-                        <th><span class="rcv-th">Phòng</span></th>
-                        <th><span class="rcv-th">Trạng thái</span></th>
-                        <th><span class="rcv-th">Thu tiền</span></th>
-                        <th><span class="rcv-th">Thao tác</span></th>
+                    <tr>
+                        <th>Ngày</th>
+                        <th>Giờ</th>
+                        <th>Bệnh nhân</th>
+                        <th>Số điện thoại</th>
+                        <th>Bác sĩ</th>
+                        <th>Dịch vụ</th>
+                        <th>Phòng</th>
+                        <th>Trạng thái</th>
+                        <th>Thu tiền</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
               <tbody id="appointmentTableBody">
@@ -148,8 +148,11 @@
         <c:set var="stKey" value="pending"/>
         <c:choose>
             <c:when test="${lh.trangThai eq 'Đã hủy'}"><c:set var="stKey" value="cancelled"/></c:when>
-            <c:when test="${lh.trangThai eq 'Hoàn thành' or lh.trangThai eq 'Đã thanh toán'}"><c:set var="stKey" value="completed"/></c:when>
-            <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã đến'}"><c:set var="stKey" value="confirmed"/></c:when>
+            <c:when test="${lh.trangThai eq 'Hoàn thành' or lh.trangThai eq 'Đã hoàn thành' or lh.trangThai eq 'Đã thanh toán'}"><c:set var="stKey" value="completed"/></c:when>
+            <c:when test="${lh.trangThai eq 'Đã khám'}"><c:set var="stKey" value="examined"/></c:when>
+            <c:when test="${lh.trangThai eq 'Đang khám'}"><c:set var="stKey" value="examining"/></c:when>
+            <c:when test="${lh.trangThai eq 'Đã đến'}"><c:set var="stKey" value="arrived"/></c:when>
+            <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận'}"><c:set var="stKey" value="confirmed"/></c:when>
             <c:when test="${lh.trangThai eq 'Chờ duyệt' or lh.trangThai eq 'Chờ xác nhận'}"><c:set var="stKey" value="pending"/></c:when>
         </c:choose>
         <c:set var="gioRaw"><c:out value="${lh.gioKham}"/></c:set>
@@ -160,12 +163,7 @@
             <td class="rcv-td-muted"><fmt:formatDate value="${lh.ngayKham}" pattern="dd/MM/yyyy"/></td>
             <td><span class="rcv-time-pill">${fn:length(gioRaw) ge 5 ? fn:substring(gioRaw, 0, 5) : gioRaw}</span></td>
             <c:set var="ptName">${lh.benhNhan ne null && lh.benhNhan.taiKhoan ne null ? fn:escapeXml(lh.benhNhan.taiKhoan.hoTen) : ''}</c:set>
-            <td>
-                <div class="rcv-patient-pill">
-                    <span class="rcv-patient-pill__av"><c:choose><c:when test="${fn:length(ptName) ge 1}">${fn:toUpperCase(fn:substring(ptName, 0, 1))}</c:when><c:otherwise>?</c:otherwise></c:choose></span>
-                    <span class="rcv-patient-pill__nm">${ptName}</span>
-                </div>
-            </td>
+            <td class="rcv-td-name">${ptName}</td>
             <td class="rcv-td-phone">
                 <c:choose>
                     <c:when test="${lh.benhNhan ne null && lh.benhNhan.taiKhoan ne null && not empty lh.benhNhan.taiKhoan.soDienThoai}">
@@ -176,58 +174,99 @@
             </td>
             <c:set var="bsName">${lh.bacSi ne null && lh.bacSi.taiKhoan ne null ? fn:escapeXml(lh.bacSi.taiKhoan.hoTen) : ''}</c:set>
             <c:set var="bsSpec">${lh.bacSi ne null && not empty lh.bacSi.chuyenKhoa ? lh.bacSi.chuyenKhoa.tenChuyenKhoa : ''}</c:set>
-            <td>
-                <div class="rcv-dr-chip">
-                    <span class="rcv-dr-chip__badge">${fn:length(bsName) ge 1 ? fn:toUpperCase(fn:substring(bsName, 0, 1)) : '?'}</span>
-                    <div class="rcv-dr-chip__txt">
-                        <span class="rcv-dr-chip__name">${bsName}</span>
-                        <c:if test="${not empty bsSpec}"><span class="rcv-dr-chip__spec">${fn:escapeXml(bsSpec)}</span></c:if>
-                    </div>
-                </div>
+            <td class="rcv-td-doctor">
+                <span class="rcv-dr-name">${bsName}</span>
+                <c:if test="${not empty bsSpec}"><span class="rcv-dr-spec">${fn:escapeXml(bsSpec)}</span></c:if>
             </td>
             
-            <td>${lh.ghiChu != null ? fn:escapeXml(lh.ghiChu) : '—'}</td>
-            
-            <td>${fn:escapeXml(lh.tenPhong)}</td>
+            <td class="service-tags-cell">
+                <c:choose>
+                    <c:when test="${not empty lh.tenDichVuList}">
+                        <c:forEach var="dvName" items="${lh.tenDichVuList}">
+                            <span class="history-tag">${fn:escapeXml(dvName)}</span>
+                        </c:forEach>
+                    </c:when>
+                    <c:otherwise><span class="no-data">Chưa chọn dịch vụ</span></c:otherwise>
+                </c:choose>
+            </td>
+            <td><c:out value="${empty lh.tenPhong ? '—' : lh.tenPhong}"/></td>
             
             <td>
                 <c:set var="badgeClass" value="status-pending"/>
                 <c:set var="statusLabel" value="${lh.trangThai}"/>
                 <c:choose>
                     <c:when test="${lh.trangThai eq 'Đã hủy'}"><c:set var="badgeClass" value="status-cancelled"/></c:when>
-                    <c:when test="${lh.trangThai eq 'Đã thanh toán'}"><c:set var="badgeClass" value="rcv-status-settled"/></c:when>
-                    <c:when test="${lh.trangThai eq 'Hoàn thành'}"><c:set var="badgeClass" value="status-completed"/></c:when>
-                    <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã đến'}"><c:set var="badgeClass" value="status-confirmed"/></c:when>
+                    <c:when test="${lh.trangThai eq 'Đã thanh toán'}">
+                        <c:set var="badgeClass" value="status-completed"/>
+                        <c:set var="statusLabel" value="Đã thanh toán"/>
+                    </c:when>
+                    <c:when test="${lh.trangThai eq 'Đã khám'}">
+                        <c:set var="badgeClass" value="status-examined"/>
+                        <c:set var="statusLabel" value="Đã khám"/>
+                    </c:when>
+                    <c:when test="${lh.trangThai eq 'Đã hoàn thành' or lh.trangThai eq 'Hoàn thành'}">
+                        <c:set var="badgeClass" value="status-completed"/>
+                        <c:set var="statusLabel" value="Đã hoàn thành"/>
+                    </c:when>
+                    <c:when test="${lh.trangThai eq 'Đang khám'}"><c:set var="badgeClass" value="status-examining"/></c:when>
+                    <c:when test="${lh.trangThai eq 'Đã đến'}"><c:set var="badgeClass" value="status-arrived"/></c:when>
+                    <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận'}">
+                        <c:set var="badgeClass" value="status-confirmed"/>
+                        <c:set var="statusLabel" value="Đã xác nhận"/>
+                    </c:when>
                     <c:when test="${lh.trangThai eq 'Chờ duyệt' or lh.trangThai eq 'Chờ xác nhận'}">
                         <c:set var="badgeClass" value="status-pending"/>
                         <c:set var="statusLabel" value="Chờ duyệt"/>
                     </c:when>
                 </c:choose>
+                <c:set var="isExamined" value="${lh.trangThai eq 'Đã khám' or lh.trangThai eq 'Đã hoàn thành' or lh.trangThai eq 'Hoàn thành'}"/>
+                <c:set var="canChangeStatus" value="${lh.trangThai eq 'Chờ xác nhận' or lh.trangThai eq 'Chờ duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã đến' or isExamined}"/>
                 <div class="status-dropdown">
-                    <span class="status-badge ${badgeClass}" onclick="toggleReceptionStatusMenu(${lh.lichHenID})">${statusLabel}</span>
+                    <span class="status-badge ${badgeClass}" <c:if test="${canChangeStatus}">onclick="toggleReceptionStatusMenu(${lh.lichHenID})"</c:if>>${statusLabel}</span>
+                    <c:if test="${canChangeStatus}">
                     <div class="status-menu" id="statusMenu_${lh.lichHenID}">
+                        <c:if test="${isExamined}">
+                        <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'arrived')">
+                            <i class="fas fa-user-check" style="color:#2563eb;"></i> Chuyển lại: Đã đến
+                        </div>
+                        </c:if>
+                        <c:if test="${not isExamined and lh.trangThai ne 'Đã đến'}">
                         <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'pending')">
                             <i class="fas fa-hourglass-half" style="color:#f59e0b;"></i> Chờ duyệt
                         </div>
+                        </c:if>
+                        <c:if test="${not isExamined}">
                         <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'approved')">
-                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Đã duyệt
+                            <i class="fas fa-check-circle" style="color:#10b981;"></i> Đã xác nhận
                         </div>
+                        <c:if test="${lh.trangThai ne 'Đã đến'}">
+                        <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'arrived')">
+                            <i class="fas fa-user-check" style="color:#2563eb;"></i> Đã đến
+                        </div>
+                        <div class="status-option" onclick="setReceptionStatus(${lh.lichHenID}, 'cancelled')">
+                            <i class="fas fa-ban" style="color:#ef4444;"></i> Đã hủy
+                        </div>
+                        </c:if>
+                        </c:if>
                     </div>
+                    </c:if>
                 </div>
             </td>
             
             <td>
+                <c:set var="choThu" value="${lh.trangThai eq 'Đã khám'}"/>
+                <c:set var="daHoanThanh" value="${lh.trangThai eq 'Đã hoàn thành' or lh.trangThai eq 'Hoàn thành' or lh.trangThai eq 'Đã thanh toán'}"/>
                 <c:choose>
-                    <c:when test="${lh.trangThai eq 'Đã thanh toán'}">
-                        <span class="rcv-pay-pill rcv-pay-pill--done"><i class="fas fa-sack-dollar"></i> Đã thu</span>
+                    <c:when test="${daHoanThanh}">
+                        <span class="rcv-pay-pill rcv-pay-pill--done"><i class="fas fa-check"></i> Đã thu</span>
                     </c:when>
-                    <c:when test="${lh.trangThai eq 'Đã duyệt' or lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã đến'}">
-                        <button class="btn-payment" onclick="openReceptionPaymentModal(${lh.lichHenID})">
+                    <c:when test="${choThu}">
+                        <button type="button" class="btn-payment" onclick="openReceptionPaymentModal(${lh.lichHenID})">
                             <i class="fas fa-credit-card"></i> Thanh toán
                         </button>
                     </c:when>
                     <c:otherwise>
-                        <span class="rcv-pay-pill rcv-pay-pill--open"><i class="fas fa-hourglass-half"></i> Chưa thu</span>
+                        <span class="rcv-dash">—</span>
                     </c:otherwise>
                 </c:choose>
             </td>
@@ -433,6 +472,7 @@
     </div>
 
     <script>
+        window.APP_CONTEXT_PATH = '${pageContext.request.contextPath}';
         window.RECEPTION_CONTEXT = {
             baseUrl: '${pageContext.request.contextPath}/reception-dashboard',
             selectedDate: '<c:out value="${selectedDateNgay}"/>',
@@ -508,9 +548,72 @@
             color: #fff;
         }
 
+        body#receptionDashboardPage .reception-appointment-table.table-container {
+            background: #fff;
+            border-radius: 16px;
+            overflow-x: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+            margin-top: 8px;
+        }
         body#receptionDashboardPage #appointmentTable {
-            border-collapse: separate;
-            border-spacing: 0;
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+        body#receptionDashboardPage #appointmentTable th {
+            background: #f8fafc;
+            padding: 15px;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        body#receptionDashboardPage #appointmentTable td {
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.85rem;
+            vertical-align: middle;
+        }
+        body#receptionDashboardPage #appointmentTable tbody tr:hover {
+            background: #f8fafc;
+        }
+        body#receptionDashboardPage .history-tag {
+            background: #fef3c7;
+            color: #d97706;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin: 2px 4px 2px 0;
+        }
+        body#receptionDashboardPage .service-tags-cell {
+            max-width: 220px;
+        }
+        body#receptionDashboardPage .no-data {
+            color: #6b7280;
+            font-style: italic;
+            font-size: 0.75rem;
+        }
+        body#receptionDashboardPage .status-badge.status-arrived {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+        body#receptionDashboardPage .status-badge.status-examining {
+            background: #ede9fe;
+            color: #6d28d9;
+        }
+        body#receptionDashboardPage .status-badge.status-examined {
+            background: #d1fae5;
+            color: #047857;
+        }
+        body#receptionDashboardPage #appointmentTable td.action-btns,
+        body#receptionDashboardPage #appointmentTable .action-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
         body#receptionDashboardPage #appointmentTable .rcv-thead-row th {
             background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
@@ -534,6 +637,11 @@
             padding: 12px 10px;
             vertical-align: middle;
             border-bottom: 1px solid var(--border-color, #e5e7eb);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-main, #334155);
+            line-height: 1.4;
         }
         body#receptionDashboardPage #appointmentTable .rcv-td-muted {
             font-size: 0.85rem;
@@ -552,28 +660,9 @@
             border: 1px solid #bfdbfe;
         }
 
-        body#receptionDashboardPage #appointmentTable .rcv-patient-pill {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        body#receptionDashboardPage #appointmentTable .rcv-patient-pill__av {
-            width: 38px;
-            height: 38px;
-            border-radius: 12px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 800;
-            font-size: 0.85rem;
-            color: #fff;
-            background: linear-gradient(135deg, #3b82f6, #6366f1);
-            flex-shrink: 0;
-        }
-        body#receptionDashboardPage #appointmentTable .rcv-patient-pill__nm {
+        body#receptionDashboardPage #appointmentTable .rcv-td-name {
             font-weight: 600;
-            color: var(--text-main);
-            font-size: 0.92rem;
+            color: var(--text-main, #1e293b);
         }
 
         body#receptionDashboardPage #appointmentTable .rcv-td-phone { min-width: 118px; }
@@ -597,44 +686,21 @@
             font-weight: 600;
         }
 
-        body#receptionDashboardPage #appointmentTable .rcv-dr-chip {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
+        body#receptionDashboardPage #appointmentTable .rcv-td-doctor {
             max-width: 220px;
         }
-        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__badge {
-            flex-shrink: 0;
-            width: 36px;
-            height: 36px;
-            border-radius: 999px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            font-weight: 800;
-            color: #7c3aed;
-            background: linear-gradient(145deg, #fae8ff 0%, #ede9fe 100%);
-            border: 2px solid #ddd6fe;
-            box-shadow: 0 1px 3px rgba(124,58,237,0.12);
-        }
-        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__txt {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-            min-width: 0;
-        }
-        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__name {
+        body#receptionDashboardPage #appointmentTable .rcv-dr-name {
+            display: block;
             font-weight: 600;
-            font-size: 0.9rem;
-            color: var(--text-main);
-            line-height: 1.3;
+            color: var(--text-main, #1e293b);
             word-break: break-word;
         }
-        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__spec {
-            font-size: 0.72rem;
-            font-weight: 600;
-            color: var(--text-sub);
+        body#receptionDashboardPage #appointmentTable .rcv-dr-spec {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            color: var(--text-sub, #64748b);
         }
 
         body#receptionDashboardPage #appointmentTable .status-badge.rcv-status-settled {
@@ -667,7 +733,13 @@
             color: #b45309;
             border-color: #fcd34d;
         }
+        body#receptionDashboardPage #appointmentTable .rcv-pay-cell {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
     </style>
-    <script src="${pageContext.request.contextPath}/assets/js/script.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/script.js?v=20260517a"></script>
 </body>
 </html>

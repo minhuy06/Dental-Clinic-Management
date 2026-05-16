@@ -5,7 +5,7 @@ function togglePass(id, btn) {
 }
 
 var LOGIN_CONFIG = {
-    USE_MOCK: true,
+    USE_MOCK: false,
     API_BASE: (window.CONTEXT_PATH || '') + '/api/auth',
     MOCK_DELAY_MS: 120
 };
@@ -77,10 +77,21 @@ async function handleLogin(e) {
                 submitBtn.dataset.originalText = submitBtn.innerHTML;
                 submitBtn.innerHTML = 'Đang đăng nhập...';
             }
-            var res = await loginDataSource.login({ account: acc, password: pass });
+
+            var response = await fetch((window.CONTEXT_PATH || '') + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ account: acc, password: pass })
+            });
+
+            if (!response.ok) {
+                throw new Error('Lỗi máy chủ: HTTP ' + response.status);
+            }
+
+            var res = await response.json();
+
             if (res && res.success) {
-                var phone = res.phone || acc;
-                window.location.href = window.CONTEXT_PATH + '/index.jsp?loginSuccess=true&phone=' + encodeURIComponent(phone);
+                window.location.href = res.redirectUrl;
             } else {
                 showLoginError((res && res.message) || 'Sai tài khoản hoặc mật khẩu');
             }

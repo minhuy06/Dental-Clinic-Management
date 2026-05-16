@@ -1,5 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
 <%
+    TaiKhoan loggedDoctor = (TaiKhoan) session.getAttribute("loggedInUser");
+    String sessionDoctorName = "Bác sĩ";
+    if (loggedDoctor != null && loggedDoctor.getHoTen() != null && !loggedDoctor.getHoTen().trim().isEmpty()) {
+        sessionDoctorName = loggedDoctor.getHoTen().trim();
+        if (!sessionDoctorName.toLowerCase().startsWith("bs")) {
+            sessionDoctorName = "BS. " + sessionDoctorName;
+        }
+    }
     String patientName = request.getParameter("name");
     if (patientName == null || patientName.trim().isEmpty()) patientName = "Nguyễn Văn Hiển";
     String patientId = request.getParameter("patientId");
@@ -7,7 +16,7 @@
     String patientPhone = request.getParameter("phone");
     if (patientPhone == null || patientPhone.trim().isEmpty()) patientPhone = "0987 654 321";
     String doctorName = request.getParameter("doctor");
-    if (doctorName == null || doctorName.trim().isEmpty()) doctorName = "BS. Nguyễn Hoàng";
+    if (doctorName == null || doctorName.trim().isEmpty()) doctorName = sessionDoctorName;
     String appointmentDateTime = request.getParameter("apptTime");
     if (appointmentDateTime == null || appointmentDateTime.trim().isEmpty()) appointmentDateTime = "22/05/2024 | 09:30 AM";
 %>
@@ -25,7 +34,7 @@
 
 <header>
     <a class="btn-back" id="backBtn"  href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
-    <div class="doctor-info"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
+    <div class="doctor-info" id="doctorRoomUI"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
     <div class="appointment-time"><i class="fa-regular fa-calendar"></i> <%= appointmentDateTime %></div>
 </header>
 
@@ -34,22 +43,21 @@
         <div class="card">
             <div class="patient-info-header">
                 <div class="patient-avatar"><i class="fa-solid fa-user-large"></i></div>
-                <h3 class="patient-name"><%= patientName %></h3>
-                <p class="patient-detail"><i class="fa-regular fa-venus-mars"></i> Nam | 28 Tuổi</p>
-                <p class="patient-detail"><i class="fa-solid fa-phone"></i> <%= patientPhone %></p>
-                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: #<%= patientId %></p>
+                <h3 class="patient-name" id="patientNameUI"><%= patientName %></h3>
+                <p class="patient-detail"><i class="fa-regular fa-venus-mars"></i> <span id="patientAgeGenderUI">Đang tải…</span></p>
+                <p class="patient-detail"><i class="fa-solid fa-phone"></i> <span id="patientPhoneUI"><%= patientPhone %></span></p>
+                <p class="patient-detail"><i class="fa-regular fa-address-card"></i> Mã BN: <span id="patientCodeUI">#<%= patientId %></span></p>
             </div>
             <div class="medical-history">
                 <div class="section-title"><i class="fa-solid fa-circle-exclamation"></i> CẢNH BÁO Y TẾ</div>
-                <span class="allergy-tag"><i class="fa-solid fa-syringe"></i> Dị ứng Penicillin</span>
+                <span class="allergy-tag"><i class="fa-solid fa-syringe"></i> <span id="diUngThuocUI">Đang tải…</span></span>
                 <div class="section-title"><i class="fa-solid fa-clock-rotate-left"></i> TIỀN SỬ BỆNH LÝ</div>
-                <div class="history-item"><strong>15/01/2024:</strong> Nhổ răng số 38 (răng khôn). Lành thương tốt.</div>
-                <div class="history-item"><strong>10/10/2023:</strong> Hàn răng sâu số 46.</div>
+                <div class="history-item" id="tienSuBenhUI" style="white-space: pre-wrap;">Đang tải…</div>
             </div>
         </div>
         <div class="card">
             <div class="section-title"><i class="fa-regular fa-note-sticky"></i> GHI CHÚ CỦA LỄ TÂN</div>
-            <p class="note-from-reception">"Bệnh nhân đau buốt vùng răng hàm dưới bên trái khi uống nước lạnh 2 ngày nay."</p>
+            <p class="note-from-reception" id="receptionNoteUI">—</p>
         </div>
     </aside>
 
@@ -82,11 +90,11 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                 <div class="form-group">
                     <label><i class="fa-regular fa-message"></i> LÝ DO KHÁM</label>
-                    <textarea id="symptoms" rows="2">Đau buốt khi ăn đồ lạnh, ê buốt răng số 46</textarea>
+                    <textarea id="symptoms" rows="2" placeholder="Lý do khám / triệu chứng…"></textarea>
                 </div>
                 <div class="form-group">
                     <label><i class="fa-regular fa-clipboard"></i> CHẨN ĐOÁN</label>
-                    <textarea id="diagnosis" rows="2">Sâu răng độ 3 (gần tủy) - Răng 46</textarea>
+                    <textarea id="diagnosis" rows="2" placeholder="Chẩn đoán…"></textarea>
                 </div>
             </div>
 
@@ -107,28 +115,57 @@
                     <tbody id="treatmentBody"></tbody>
                 </table>
             </div>
-            <button id="addServiceBtn" class="btn-add-service"><i class="fa-solid fa-plus"></i> Thêm dịch vụ</button>
+            <div class="service-selection-wrapper" style="display: flex; gap: 10px; align-items: center; margin-top: 15px;">
+                <select id="serviceSelect" style="max-width: 300px; padding: 8px; border-radius: 8px; border: 1px solid var(--border); outline: none;">
+                    <option value="">-- Chọn dịch vụ để thêm --</option>
+                </select>
+                <button id="addServiceBtn" class="btn-add-service" style="margin-top: 0;"><i class="fa-solid fa-plus"></i> Thêm dịch vụ</button>
+            </div>
         </div>
 
         <div class="card">
             <label><i class="fa-solid fa-prescription-bottle"></i> ĐƠN THUỐC / DẶN DÒ</label>
-            <textarea id="prescription" rows="3">- Amoxicillin 500mg: 2 lần/ngày x 5 ngày
-- Paracetamol 500mg: khi đau
-- Dặn dò: Tránh nhai bên điều trị, vệ sinh nhẹ nhàng</textarea>
+            <textarea id="prescription" rows="3" placeholder="Đơn thuốc / dặn dò…"></textarea>
         </div>
 
         <div class="action-bar">
             <button class="btn btn-outline" id="printBtn"><i class="fa-solid fa-print"></i> In đơn</button>
             <button class="btn btn-outline" id="xrayBtn"><i class="fa-solid fa-camera"></i> X-Quang</button>
             <button class="btn btn-danger" id="cancelBtn"><i class="fa-solid fa-xmark"></i> Hủy</button>
-            <button class="btn btn-success" id="saveBtn"><i class="fa-solid fa-check-double"></i> HOÀN TẤT & LƯU</button>
+            <button type="button" class="btn btn-success" id="saveBtn"><i class="fa-solid fa-check-double"></i> Hoàn tất & lưu</button>
         </div>
     </main>
 </div>
 
 <div id="toastMessage" class="toast-message"></div>
 
+<%@ page import="com.dentalclinic.dao.DichVuDAO" %>
+<%@ page import="com.dentalclinic.dao.LichHenDAO" %>
+<%@ page import="com.dentalclinic.model.DichVu" %>
+<%@ page import="com.dentalclinic.model.LichHen" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.google.gson.Gson" %>
+<%
+    DichVuDAO dvDAO = new DichVuDAO();
+    List<DichVu> listDV = dvDAO.getAll();
+    String jsonDV = new Gson().toJson(listDV);
+
+    String initialBookedJson = "[]";
+    String lichHenIdParam = request.getParameter("id");
+    if (lichHenIdParam != null && !lichHenIdParam.trim().isEmpty()) {
+        try {
+            int lhId = Integer.parseInt(lichHenIdParam.trim());
+            LichHen lhDetail = new LichHenDAO().layChiTietLichHen(lhId);
+            if (lhDetail != null && lhDetail.getDanhSachDichVuDat() != null && !lhDetail.getDanhSachDichVuDat().isEmpty()) {
+                initialBookedJson = new Gson().toJson(lhDetail.getDanhSachDichVuDat());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+%>
 <script>
+    window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     window.DOCTOR_HOSO_BOOTSTRAP = {
         patientName: '<%= patientName.replace("'", "\\'") %>',
         patientId: '<%= patientId.replace("'", "\\'") %>',
@@ -136,7 +173,9 @@
         doctorName: '<%= doctorName.replace("'", "\\'") %>',
         appointmentDateTime: '<%= appointmentDateTime.replace("'", "\\'") %>'
     };
+    var danhSachDichVuTuDB = <%= jsonDV %>;
+    window.INITIAL_BOOKED_SERVICES = <%= initialBookedJson %>;
 </script>
-<script src="${pageContext.request.contextPath}/doctor/js/hoso.js"></script>
+<script src="${pageContext.request.contextPath}/doctor/js/hoso.js?v=20260516l"></script>
 </body>
 </html>
