@@ -141,6 +141,18 @@ public class LichHenDAO {
 
 
     public int insertBooking(LichHen lh, List<Integer> dichVuIds) {
+        Map<Integer, Integer> qtyMap = new HashMap<>();
+        if (dichVuIds != null) {
+            for (Integer dvID : dichVuIds) {
+                if (dvID == null) continue;
+                qtyMap.put(dvID, qtyMap.getOrDefault(dvID, 0) + 1);
+            }
+        }
+        return insertBooking(lh, qtyMap);
+    }
+
+    public int insertBooking(LichHen lh, Map<Integer, Integer> qtyByDvId) {
+        if (qtyByDvId == null || qtyByDvId.isEmpty()) return -1;
 
         String sql = "INSERT INTO LichHen (BenhNhan_ID, BacSi_ID, NgayKham, GioKham, GhiChu, TrangThai, Phong_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
@@ -172,18 +184,17 @@ public class LichHenDAO {
 
                     int lhID = rs.getInt(1);
 
-                    String sqlDV = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID, SoLuong) VALUES (?, ?, 1)";
+                    String sqlDV = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID, SoLuong) VALUES (?, ?, ?)";
 
                     try (PreparedStatement psDV = conn.prepareStatement(sqlDV)) {
 
-                        for (Integer dvID : dichVuIds) {
-
+                        for (Map.Entry<Integer, Integer> e : qtyByDvId.entrySet()) {
+                            if (e.getKey() == null || e.getKey() < 1) continue;
+                            int qty = e.getValue() == null || e.getValue() < 1 ? 1 : e.getValue();
                             psDV.setInt(1, lhID);
-
-                            psDV.setInt(2, dvID);
-
+                            psDV.setInt(2, e.getKey());
+                            psDV.setInt(3, qty);
                             psDV.addBatch();
-
                         }
 
                         psDV.executeBatch();

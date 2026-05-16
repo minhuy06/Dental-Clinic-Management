@@ -1,5 +1,5 @@
 var BOOKING_CONFIG = {
-    USE_MOCK: true,
+    USE_MOCK: false,
     API_BASE: '/api',
     MOCK_DELAY_MS: 120
 };
@@ -49,8 +49,35 @@ var mockBookingSource = {
 };
 
 var apiBookingSource = {
-    servicesList: async function() { return normalizeBookingList(await bookingRequest('services')); },
-    createBooking: async function(payload) { return bookingRequest('appointments/add', {method:'POST', body:payload}); }
+    servicesList: async function() {
+        if (window.allServices && window.allServices.length > 0) {
+            return bookingClone(window.allServices);
+        }
+        return [];
+    },
+    createBooking: async function(payload) {
+        var ctx = window.BOOKING_CONTEXT_PATH || '';
+        var res = await fetch(ctx + '/dat-lich', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json; charset=UTF-8',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(payload)
+        });
+        var json = null;
+        try { json = await res.json(); } catch (e) { json = null; }
+        if (res.status === 401) {
+            var loginUrl = (window.BOOKING_LOGIN_URL || (ctx + '/account/login.jsp')) + '?redirect=datlich';
+            throw new Error('Vui lòng đăng nhập tài khoản bệnh nhân để đặt lịch.');
+        }
+        if (!res.ok || (json && json.success === false)) {
+            throw new Error((json && json.message) ? json.message : 'Không thể đặt lịch');
+        }
+        return json || { success: true };
+    }
 };
 
 var bookingSource = BOOKING_CONFIG.USE_MOCK ? mockBookingSource : apiBookingSource;
@@ -59,19 +86,23 @@ async function withBookingGuard(action, successMsg) {
     try {
         var res = await action();
         if (res && res.success === false) {
-            AppNotify.error(res.message || 'Không thể xử lý đặt lịch');
+            if (window.AppNotify) AppNotify.error(res.message || 'Không thể xử lý đặt lịch');
+            else alert(res.message || 'Không thể xử lý đặt lịch');
             return null;
         }
-        if (successMsg) AppNotify.success(successMsg);
+        if (successMsg) {
+            if (window.AppNotify) AppNotify.success(successMsg);
+            else alert(successMsg);
+        }
         return res || {success:true};
     } catch (error) {
         console.error('[dat-lich] data error:', error);
-        AppNotify.error(error.message || 'Có lỗi kết nối dữ liệu!');
+        if (window.AppNotify) AppNotify.error(error.message || 'Có lỗi kết nối dữ liệu!');
+        else alert(error.message || 'Có lỗi kết nối dữ liệu!');
         return null;
     }
 }
 
-// Dùng data được inject từ backend (BookingServlet)
 var allServices = (window.allServices && window.allServices.length > 0)
     ? window.allServices
     : [];
@@ -94,8 +125,6 @@ function normalizeServiceItem(s) {
 
 allServices = allServices.map(normalizeServiceItem).filter(function(s) { return s !== null; });
 
-
-// === RENDER BANG DICH VU ===
 function renderServiceTable(list, showAll) {
     var tbody = document.getElementById('serviceTableBody');
     var html = '';
@@ -127,7 +156,6 @@ function toggleServices() {
 
 renderServiceTable(allServices, false);
 
-// === BOOKING FORM - CHECKBOX GRID ===
 var selectedList = [];
 
 function buildCheckboxGrid() {
@@ -206,25 +234,62 @@ function renderNbSelected() {
 }
 
 // === NGAY + GIO ===
+function todayYmd() {
+    var d = new Date();
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (day < 10 ? '0' : '') + day;
+}
+
+function currentHm() {
+    var d = new Date();
+    var h = d.getHours();
+    var m = d.getMinutes();
+    return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m;
+}
+
+function compareHm(a, b) {
+    var pa = a.split(':').map(Number);
+    var pb = b.split(':').map(Number);
+    if (pa[0] !== pb[0]) return pa[0] - pb[0];
+    return pa[1] - pb[1];
+}
+
 (function() {
-    document.getElementById('bookingDate').min = new Date().toISOString().split('T')[0];
+    document.getElementById('bookingDate').min = todayYmd();
 })();
 
 var weekdayTimes = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30','13:00','13:30','14:00','14:30','15:00','15:30','16:00','16:30'];
 var sundayTimes = ['08:00','08:30','09:00','09:30','10:00','10:30','11:00','11:30'];
 
-function buildTimeOptions(times) {
+function getTimesForDate(dateStr) {
+    if (!dateStr) return weekdayTimes.slice();
+    var day = new Date(dateStr + 'T12:00:00').getDay();
+    return day === 0 ? sundayTimes.slice() : weekdayTimes.slice();
+}
+
+function buildTimeOptions(dateStr) {
     var sel = document.getElementById('bookingTimeSelect');
+    var prev = sel.value;
+    var times = getTimesForDate(dateStr);
+    if (dateStr === todayYmd()) {
+        var nowHm = currentHm();
+        times = times.filter(function(t) { return compareHm(t, nowHm) > 0; });
+    }
     sel.innerHTML = '<option value="">Chọn giờ</option>';
     times.forEach(function(t) {
         sel.innerHTML += '<option value="' + t + '">' + t + '</option>';
     });
+    if (prev && times.indexOf(prev) >= 0) sel.value = prev;
+    else sel.value = '';
+    if (dateStr === todayYmd() && times.length === 0) {
+        sel.innerHTML = '<option value="">Không còn khung giờ hôm nay</option>';
+    }
 }
-buildTimeOptions(weekdayTimes);
+buildTimeOptions('');
 
 document.getElementById('bookingDate').addEventListener('change', function() {
-    var day = new Date(this.value).getDay();
-    buildTimeOptions(day === 0 ? sundayTimes : weekdayTimes);
+    buildTimeOptions(this.value);
     document.getElementById('dateGroup').classList.remove('error');
 });
 
@@ -232,13 +297,12 @@ document.getElementById('bookingTimeSelect').addEventListener('change', function
     if (this.value) document.getElementById('timeGroup').classList.remove('error');
 });
 
-// === RESET + SUBMIT ===
 function resetBookingForm() {
     selectedList = [];
     document.querySelectorAll('#svcCheckboxGrid input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
     renderNbSelected();
     document.getElementById('bookingDate').value = '';
-    document.getElementById('bookingTimeSelect').value = '';
+    buildTimeOptions('');
     document.getElementById('bookingNote').value = '';
     document.getElementById('dateGroup').classList.remove('error');
     document.getElementById('timeGroup').classList.remove('error');
@@ -246,18 +310,32 @@ function resetBookingForm() {
 }
 
 function handleBooking() {
+    if (!window.PATIENT_LOGGED_IN) {
+        var ctx = window.BOOKING_CONTEXT_PATH || '';
+        var msg = 'Vui lòng đăng nhập tài khoản bệnh nhân để đặt lịch.';
+        if (window.AppNotify) {
+            AppNotify.error(msg);
+        } else {
+            alert(msg);
+        }
+        window.location.href = window.BOOKING_LOGIN_URL || (ctx + '/account/login.jsp?redirect=datlich');
+        return;
+    }
+
     var ok = true;
     if (selectedList.length === 0) {
         document.getElementById('serviceGroup').classList.add('error');
         ok = false;
     } else document.getElementById('serviceGroup').classList.remove('error');
 
-    if (!document.getElementById('bookingDate').value) {
+    var bookingDate = document.getElementById('bookingDate').value;
+    if (!bookingDate) {
         document.getElementById('dateGroup').classList.add('error');
         ok = false;
     } else document.getElementById('dateGroup').classList.remove('error');
 
-    if (!document.getElementById('bookingTimeSelect').value) {
+    var bookingTime = document.getElementById('bookingTimeSelect').value;
+    if (!bookingTime) {
         document.getElementById('timeGroup').classList.add('error');
         ok = false;
     } else document.getElementById('timeGroup').classList.remove('error');
@@ -277,7 +355,7 @@ async function submitBooking() {
         note: bookingNote,
         services: selectedList.map(function(s) {
             return {
-                id: s.id,
+                id: parseInt(s.id, 10),
                 name: s.name,
                 price: s.price,
                 quantity: s.qty
@@ -288,20 +366,32 @@ async function submitBooking() {
 
     var res = await withBookingGuard(
         function() { return bookingSource.createBooking(payload); },
-        '✅ Đặt lịch thành công! Phòng khám sẽ liên hệ xác nhận trong 30 phút.'
+        '✅ Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.'
     );
-    if (res) resetBookingForm();
+    if (res) {
+        resetBookingForm();
+        var ctx = window.BOOKING_CONTEXT_PATH || '';
+        setTimeout(function() {
+            window.location.href = ctx + '/hoso#lichhen';
+        }, 1200);
+    }
 }
 
-async function loadServicesForBooking() {
-    var list = await withBookingGuard(function() { return bookingSource.servicesList(); });
-    if (!list) return;
-    allServices = normalizeBookingList(list).map(normalizeServiceItem).filter(function(s) { return s !== null; });
+function refreshBookingServicesFromWindow() {
+    var list = (window.allServices && window.allServices.length) ? window.allServices : [];
+    allServices = list.map(normalizeServiceItem).filter(function(s) { return s !== null; });
     renderServiceTable(allServices, false);
     buildCheckboxGrid();
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.info('[dat-lich] mode:', BOOKING_CONFIG.USE_MOCK ? 'MOCK' : 'REAL API');
-    loadServicesForBooking();
+    console.info('[dat-lich] mode:', BOOKING_CONFIG.USE_MOCK ? 'MOCK' : 'REAL (/dat-lich)');
+    refreshBookingServicesFromWindow();
+    if (window.BOOKING_SUCCESS) {
+        if (window.AppNotify) AppNotify.success('Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.');
+    }
+    if (window.BOOKING_ERROR) {
+        if (window.AppNotify) AppNotify.error(window.BOOKING_ERROR);
+        else alert(window.BOOKING_ERROR);
+    }
 });

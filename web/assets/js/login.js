@@ -91,7 +91,12 @@ async function handleLogin(e) {
             var res = await response.json();
 
             if (res && res.success) {
-                window.location.href = res.redirectUrl;
+                var qp = new URLSearchParams(window.location.search);
+                if (qp.get('redirect') === 'datlich') {
+                    window.location.href = (window.CONTEXT_PATH || '') + '/Infor/Schedule#datlich';
+                } else {
+                    window.location.href = res.redirectUrl;
+                }
             } else {
                 showLoginError((res && res.message) || 'Sai tài khoản hoặc mật khẩu');
             }

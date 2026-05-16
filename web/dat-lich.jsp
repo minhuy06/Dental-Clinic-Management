@@ -1,4 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
 <%
     String scrollSection = (String) request.getAttribute("scrollSection");
     if (scrollSection == null || scrollSection.isEmpty()) {
@@ -125,8 +126,19 @@
     </main>
     <jsp:include page="components/footer.jsp" />
 
+    <jsp:include page="components/notify-resources.jsp" />
     <script>
     (function() {
+        window.BOOKING_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        window.BOOKING_LOGIN_URL = '${pageContext.request.contextPath}/account/login.jsp';
+        <%
+            TaiKhoan bookingUser = (TaiKhoan) session.getAttribute("loggedInUser");
+            boolean patientLoggedIn = bookingUser != null && "Bệnh nhân".equalsIgnoreCase(
+                    bookingUser.getVaiTro() != null ? bookingUser.getVaiTro().trim() : "");
+        %>
+        window.PATIENT_LOGGED_IN = <%= patientLoggedIn %>;
+        window.BOOKING_SUCCESS = <%= "1".equals(request.getParameter("booked")) %>;
+        window.BOOKING_ERROR = <%= request.getAttribute("error") != null ? "\"" + request.getAttribute("error").toString().replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", " ") + "\"" : "null" %>;
         window.allServices = <%= request.getAttribute("serviceListJson") == null ? "[]" : request.getAttribute("serviceListJson") %>;
 
         var doctors = <%= request.getAttribute("doctorListJson") == null ? "[]" : request.getAttribute("doctorListJson") %>;
@@ -155,6 +167,6 @@
     })();
     </script>
 
-    <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/dat-lich.js?v=20260518c"></script>
 </body>
 </html>
