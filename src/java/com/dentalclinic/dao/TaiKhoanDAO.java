@@ -31,9 +31,16 @@ public class TaiKhoanDAO {
                 tk.setVaiTro(rs.getNString("VaiTro"));
                 tk.setNgaySinh(rs.getString("NgaySinh"));
                 tk.setGioiTinh(rs.getBoolean("GioiTinh"));
+                String dbRole = rs.getNString("VaiTro");
                 tk.setTrangThai(rs.getNString("TrangThai"));
                 
-                if("Bác sĩ".equals(tk.getVaiTro())){
+                // Map DB roles to internal roles for frontend
+                if ("Bác sĩ".equals(dbRole)) tk.setVaiTro("doctor");
+                else if ("Lễ tân".equals(dbRole)) tk.setVaiTro("staff");
+                else if ("Quản trị viên".equals(dbRole) || "Admin".equals(dbRole)) tk.setVaiTro("admin");
+                else tk.setVaiTro("customer");
+                
+                if("doctor".equals(tk.getVaiTro())){
                     tk.setChuyenKhoaID(rs.getInt("ChuyenKhoa_ID"));
                     tk.setTenChuyenKhoa(rs.getNString("TenChuyenKhoa"));
                     tk.setTrinhDo(rs.getNString("TrinhDo"));
@@ -59,7 +66,13 @@ public class TaiKhoanDAO {
             cs.setString(2, tk.getSoDienThoai());
             cs.setString(3, tk.getMatKhau());
             cs.setString(4, tk.getVaiTro());
-            cs.setDate(5, java.sql.Date.valueOf(tk.getNgaySinh()));
+            
+            if (tk.getNgaySinh() != null && !tk.getNgaySinh().trim().isEmpty()) {
+                cs.setDate(5, java.sql.Date.valueOf(tk.getNgaySinh()));
+            } else {
+                cs.setNull(5, java.sql.Types.DATE);
+            }
+            
             cs.setBoolean(6, tk.isGioiTinh());
             
             if("doctor".equals(tk.getVaiTro())){
@@ -84,7 +97,7 @@ public class TaiKhoanDAO {
     
     // Cập nhật tài khoản nhân sự
     public boolean capNhatTaiKhoanNhanSu(TaiKhoanBsLtDTO tk){
-        String sql = "{call SP_CapNhatTaiKhoan(?, ?, ?, ?, ?, ?, ?, ?, ?, ? , ?)}";
+        String sql = "{call SP_CapNhatTaiKhoan(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)}";
         try (Connection conn = DBConnection.getConnection();
             CallableStatement cs = conn.prepareCall(sql))
         {
@@ -94,7 +107,13 @@ public class TaiKhoanDAO {
             cs.setString(4, tk.getMatKhau());
             cs.setString(5, tk.getVaiTro());
             cs.setString(6, tk.getTrangThai());
-            cs.setDate(7, java.sql.Date.valueOf(tk.getNgaySinh()));
+            
+            if (tk.getNgaySinh() != null && !tk.getNgaySinh().trim().isEmpty()) {
+                cs.setDate(7, java.sql.Date.valueOf(tk.getNgaySinh()));
+            } else {
+                cs.setNull(7, java.sql.Types.DATE);
+            }
+            
             cs.setBoolean(8, tk.isGioiTinh());
             
             if("doctor".equals(tk.getVaiTro())){
@@ -107,7 +126,8 @@ public class TaiKhoanDAO {
                 cs.setNull(10, java.sql.Types.NVARCHAR);
                 cs.setNull(11, java.sql.Types.VARCHAR);
             }
-            return cs.executeUpdate() > 0;
+            cs.execute();
+            return true;
             
         } catch (Exception e){
             e.printStackTrace();

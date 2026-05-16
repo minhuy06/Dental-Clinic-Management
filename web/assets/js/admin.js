@@ -331,7 +331,7 @@ var apiDataSource = {
     accounts: {
         list: async function() { return normalizeListRes(await requestApi('accounts')); },
         create: async function(payload) { return requestApi('accounts/add', {method:'POST', body:payload}); },
-        update: async function(payload) { return requestApi('accounts/update', {method:'PUT', body:payload}); },
+        update: async function(payload) { return requestApi('accounts/update', {method:'POST', body:payload}); },
         remove: async function(id) { return requestApi('accounts/delete?id=' + id, {method:'DELETE'}); },
         toggleStatus: async function(id, status) { return requestApi('accounts/toggle-status', {method:'PUT', body:{id:id, status:status}}); }
     },
@@ -1050,13 +1050,18 @@ function editAccount(id) {
     document.getElementById('accRole').value = a.role;
     document.getElementById('accDob').value = a.dob || '';
     document.getElementById('accGender').value = a.gender || '';
-    document.getElementById('accSpecialty').value = a.specialty || '';
+    document.getElementById('accSpecialty').value = a.specialtyId || '';
     document.getElementById('accDegree').value = a.degree || '';
     document.getElementById('accPhone').value = a.phone || '';
     document.getElementById('accPassword').value = '';
     document.getElementById('accAvatarFile').value = '';
     var prev = document.getElementById('accAvatarPreview');
-    if (a.avatar) { prev.src = a.avatar; prev.style.display = 'block'; }
+    if (a.avatar) { 
+        var avatarUrl = a.avatar;
+        if (avatarUrl.startsWith('assets/')) avatarUrl = '../' + avatarUrl;
+        prev.src = avatarUrl; 
+        prev.style.display = 'block'; 
+    }
     else { prev.src = ''; prev.style.display = 'none'; }
     document.getElementById('accStatus').value = a.status;
     document.getElementById('accStatusGroup').style.display = '';
@@ -1109,7 +1114,7 @@ async function saveAccount() {
     }
     if (!res) return;
     closeAccountModal();
-    // await loadAccountsFromServer();
+    await loadAccountsFromServer();
 }
 
 // ===== POPUP THÔNG TIN NHÂN SỰ =====
@@ -1125,24 +1130,37 @@ function showStaffInfo(id) {
         var age = new Date().getFullYear() - new Date(a.dob + 'T00:00:00').getFullYear();
         dobStr = formatDate(a.dob) + ' (' + age + ' tuổi)';
     }
-    // Tính tuần hiện tại không cần getWeekStart
-    var now = new Date();
-    var dow = now.getDay();
-    var wsDate = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dow);
-    var weDate = new Date(wsDate.getFullYear(), wsDate.getMonth(), wsDate.getDate() + 6);
-    var wsStr = toYMD(wsDate), weStr = toYMD(weDate);
+    // Lấy lịch làm việc từ hôm nay trở đi (trong vòng 14 ngày tới) để người quản trị dễ theo dõi
+    var today = new Date();
+    today.setHours(0, 0, 0, 0);
+    var futureLimit = new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000);
+    
+    var tStr = toYMD(today), fStr = toYMD(futureLimit);
+
     var weekShifts = shifts.filter(function(s) {
-        return s.staffId === id && s.date >= wsStr && s.date <= weStr;
+        var sDate = s.date ? s.date.substring(0, 10) : "";
+        return s.staffId == id && sDate >= tStr && sDate <= fStr;
     });
+    weekShifts.sort(function(a, b) { return a.date.localeCompare(b.date); });
+
     var shiftsHtml = weekShifts.length > 0
         ? weekShifts.map(function(s) {
             var sc = shiftConfig[s.shiftType] || shiftConfig.morning;
-            return '<span class="sch-chip" style="background:'+sc.bg+';color:'+sc.color+'">'+formatDate(s.date)+' – '+sc.label+'</span>';
+            // Dùng class mới staff-info-chip để tránh bị dính max-width của .sch-chip trong CSS
+            return '<div class="staff-info-chip" style="background:'+sc.bg+';color:'+sc.color+';padding:12px 16px;margin-bottom:10px;border-radius:12px;font-size:0.92rem;border:1px solid rgba(0,0,0,0.05);display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 5px rgba(0,0,0,0.04)">' +
+                        '<span><i class="far fa-calendar-alt"></i> <b>'+formatDate(s.date)+'</b> ('+sc.label+')</span>' +
+                        '<span style="font-weight:700;margin-left:20px;padding-left:15px;border-left:1px solid rgba(0,0,0,0.1)"><i class="fas fa-door-open"></i> '+s.room+'</span>' +
+                   '</div>';
           }).join('')
-        : '<span style="color:var(--text-sub);font-size:0.85rem">Chưa có ca tuần này</span>';
-    var avatarHtml = a.avatar
-        ? '<img src="'+a.avatar+'" style="width:56px;height:56px;border-radius:50%;object-fit:cover">'
+        : '<div style="text-align:center;padding:25px;background:#f8fafc;border-radius:12px;color:#64748b;font-size:0.88rem;border:1px dashed #cbd5e1">Không có lịch làm việc sắp tới</div>';
+
+    var avatarUrl = a.avatar;
+    if (avatarUrl && avatarUrl.startsWith('assets/')) avatarUrl = '../' + avatarUrl;
+    
+    var avatarHtml = avatarUrl
+        ? '<img src="'+avatarUrl+'" style="width:60px;height:60px;border-radius:50%;object-fit:cover;border:2px solid var(--primary-color)">'
         : '<div class="staff-info-avatar"><i class="fas '+icon+'"></i></div>';
+
     document.getElementById('staffInfoBody').innerHTML =
         '<div class="staff-info-header">' +
             avatarHtml +
@@ -1155,10 +1173,11 @@ function showStaffInfo(id) {
             '<div class="staff-info-item"><i class="fas fa-graduation-cap"></i><span>'+escapeHtml(a.degree||'—')+'</span></div>' +
             (a.role==='doctor' ? '<div class="staff-info-item" style="grid-column:1/-1"><i class="fas fa-stethoscope"></i><span>'+escapeHtml(a.specialty||'—')+'</span></div>' : '') +
         '</div>' +
-        '<div class="staff-info-section">' +
-            '<div class="staff-info-sec-title"><i class="fas fa-calendar-week"></i> Ca làm việc tuần này</div>' +
-            '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+shiftsHtml+'</div>' +
-        '</div>';
+        (a.role === 'doctor' ? 
+        '<div class="staff-info-section" style="margin-top:20px">' +
+            '<div class="staff-info-sec-title" style="margin-bottom:12px;font-weight:700;display:flex;align-items:center;gap:8px"><i class="fas fa-calendar-alt" style="color:var(--primary-color)"></i> Lịch làm việc sắp tới (14 ngày)</div>' +
+            '<div style="display:block">'+shiftsHtml+'</div>' +
+        '</div>' : '');
     document.getElementById('staffInfoModal').style.display = 'flex';
     var btnEditStaffInfo = document.getElementById('btnEditStaffInfo');
     if (btnEditStaffInfo) {

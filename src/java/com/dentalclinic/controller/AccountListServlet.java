@@ -39,12 +39,9 @@ public class AccountListServlet extends HttpServlet {
                 obj.addProperty("avatar", tk.getAnhDaiDien());
                 obj.addProperty("degree", tk.getTrinhDo() != null ? tk.getTrinhDo() : "");
                 obj.addProperty("specialty", tk.getTenChuyenKhoa());
+                obj.addProperty("specialtyId", tk.getChuyenKhoaID());
                 
-                String roleJS = "customer";
-                if ("Bác sĩ".equals(tk.getVaiTro())) roleJS = "doctor";
-                else if("Lễ tân".equals(tk.getVaiTro())) roleJS = "staff";
-                else if("Quản trị viên".equals(tk.getVaiTro())) roleJS = "admin";
-                obj.addProperty("role", roleJS);
+                obj.addProperty("role", tk.getVaiTro());
                 
                 String statusJS = "Hoạt động".equals(tk.getTrangThai()) ? "active" : "inactive";
                 obj.addProperty("status", statusJS); 

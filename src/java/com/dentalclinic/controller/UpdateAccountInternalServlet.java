@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet(name = "UpdateAccountServlet", urlPatterns = {"/api/accounts/update"})
 public class UpdateAccountInternalServlet extends HttpServlet {
     @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
             throws ServletException, IOException{
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
@@ -35,7 +35,7 @@ public class UpdateAccountInternalServlet extends HttpServlet {
             TaiKhoanBsLtDTO dto = gson.fromJson(sb.toString(), TaiKhoanBsLtDTO.class);
             
             // Cấu hình đường dẫn hệ thống
-            String serverPath = request.getServletContext().getRealPath("") + File.separator + "img";
+            String serverPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img" + File.separator + "doctors";
             String sourcePath = System.getenv("CLINIC_IMG_PATH");
             
             // Chuyển cho Service xử lý cập nhật

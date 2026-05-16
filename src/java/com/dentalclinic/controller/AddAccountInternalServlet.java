@@ -36,7 +36,7 @@ public class AddAccountInternalServlet extends HttpServlet {
             TaiKhoanBsLtDTO dto = gson.fromJson(sb.toString(), TaiKhoanBsLtDTO.class);
             
             // Cấu hình đường dẫn hệ thống
-            String serverPath = request.getServletContext().getRealPath("") + File.separator + "img";
+            String serverPath = request.getServletContext().getRealPath("") + File.separator + "assets" + File.separator + "img" + File.separator + "doctors";
             String sourcePath = System.getenv("CLINIC_IMG_PATH");
             
             // Chuyển cho Service xử lý thêm

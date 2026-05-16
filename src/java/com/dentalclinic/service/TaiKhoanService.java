@@ -28,9 +28,9 @@ public class TaiKhoanService {
                     dto.setAnhDaiDien("assets/img/doctors/" + fileName);
                 }
             } 
-            // Không có ảnh gửi lên (Gán ảnh mặc định)
+            // Không có ảnh gửi lên (Gán null để UI dùng icon mặc định)
             else if (avatarData == null || avatarData.isEmpty()) {
-                dto.setAnhDaiDien("assets/img/doctors/default-avatar.jpg");
+                dto.setAnhDaiDien(null);
             }
         } else {
             // Khách hàng, Lễ tân, Admin không được có ảnh
@@ -47,6 +47,11 @@ public class TaiKhoanService {
     // Nghiệp vụ: Cập nhật tài khoản cho Admin
     public boolean capNhatTaiKhoan(TaiKhoanBsLtDTO dto, String serverPath, String sourcePath) {
         xuLyAnhDaiDien(dto, serverPath, sourcePath);
+        
+        // Map trạng thái sang tiếng Việt cho DB
+        if ("active".equals(dto.getTrangThai())) dto.setTrangThai("Hoạt động");
+        else if ("inactive".equals(dto.getTrangThai())) dto.setTrangThai("Bị khóa");
+        
         return taiKhoanDAO.capNhatTaiKhoanNhanSu(dto);
     }
     

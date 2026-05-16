@@ -9,7 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
 public class HoSoDAO {
-    // Chỉ chứa các phương thức tương tác trực tiếp với bảng HoSo
     public HoSo layHoSoTheoBenhNhan(int benhNhanID) {
         String sql = "SELECT * FROM HoSo WHERE BenhNhan_ID = ?";
         try (Connection conn = DBConnection.getConnection();
@@ -21,7 +20,6 @@ public class HoSoDAO {
                     hs.setHoSoID(rs.getInt("HoSo_ID"));
                     hs.setDiUngThuoc(rs.getNString("DiUngThuoc"));
                     hs.setTienSuBenh(rs.getNString("TienSuBenh"));
-                    // ... set other fields if needed
                     return hs;
                 }
             }

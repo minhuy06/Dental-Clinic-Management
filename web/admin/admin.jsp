@@ -489,11 +489,11 @@
                     <div class="form-group" id="accSpecialtyGroup"><label>Chuyên khoa</label>
                         <select id="accSpecialty">
                             <option value="">-- Chọn chuyên khoa --</option>
-                            <option value="Răng tổng quát">Khám & Chẩn đoán</option>
-                            <option value="Chỉnh nha">Thẩm mỹ</option>
-                            <option value="Phục hình">Chỉnh nha</option>
-                            <option value="Thẩm mỹ nha">Phẫu thuật</option>
-                            <option value="Phẫu thuật miệng">Trẻ em</option>
+                            <option value="1">Khám & Chẩn đoán</option>
+                            <option value="2">Thẩm mỹ</option>
+                            <option value="3">Chỉnh nha</option>
+                            <option value="4">Phẫu thuật</option>
+                            <option value="5">Trẻ em</option>
                         </select>
                     </div>
                     <div class="form-group" id="accDegreeGroup"><label>Bằng cấp / Học vị</label>

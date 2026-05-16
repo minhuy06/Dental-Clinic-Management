@@ -1267,6 +1267,18 @@ SET NgayKham = GETDATE(), TrangThai = N'Đã đến'
 WHERE LichHen_ID IN (1, 2, 3, 4) ;
 go
 
+-- Test Ca làm
+update LichLamViec
+set NgayLam = GetDate()
+where TaiKhoan_ID in  (21, 22, 23)
+go
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, Phong_ID) VALUES 
+(21, 1, '2026-05-17', 3),
+(22, 2, '2026-05-17', 1)
+go
+INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, Phong_ID) VALUES 
+(21, 1, '2026-05-18', 3)
+go
 ------ STORED PROCEDURE ------
 ---- Admin: Quản lý tài khoản
 -- Thêm tài khoản bác sĩ/lễ tân
@@ -1289,7 +1301,7 @@ begin
 
             IF @VaiTro = 'doctor' SET @VaiTroTiengViet = N'Bác sĩ'
             ELSE IF @VaiTro = 'staff' SET @VaiTroTiengViet = N'Lễ tân'
-            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Admin'
+            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Quản trị viên'
             ELSE SET @VaiTroTiengViet = N'Khách hàng';
 
             -- Thêm vào TaiKhoan
@@ -1341,11 +1353,16 @@ begin
             DECLARE @VaiTroTiengViet nvarchar(30);
             IF @VaiTro = 'doctor' SET @VaiTroTiengViet = N'Bác sĩ'
             ELSE IF @VaiTro = 'staff' SET @VaiTroTiengViet = N'Lễ tân'
-            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Admin'
+            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Quản trị viên'
             ELSE SET @VaiTroTiengViet = @VaiTro;
 
+            DECLARE @TrangThaiTiengViet nvarchar(50);
+            IF @TrangThai = 'active' SET @TrangThaiTiengViet = N'Hoạt động'
+            ELSE IF @TrangThai = 'inactive' SET @TrangThaiTiengViet = N'Bị khóa'
+            ELSE SET @TrangThaiTiengViet = @TrangThai;
+
             update TaiKhoan
-                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThai, VaiTro = @VaiTroTiengViet, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
+                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThaiTiengViet, VaiTro = @VaiTroTiengViet, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
                 where TaiKhoan_ID = @TaiKhoan_ID
 
                 if @MaKhau is not null and @MaKhau <> ''
