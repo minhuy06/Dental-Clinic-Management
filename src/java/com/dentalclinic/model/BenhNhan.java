@@ -8,6 +8,7 @@ public class BenhNhan {
 
     // Đối tượng quan hệ (Dùng để hứng dữ liệu chứa Tên, Tuổi, Giới tính khi JOIN)
     private TaiKhoan taiKhoan;
+    private HoSo hoSo;
     private List<LichHen> danhSachLichHen;
 
     public BenhNhan() {}
@@ -26,6 +27,9 @@ public class BenhNhan {
 
     public TaiKhoan getTaiKhoan() { return taiKhoan; }
     public void setTaiKhoan(TaiKhoan taiKhoan) { this.taiKhoan = taiKhoan; }
+
+    public HoSo getHoSo() { return hoSo; }
+    public void setHoSo(HoSo hoSo) { this.hoSo = hoSo; }
     
     public List<LichHen> getDanhSachLichHen() { return danhSachLichHen; }
     public void setDanhSachLichHen(List<LichHen> danhSachLichHen) { this.danhSachLichHen = danhSachLichHen; }

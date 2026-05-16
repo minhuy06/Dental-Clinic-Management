@@ -177,8 +177,8 @@ function renderPagination(containerId, total, perPage, currentPage, onClickFn) {
 // ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
 var ADMIN_CONFIG = {
     // true: dùng dữ liệu giả (mảng local), false: gọi backend thật
-    USE_MOCK: true,
-    API_BASE: '/api',
+    USE_MOCK: false,
+    API_BASE: '/Dental_Clinic_Management/api',
     MOCK_DELAY_MS: 120
 };
 
@@ -1087,24 +1087,27 @@ async function saveAccount() {
     var prevSrc = document.getElementById('accAvatarPreview').src;
     var avatar = (prevSrc && prevSrc.indexOf('data:') === 0) ? prevSrc : (editingAccId ? (accounts.find(function(a){return a.id===editingAccId;})||{}).avatar||'' : '');
     var data = {
-        name: name, role: role, phone: phone,
-        dob: document.getElementById('accDob').value,
-        gender: document.getElementById('accGender').value,
-        specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
-        degree: role === 'doctor' ? document.getElementById('accDegree').value.trim() : '',
-        avatar: avatar,
-        status: editingAccId ? document.getElementById('accStatus').value : 'active'
+        hoTen: name, 
+        vaiTro: role, 
+        soDienThoai: phone, 
+        matKhau: document.getElementById('accPassword').value,
+        ngaySinh: document.getElementById('accDob').value,
+        gioiTinh: document.getElementById('accGender').value === 'male',
+        chuyenKhoaID: role === 'doctor' ? parseInt(document.getElementById('accSpecialty').value) || 0 : 0,
+        trinhDo: role === 'doctor' ? document.getElementById('accDegree').value.trim() : '',
+        anhDaiDien: avatar,
+        trangThai: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
     var res = null;
     if (editingAccId) {
-        data.id = editingAccId;
+        data.taiKhoanID = editingAccId;
         res = await withApiGuard(function() { return dataSource.accounts.update(data); }, 'Đã cập nhật tài khoản');
     } else {
         res = await withApiGuard(function() { return dataSource.accounts.create(data); }, 'Đã thêm tài khoản mới');
     }
     if (!res) return;
     closeAccountModal();
-    await loadAccountsFromServer();
+    // await loadAccountsFromServer();
 }
 
 // ===== POPUP THÔNG TIN NHÂN SỰ =====
@@ -1557,8 +1560,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     } else {
         console.info('[admin] mode: REAL API');
     }
-    await loadServicesFromServer();
-    await loadShiftsFromServer();
-    await loadAccountsFromServer();
-    await loadRevenueFromServer();
+    //await loadServicesFromServer();
+    //await loadShiftsFromServer();
+    //await loadAccountsFromServer();
+    //await loadRevenueFromServer();
 });

@@ -199,9 +199,6 @@ GO
 -- INSERT dữ liệu mồi
 -- 1. INSERT TÀI KHOẢN
 INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
--- 1 Admin
-('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động'),
-
 -- 20 Bệnh nhân
 ('0901000001', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000002', '123456', N'Bệnh nhân', N'Hoạt động'), 
 ('0901000003', '123456', N'Bệnh nhân', N'Hoạt động'), ('0901000004', '123456', N'Bệnh nhân', N'Hoạt động'),
@@ -236,7 +233,11 @@ INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
 ('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000015', '123456', N'Lễ tân', N'Hoạt động'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động'),
 ('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'), 
-('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động');
+('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động'),
+
+-- 1 Admin
+('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động')
+
 GO
 
 -- 2. INSERT BỆNH NHÂN
@@ -318,16 +319,16 @@ GO
 
 -- 7. INSERT LỊCH HẸN
 INSERT INTO LichHen (BenhNhan_ID, BacSi_ID, NgayKham, GioKham, GhiChu, TrangThai) VALUES
-(1, 1, '2024-03-01', '08:00', N'Khám định kỳ', N'Đã thanh toán'), (2, 2, '2024-03-02', '09:00', N'Tư vấn niềng răng', N'Đã thanh toán'),
-(3, 3, '2024-03-03', '10:00', N'Làm lại răng sứ', N'Đã thanh toán'), (4, 4, '2024-03-04', '14:00', N'Muốn tẩy trắng', N'Đã thanh toán'),
-(5, 5, '2024-03-05', '15:00', N'Đau răng khôn', N'Đã thanh toán'), (6, 6, '2024-03-06', '16:00', N'Nhổ răng sữa cho bé', N'Đã thanh toán'),
-(7, 7, '2024-03-07', '08:30', N'Cạo vôi răng', N'Đã thanh toán'), (8, 8, '2024-03-08', '09:30', N'Tái khám chỉnh nha', N'Đã thanh toán'),
-(9, 9, '2024-03-09', '10:30', N'Rớt răng tạm', N'Đã thanh toán'), (10, 10, '2024-03-10', '14:30', N'Khám thẩm mỹ', N'Đã thanh toán'),
-(11, 11, '2024-03-11', '15:30', N'Đau nhức dữ dội', N'Đã thanh toán'), (12, 12, '2024-03-12', '16:30', N'Nhổ răng lung lay', N'Đã thanh toán'),
-(13, 13, '2024-03-13', '08:00', N'Trám răng mẻ', N'Đã thanh toán'), (14, 14, '2024-03-14', '09:00', N'Tái khám niềng', N'Đã thanh toán'),
-(15, 15, '2024-03-15', '10:00', N'Cắm Implant', N'Đã thanh toán'), (16, 16, '2024-03-16', '14:00', N'Bọc sứ Veneer', N'Đã thanh toán'),
-(17, 17, '2024-03-17', '15:00', N'Cắt lợi', N'Đã thanh toán'), (18, 18, '2024-03-18', '16:00', N'Nhổ răng sâu', N'Đã thanh toán'),
-(19, 19, '2024-03-19', '08:30', N'Khám tổng quát', N'Đã thanh toán'), (20, 20, '2024-03-20', '09:30', N'Tái khám', N'Đã thanh toán');
+(1, 1, '2024-03-01', '08:00', N'Khám định kỳ', N'Đã hoàn thành'), (2, 2, '2024-03-02', '09:00', N'Tư vấn niềng răng', N'Đã hoàn thành'),
+(3, 3, '2024-03-03', '10:00', N'Làm lại răng sứ', N'Đã hoàn thành'), (4, 4, '2024-03-04', '14:00', N'Muốn tẩy trắng', N'Đã hoàn thành'),
+(5, 5, '2024-03-05', '15:00', N'Đau răng khôn', N'Đã hoàn thành'), (6, 6, '2024-03-06', '16:00', N'Nhổ răng sữa cho bé', N'Đã hoàn thành'),
+(7, 7, '2024-03-07', '08:30', N'Cạo vôi răng', N'Đã hoàn thành'), (8, 8, '2024-03-08', '09:30', N'Tái khám chỉnh nha', N'Đã hoàn thành'),
+(9, 9, '2024-03-09', '10:30', N'Rớt răng tạm', N'Đã hoàn thành'), (10, 10, '2024-03-10', '14:30', N'Khám thẩm mỹ', N'Đã hoàn thành'),
+(11, 11, '2024-03-11', '15:30', N'Đau nhức dữ dội', N'Đã hoàn thành'), (12, 12, '2024-03-12', '16:30', N'Nhổ răng lung lay', N'Đã hoàn thành'),
+(13, 13, '2024-03-13', '08:00', N'Trám răng mẻ', N'Đã hoàn thành'), (14, 14, '2024-03-14', '09:00', N'Tái khám niềng', N'Đã hoàn thành'),
+(15, 15, '2024-03-15', '10:00', N'Cắm Implant', N'Đã hoàn thành'), (16, 16, '2024-03-16', '14:00', N'Bọc sứ Veneer', N'Đã hoàn thành'),
+(17, 17, '2024-03-17', '15:00', N'Cắt lợi', N'Đã hoàn thành'), (18, 18, '2024-03-18', '16:00', N'Nhổ răng sâu', N'Đã hoàn thành'),
+(19, 19, '2024-03-19', '08:30', N'Khám tổng quát', N'Đã hoàn thành'), (20, 20, '2024-03-20', '09:30', N'Tái khám', N'Đã hoàn thành');
 GO
 
 -- 8. INSERT PHIẾU KHÁM (20 Dòng, chỉ chèn LichHen_ID, ChanDoan)
@@ -429,7 +430,7 @@ ALTER TABLE LichHen
 ADD CONSTRAINT CK_LichHen_NgayKham CHECK (NgayKham >= '2024-01-01');
 
 ALTER TABLE LichHen
-ADD CONSTRAINT CK_LichHen_TrangThai CHECK (TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đã đến', N'Đã thanh toán', N'Đã hủy'));
+ADD CONSTRAINT CK_LichHen_TrangThai CHECK (TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đã hoàn thành', N'Đã hủy'));
 GO
 
 -- Bảng Phiếu Khám
@@ -448,7 +449,7 @@ ALTER TABLE HoaDon
 ADD CONSTRAINT CK_HoaDon_NgayThanhToan CHECK (NgayThanhToan <= GETDATE() AND NgayThanhToan >= '2024-01-01');
 
 ALTER TABLE HoaDon
-ADD CONSTRAINT CK_HoaDon_TrangThai CHECK (TrangThai IN (N'Chưa thanh toán', N'Đã thanh toán', N'Đã hủy'));
+ADD CONSTRAINT CK_HoaDon_TrangThai CHECK (TrangThai IN (N'Chưa thanh toán', N'Thanh toán', N'Đã thanh toán'));
 GO
 
 -- Ràng buộc các thuộc tính Tiền tệ & Số lượng phải > 0
@@ -1059,21 +1060,20 @@ go
 -- TẠO BẢNG HoSo
 CREATE TABLE HoSo (
     HoSo_ID     INT IDENTITY(1,1) PRIMARY KEY,
+    BenhNhan_ID int not null,
     DiaChi      NVARCHAR(255),
     DiUngThuoc  NVARCHAR(500),
     TienSuBenh  NVARCHAR(500),
-    TrangThai   NVARCHAR(50) NOT NULL DEFAULT N'Đang điều trị',
     NgayDangKy  DATE NOT NULL DEFAULT GETDATE(),
     GhiChu      NVARCHAR(1000),
 
-    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (HoSo_ID) REFERENCES BenhNhan(BenhNhan_ID),
-    Constraint UQ_HoSo_BenhNhan unique(HoSo_ID)
+    CONSTRAINT FK_HoSo_BenhNhan FOREIGN KEY (BenhNhan_ID) REFERENCES BenhNhan(BenhNhan_ID),
 );
 go
 
 -- CHUYỂN TienSuBenh TỪ BenhNhan SANG HoSo
-INSERT INTO HoSo (TienSuBenh, NgayDangKy)
-SELECT TienSuBenh, GETDATE()
+INSERT INTO HoSo (BenhNhan_ID, TienSuBenh, NgayDangKy)
+SELECT BenhNhan_ID, TienSuBenh, GETDATE()
 FROM BenhNhan;
 
 -- Xóa cột TienSuBenh khỏi BenhNhan sau khi đã chuyển xong
@@ -1093,10 +1093,6 @@ SET
         WHEN 1 THEN N'Dị ứng Penicillin'
         WHEN 2 THEN N'Dị ứng thuốc tê'
         ELSE N'Dị ứng Aspirin' END,
-    TrangThai = CASE (HoSo_ID % 3)
-        WHEN 0 THEN N'Đang điều trị'
-        WHEN 1 THEN N'Đã hoàn thành'
-        ELSE N'Tạm dừng' END,
     GhiChu = N'Dữ liệu mẫu hệ thống';
 
 -- Xóa cột BacSi_ID trong ChiTietDichVu (1 bác sĩ làm hết)
@@ -1245,3 +1241,256 @@ alter table PhieuKham
     drop constraint FK_PhieuKham_BacSi
 alter table PhieuKham
     drop column BacSi_ID
+go
+
+-- Xóa cột PhieuGiamGia khỏi bảng HoaDon
+ALTER TABLE HoaDon
+DROP COLUMN PhieuGiamGia;
+
+-- Sửa LeTan_ID trong phiếu khánh thành null
+ALTER TABLE HoaDon ALTER COLUMN LeTan_ID INT NULL;
+go
+
+alter table LichHen
+    drop constraint CK_LichHen_TrangThai
+
+ALTER TABLE LichHen 
+ADD CONSTRAINT CK_LichHen_TrangThai 
+CHECK (TrangThai IN (N'Chờ xác nhận', N'Đã xác nhận', N'Đã đến', N'Đang khám', N'Đã hoàn thành', N'Đã hủy'));
+go
+
+-- Cập nhật lịch hẹn số 1, 2 và 3 sang ngày hôm nay để test
+UPDATE LichHen 
+SET NgayKham = GETDATE(), TrangThai = N'Đã đến'
+WHERE LichHen_ID IN (1, 2, 3, 4) ;
+go
+
+------ STORED PROCEDURE ------
+---- Admin: Quản lý tài khoản
+-- Thêm tài khoản bác sĩ/lễ tân
+create procedure SP_ThemTaiKhoan_NhanSu
+    @HoTen nvarchar(100),
+    @SoDienThoai varchar(15),
+    @MatKhau varchar(100),
+    @VaiTro varchar(30),
+    @NgaySinh date,
+    @GioiTinh bit,
+    @ChuyenKhoa_ID int,
+    @TrinhDo nvarchar(50),
+    @AnhDaiDien varchar(255)
+as
+begin
+    begin try
+        begin tran
+            declare @TaiKhoan_ID int;
+            DECLARE @VaiTroTiengViet nvarchar(30);
+
+            IF @VaiTro = 'doctor' SET @VaiTroTiengViet = N'Bác sĩ'
+            ELSE IF @VaiTro = 'staff' SET @VaiTroTiengViet = N'Lễ tân'
+            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Admin'
+            ELSE SET @VaiTroTiengViet = N'Khách hàng';
+
+            -- Thêm vào TaiKhoan
+            insert into TaiKhoan(SoDienThoai, MatKhau, VaiTro, HoTen, NgaySinh, GioiTinh)
+            values (@SoDienThoai, @MatKhau, @VaiTroTiengViet, @HoTen, @NgaySinh, @GioiTinh)
+
+            -- Lấy TaiKhoan_ID vừa tự tăng
+            set @TaiKhoan_ID = SCOPE_IDENTITY()
+
+            -- Nếu là bác sĩ thì lưu thêm ảnh, trình độ và chuyên khoa
+            if @VaiTro = 'doctor'
+            begin
+                insert into BacSi (TaiKhoan_ID, AnhDaiDien, TrinhDo, ChuyenKhoa_ID)
+                values (@TaiKhoan_ID, @AnhDaiDien, @TrinhDo, @ChuyenKhoa_ID)
+            end
+
+            else if @VaiTro = N'staff'
+            begin
+                insert into LeTan (TaiKhoan_ID)
+                values (@TaiKhoan_ID)
+            end
+
+        commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
+go
+
+-- Cập nhật tài khoản
+create procedure SP_CapNhatTaiKhoan
+    @TaiKhoan_ID int,
+    @HoTen nvarchar(100),
+    @SoDienThoai varchar(15),
+    @MaKhau varchar(100),
+    @VaiTro nvarchar(30),
+    @TrangThai nvarchar(50),
+    @NgaySinh date,
+    @GioiTinh bit,
+    @ChuyenKhoa_ID int,
+    @TrinhDo nvarchar(50),
+    @AnhDaiDien varchar(255)
+as
+begin
+    begin try
+        begin tran
+            update TaiKhoan
+                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThai, VaiTro = @VaiTro, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
+                where TaiKhoan_ID = @TaiKhoan_ID
+
+                if @MaKhau is not null and @MaKhau <> ''
+                begin
+                    update TaiKhoan set MatKhau = @MaKhau where TaiKhoan_ID = @TaiKhoan_ID
+                end
+                update BacSi
+                    set ChuyenKhoa_ID = @ChuyenKhoa_ID, TrinhDo = @TrinhDo, AnhDaiDien = @AnhDaiDien
+                    where TaiKhoan_ID = @TaiKhoan_ID
+
+                commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
+go
+
+-- Xóa tài khoản
+create procedure SP_XoaTaiKhoan
+    @TaiKhoan_ID int
+as
+begin
+    begin try
+        begin tran
+            delete from BacSi where TaiKhoan_ID = @TaiKhoan_ID
+            delete from LeTan where TaiKhoan_ID = @TaiKhoan_ID
+            delete from BenhNhan where TaiKhoan_ID = @TaiKhoan_ID
+
+        commit tran
+    end try
+    begin catch
+        rollback tran
+        throw
+    end catch
+end
+go
+
+---- Bác sĩ
+-- Khám lâm sàn: Thêm phiếu khám
+-- Địng nghĩa khuông mẫu hứng danh sách dịch vụ
+create type Type_ChiTietDichVu as table(
+    DichVu_ID int,
+    DonGia money,
+    ViTriRang int,
+    SoLuong int
+);
+go
+
+-- Thủ tục lưu phiếu khám
+create procedure SP_LuuPhieuKham
+    @LichHen_ID int,
+    @ChanDoan nvarchar(200),
+    @LyDoKham nvarchar(100),
+    @GhiChu nvarchar(200),
+    @DanhSachDichVu Type_ChiTietDichVu readonly
+as
+begin
+    begin try
+        begin tran
+            declare @PhieuKhamMoi_ID int
+
+            -- Insert vào PhieuKham
+            insert into PhieuKham (LichHen_ID, ChanDoan, NgayTao, LyDoKham, GhiChu)
+            values (@LichHen_ID, @ChanDoan, GETDATE(), @LyDoKham, @GhiChu)
+            
+            -- Lấy ID phiếu khám mới
+            set @PhieuKhamMoi_ID = SCOPE_IDENTITY()
+
+            -- Insert vào ChiTietDichVu
+            insert into ChiTietDichVu (PhieuKham_ID, DichVu_ID, DonGia, ViTriRang, SoLuong)
+            select 
+                @PhieuKhamMoi_ID,
+                DichVu_ID,
+                DonGia,
+                ViTriRang,
+                SoLuong
+            from @DanhSachDichVu
+
+            -- Insert vào HoaDon
+            declare @TongTien money = 0
+            select @TongTien = isnull(sum(DonGia * SoLuong), 0)
+            from ChiTietDichVu
+            where PhieuKham_ID = @PhieuKhamMoi_ID
+
+            insert into HoaDon(PhieuKham_ID, TongTien)
+            values (@PhieuKhamMoi_ID, @TongTien)
+
+            -- Cập nhật trạng thái lịch hẹn
+            update LichHen
+            set TrangThai = N'Đã hoàn thành'
+            where LichHen_ID = @LichHen_ID
+
+            commit tran
+     end try
+     begin catch
+        rollback tran
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        DECLARE @ErrorSeverity INT = ERROR_SEVERITY();
+        DECLARE @ErrorState INT = ERROR_STATE();
+        RAISERROR (@ErrorMessage, @ErrorSeverity, @ErrorState);
+    end catch
+end
+go
+
+ALTER PROCEDURE [dbo].[SP_LuuPhieuKham]
+    @LichHen_ID int,
+    @ChanDoan nvarchar(200),
+    @LyDoKham nvarchar(100),
+    @GhiChu nvarchar(200),
+    @DanhSachDichVu Type_ChiTietDichVu readonly
+AS
+BEGIN
+    SET XACT_ABORT ON; -- Tự động Rollback nếu có lỗi nghiêm trọng
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRAN
+            -- 1. Kiểm tra tồn tại
+            IF NOT EXISTS (SELECT 1 FROM LichHen WHERE LichHen_ID = @LichHen_ID)
+                THROW 50001, N'Lỗi: Lịch hẹn không tồn tại.', 1;
+
+            -- 2. Kiểm tra trùng lặp (Mỗi lịch hẹn chỉ có 1 phiếu khám)
+            IF EXISTS (SELECT 1 FROM PhieuKham WHERE LichHen_ID = @LichHen_ID)
+                THROW 50002, N'Lỗi: Lịch hẹn này đã có phiếu khám rồi.', 1;
+
+            DECLARE @PhieuKhamMoi_ID int
+
+            -- 3. Lưu phiếu khám
+            INSERT INTO PhieuKham (LichHen_ID, ChanDoan, NgayTao, LyDoKham, GhiChu)
+            VALUES (@LichHen_ID, @ChanDoan, GETDATE(), @LyDoKham, @GhiChu)
+            
+            SET @PhieuKhamMoi_ID = SCOPE_IDENTITY()
+
+            -- 4. Lưu chi tiết dịch vụ (Đã chuẩn hóa mỗi răng 1 dòng)
+            INSERT INTO ChiTietDichVu (PhieuKham_ID, DichVu_ID, DonGia, ViTriRang, SoLuong)
+            SELECT @PhieuKhamMoi_ID, DichVu_ID, DonGia, ViTriRang, SoLuong FROM @DanhSachDichVu
+
+            -- 5. Tạo hóa đơn
+            DECLARE @TongTien money = 0
+            SELECT @TongTien = ISNULL(SUM(DonGia * SoLuong), 0) FROM ChiTietDichVu WHERE PhieuKham_ID = @PhieuKhamMoi_ID
+
+            INSERT INTO HoaDon(PhieuKham_ID, TongTien) VALUES (@PhieuKhamMoi_ID, @TongTien)
+
+            -- 6. Cập nhật trạng thái lịch hẹn
+            UPDATE LichHen SET TrangThai = N'Đã hoàn thành' WHERE LichHen_ID = @LichHen_ID
+
+            COMMIT TRAN
+     END TRY
+     BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRAN;
+        DECLARE @Msg NVARCHAR(4000) = ERROR_MESSAGE();
+        RAISERROR(@Msg, 16, 1);
+    END CATCH
+END

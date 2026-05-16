@@ -23,8 +23,8 @@ let pendingAction = null;
 // CỜ HIỆU MOCK/REAL + DATA SOURCE
 // ========================
 let DOCTOR_LIST_CONFIG = {
-    USE_MOCK: true,
-    API_BASE: '/api/doctor',
+    USE_MOCK: false,
+    API_BASE: '/Dental_Clinic_Management/api/doctor',
     MOCK_DELAY_MS: 120
 };
 
@@ -72,7 +72,7 @@ const mockListSource = {
 
 const apiListSource = {
     listAppointments: async () => normalizeList(await listRequest('/appointments')),
-    startExam: async (id) => listRequest('/appointments/start-exam', { method: 'PUT', body: { id } })
+    startExam: async (id) => listRequest('/appointments', { method: 'PUT', body: { id } })
 };
 
 const listDataSource = DOCTOR_LIST_CONFIG.USE_MOCK ? mockListSource : apiListSource;
@@ -95,7 +95,17 @@ async function withListGuard(action, onErrorMessage) {
 async function loadAppointmentsFromServer() {
     const list = await withListGuard(() => listDataSource.listAppointments(), 'Không tải được danh sách lịch hẹn');
     if (!list) return;
-    appointments = normalizeList(list);
+    const rawData = normalizeList(list);
+    appointments = rawData.map((item, index) => ({
+        id: item.lichHenID,               // Lấy lichHenID từ Java nhét vào id của JS
+        stt: index + 1,                   // Tự động đánh số thứ tự 1, 2, 3...
+        patientName: item.tenBenhNhan,    // Dịch tiếng Việt sang tiếng Anh cho JS
+        patientPhone: item.soDienThoai,
+        time: item.gioHen,
+        doctor: item.tenBacSi,
+        reason: item.lyDoKham,
+        status: item.trangThai
+    }));
     renderTable();
 }
 
@@ -180,7 +190,7 @@ function startExamination(id) {
 function continueExamination(id) {
     const app = appointments.find(a => a.id === id);
     if (app) {
-        window.location.href = `hoso.jsp?id=${app.id}&name=${encodeURIComponent(app.patientName)}`;
+        window.location.href = `hoso.jsp?id=${app.id}&name=${encodeURIComponent(app.patientName)}&phone=${encodeURIComponent(app.patientPhone || '')}&reason=${encodeURIComponent(app.reason || '')}`;
     }
 }
 
@@ -224,13 +234,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (confirmBtn) {
         confirmBtn.addEventListener('click', async () => {
             if (pendingAction === 'start' && currentSelected) {
-                const { id, patientName } = currentSelected;
+                const { id, patientName, patientPhone, reason } = currentSelected;
                 const res = await withListGuard(() => listDataSource.startExam(id), 'Không thể bắt đầu khám');
                 if (!res) return;
                 await loadAppointmentsFromServer();
                 closeModal();
                 // Chuyển hướng sang hoso.jsp
-                window.location.href = `hoso.jsp?id=${id}&name=${encodeURIComponent(patientName)}`;
+                window.location.href = `hoso.jsp?id=${id}&name=${encodeURIComponent(patientName)}&phone=${encodeURIComponent(patientPhone || '')}&reason=${encodeURIComponent(reason || '')}`;
             }
         });
     }
