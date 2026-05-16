@@ -12,6 +12,7 @@ public class TaiKhoanBsLtDTO {
     
     // Dành cho Bác sĩ
     private int chuyenKhoaID;
+    private String tenChuyenKhoa;
     private String trinhDo;
     private String anhDaiDien;
    
@@ -44,6 +45,9 @@ public class TaiKhoanBsLtDTO {
 
     public int getChuyenKhoaID() { return chuyenKhoaID; }
     public void setChuyenKhoaID(int chuyenKhoaID) { this.chuyenKhoaID = chuyenKhoaID; }
+    
+    public String getTenChuyenKhoa() { return tenChuyenKhoa; }
+    public void setTenChuyenKhoa(String tenChuyenKhoa) { this.tenChuyenKhoa = tenChuyenKhoa; }
 
     public String getTrinhDo() { return trinhDo; }
     public void setTrinhDo(String trinhDo) { this.trinhDo = trinhDo; }

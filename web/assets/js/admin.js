@@ -965,7 +965,9 @@ function renderAccounts() {
                 '<td>' + (a.phone || '—') + '</td>' +
                 '<td>' + statusBadge + '</td>' +
                 '<td onclick="event.stopPropagation()"><div class="action-btns">' +
-                    '<button class="btn-action btn-edit" onclick="editAccount(' + a.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>' +
+                    // Kiểm tra role: Nếu là customer thì không render nút sửa
+                    (a.role === 'customer' ? '' : '<button class="btn-action btn-edit" onclick="editAccount(' + a.id + ')" title="Sửa"><i class="fas fa-edit"></i></button>') +
+
                     '<button class="btn-action ' + (a.status==='active' ? 'btn-toggle-active' : 'btn-toggle-inactive') + '" onclick="toggleAccStatus(' + a.id + ')" title="' + (a.status==='active' ? 'Khóa' : 'Mở khóa') + '">' +
                         '<i class="fas ' + (a.status==='active' ? 'fa-lock' : 'fa-unlock') + '"></i>' +
                     '</button>' +
@@ -1158,6 +1160,10 @@ function showStaffInfo(id) {
             '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">'+shiftsHtml+'</div>' +
         '</div>';
     document.getElementById('staffInfoModal').style.display = 'flex';
+    var btnEditStaffInfo = document.getElementById('btnEditStaffInfo');
+    if (btnEditStaffInfo) {
+        btnEditStaffInfo.style.display = (a.role === 'customer') ? 'none' : 'inline-block';
+    }
 }
 function closeStaffInfoModal() { document.getElementById('staffInfoModal').style.display = 'none'; }
 function editAccountFromInfo() { closeStaffInfoModal(); if (staffInfoCurrentId) editAccount(staffInfoCurrentId); }
@@ -1560,8 +1566,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     } else {
         console.info('[admin] mode: REAL API');
     }
-    //await loadServicesFromServer();
-    //await loadShiftsFromServer();
-    //await loadAccountsFromServer();
-    //await loadRevenueFromServer();
+    await loadServicesFromServer();
+    await loadShiftsFromServer();
+    await loadAccountsFromServer();
+    await loadRevenueFromServer();
 });

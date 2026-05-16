@@ -5,8 +5,50 @@ import com.dentalclinic.utils.DBConnection;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TaiKhoanDAO {
+    // Hiển thị danh sách tài khoản
+    public List<TaiKhoanBsLtDTO> layThongTinTaiKhoan(){
+        List<TaiKhoanBsLtDTO> list = new ArrayList<>();
+        String sql = "Select tk.*, bs.ChuyenKhoa_ID, bs.TrinhDo, bs.AnhDaiDien, ck.TenChuyenKhoa " +
+                "From TaiKhoan as tk "+
+                "left join BacSi bs on tk.TaiKhoan_ID = bs.TaiKhoan_ID " +
+                "LEFT JOIN ChuyenKhoa ck ON bs.ChuyenKhoa_ID = ck.ChuyenKhoa_ID " +
+                "Where tk.TrangThai != N'Đã xóa'";
+        
+        try (Connection conn = DBConnection.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()){
+            
+            while(rs.next()){
+                TaiKhoanBsLtDTO tk = new TaiKhoanBsLtDTO();
+                tk.setTaiKhoanID(rs.getInt("TaiKhoan_ID"));
+                tk.setHoTen(rs.getNString("HoTen"));
+                tk.setSoDienThoai((rs.getString("SoDienThoai")));
+                tk.setVaiTro(rs.getNString("VaiTro"));
+                tk.setNgaySinh(rs.getString("NgaySinh"));
+                tk.setGioiTinh(rs.getBoolean("GioiTinh"));
+                tk.setTrangThai(rs.getNString("TrangThai"));
+                
+                if("Bác sĩ".equals(tk.getVaiTro())){
+                    tk.setChuyenKhoaID(rs.getInt("ChuyenKhoa_ID"));
+                    tk.setTenChuyenKhoa(rs.getNString("TenChuyenKhoa"));
+                    tk.setTrinhDo(rs.getNString("TrinhDo"));
+                    tk.setAnhDaiDien(rs.getString("AnhDaiDien"));
+                }
+                list.add(tk);
+            }
+            
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
+        return list;
+    }
+    
     // Thêm tài khoản nhân sự
     public boolean themTaiKhoanNhanSu(TaiKhoanBsLtDTO tk){
         String sql = "{call SP_ThemTaiKhoan_NhanSu (?, ?, ?, ?, ?, ?, ?, ?, ?)}";
@@ -55,7 +97,7 @@ public class TaiKhoanDAO {
             cs.setDate(7, java.sql.Date.valueOf(tk.getNgaySinh()));
             cs.setBoolean(8, tk.isGioiTinh());
             
-            if("Bác sĩ".equals(tk.getVaiTro())){
+            if("doctor".equals(tk.getVaiTro())){
                 cs.setInt(9, tk.getChuyenKhoaID());
                 cs.setString(10, tk.getTrinhDo());
                 cs.setString(11, tk.getAnhDaiDien());
@@ -74,13 +116,13 @@ public class TaiKhoanDAO {
     }
     
     // Đổi trạng thái tài khoản (Khóa/Mở khóa)
-    public boolean doiTrangThaiTaiKhoanNhanSu(TaiKhoanBsLtDTO tk){
-        String sql = "{update TaiKhoan set TrangThai = ? where TaiKhoan_ID = ?}";
+    public boolean doiTrangThaiTaiKhoan(int taiKhoanID, String trangThai){
+        String sql = "UPDATE TaiKhoan SET TrangThai = ? WHERE TaiKhoan_ID = ?";
         try (Connection conn = DBConnection.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql))
         {
-           ps.setString(1, tk.getTrangThai());
-           ps.setInt(2, tk.getTaiKhoanID());
+           ps.setString(1, trangThai);
+           ps.setInt(2, taiKhoanID);
            return ps.executeUpdate() > 0;
             
         }
@@ -91,12 +133,12 @@ public class TaiKhoanDAO {
     }
     
     // Xóa tài khoản
-    public boolean xoaTaiKhoan(TaiKhoanBsLtDTO tk){
+    public boolean xoaTaiKhoan(int taiKhoanID){
         String sql = "{call SP_XoaTaiKhoan(?)}";
         try (Connection conn = DBConnection.getConnection();
             CallableStatement cs = conn.prepareCall(sql))
         {
-            cs.setInt(1, tk.getTaiKhoanID());
+            cs.setInt(1, taiKhoanID);
             return cs.executeUpdate() > 0;
         }
         catch (Exception e){

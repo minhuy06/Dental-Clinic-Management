@@ -443,7 +443,7 @@
             <div class="modal-body" id="staffInfoBody"></div>
             <div class="modal-footer">
                 <button class="btn-cancel" onclick="closeStaffInfoModal()">Đóng</button>
-                <button class="btn-save" onclick="editAccountFromInfo()">Sửa thông tin</button>
+                <button class="btn-save" id="btnEditStaffInfo" onclick="editAccountFromInfo()">Sửa thông tin</button>
             </div>
         </div>
     </div>

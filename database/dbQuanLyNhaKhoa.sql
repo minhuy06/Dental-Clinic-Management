@@ -233,10 +233,7 @@ INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai) VALUES
 ('0903000013', '123456', N'Lễ tân', N'Hoạt động'), ('0903000014', '123456', N'Lễ tân', N'Hoạt động'), 
 ('0903000015', '123456', N'Lễ tân', N'Hoạt động'), ('0903000016', '123456', N'Lễ tân', N'Hoạt động'),
 ('0903000017', '123456', N'Lễ tân', N'Hoạt động'), ('0903000018', '123456', N'Lễ tân', N'Hoạt động'), 
-('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động'),
-
--- 1 Admin
-('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động')
+('0903000019', '123456', N'Lễ tân', N'Hoạt động'), ('0903000020', '123456', N'Lễ tân', N'Hoạt động')
 
 GO
 
@@ -395,7 +392,7 @@ ADD CONSTRAINT CK_TaiKhoan_VaiTro CHECK (VaiTro IN (N'Bệnh nhân', N'Bác sĩ'
 GO
 
 ALTER TABLE TaiKhoan
-ADD CONSTRAINT CK_TaiKhoan_TrangThai CHECK (TrangThai IN (N'Hoạt động', N'Bị khóa', N'Chờ xác thực'));
+ADD CONSTRAINT CK_TaiKhoan_TrangThai CHECK (TrangThai IN (N'Hoạt động', N'Bị khóa', N'Đã xóa'));
 GO
 
 -- Bảng Bệnh Nhân
@@ -587,6 +584,11 @@ drop Constraint CK_LeTan_NgaySinh
 go
 alter table LeTan
 drop column HoTen, NgaySinh, GioiTinh
+go
+
+-- 1 Admin
+insert into TaiKhoan(SoDienThoai, MatKhau, VaiTro, TrangThai, HoTen, NgaySinh, GioiTinh)
+values ('0763612967', 'Abc23456', N'Quản trị viên', N'Hoạt động', N'Võ Minh Huy', '04/07/2006', 1)
 go
 
 -- Sửa bảng PhieuKham
@@ -1336,8 +1338,14 @@ as
 begin
     begin try
         begin tran
+            DECLARE @VaiTroTiengViet nvarchar(30);
+            IF @VaiTro = 'doctor' SET @VaiTroTiengViet = N'Bác sĩ'
+            ELSE IF @VaiTro = 'staff' SET @VaiTroTiengViet = N'Lễ tân'
+            ELSE IF @VaiTro = 'admin' SET @VaiTroTiengViet = N'Admin'
+            ELSE SET @VaiTroTiengViet = @VaiTro;
+
             update TaiKhoan
-                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThai, VaiTro = @VaiTro, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
+                set HoTen = @HoTen, SoDienThoai = @SoDienThoai, TrangThai = @TrangThai, VaiTro = @VaiTroTiengViet, NgaySinh = @NgaySinh, GioiTinh = @GioiTinh
                 where TaiKhoan_ID = @TaiKhoan_ID
 
                 if @MaKhau is not null and @MaKhau <> ''
@@ -1357,16 +1365,35 @@ begin
 end
 go
 
--- Xóa tài khoản
+-- Xóa mềm tài khoản
 create procedure SP_XoaTaiKhoan
     @TaiKhoan_ID int
 as
 begin
     begin try
         begin tran
-            delete from BacSi where TaiKhoan_ID = @TaiKhoan_ID
-            delete from LeTan where TaiKhoan_ID = @TaiKhoan_ID
-            delete from BenhNhan where TaiKhoan_ID = @TaiKhoan_ID
+            -- Lấy vai trò
+            declare @VaiTro nvarchar(30)
+            select @VaiTro = VaiTro from TaiKhoan where TaiKhoan_ID = @TaiKhoan_ID
+
+            -- Cập nhập trạng thái tài khoản
+            update TaiKhoan
+            set TrangThai = N'Đã xóa'
+            where TaiKhoan_ID = @TaiKhoan_ID
+
+            -- Nếu là khách hàng thì hủy các lịch hẹn sắp tới
+            if @VaiTro = N'Khách hàng'
+            begin
+                declare @BenhNhan_ID int
+                select @BenhNhan_ID = BenhNhan_ID from BenhNhan where TaiKhoan_ID = @TaiKhoan_ID
+
+                if @BenhNhan_ID is not null
+                begin
+                    update LichHen
+                    set TrangThai = N'Đã hủy', GhiChu = N'Tự động hủy do tài khoản bị xóa khỏi hệ thống'
+                    where BenhNhan_ID = @BenhNhan_ID and TrangThai in (N'Chờ xác nhận')
+                end
+            end
 
         commit tran
     end try

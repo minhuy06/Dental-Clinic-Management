@@ -13,25 +13,24 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-@WebServlet(name = "AddAccountInternalServlet", urlPatterns = {"/api/accounts/add"})
-public class AddAccountInternalServlet extends HttpServlet {
-    
+@WebServlet(name = "UpdateAccountServlet", urlPatterns = {"/api/accounts/update"})
+public class UpdateAccountInternalServlet extends HttpServlet {
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException{
+    protected void doPut(HttpServletRequest request, HttpServletResponse response) 
+            throws ServletException, IOException{
         request.setCharacterEncoding("UTF-8");
-        response.setContentType("application/json;charset=UTF-8"); // Trả về JSON cho trình duyệt
+        response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        
         try{
-            // Đọc file JSON từ giao diện gửi xuống
-            BufferedReader reader = request.getReader();  // Hứng json 
+            BufferedReader reader = request.getReader();
             StringBuilder sb = new StringBuilder();
             String line;
-            
-            // Chép thông tin vào StringBuilder
-            while((line = reader.readLine()) != null)
+            while((line = reader.readLine()) != null){
                 sb.append(line);
+            }
             
-            // Gắn chuỗi vào đối tượng dto
+            // Chuyển đổi dữ liệu JSON thành đối tượng DTO
             Gson gson = new Gson();
             TaiKhoanBsLtDTO dto = gson.fromJson(sb.toString(), TaiKhoanBsLtDTO.class);
             
@@ -39,17 +38,16 @@ public class AddAccountInternalServlet extends HttpServlet {
             String serverPath = request.getServletContext().getRealPath("") + File.separator + "img";
             String sourcePath = System.getenv("CLINIC_IMG_PATH");
             
-            // Chuyển cho Service xử lý thêm
+            // Chuyển cho Service xử lý cập nhật
             TaiKhoanService service = new TaiKhoanService();
-            boolean isSuccess = service.themTaiKhoanNhanSu(dto, serverPath, sourcePath);
+            boolean isSuccess = service.capNhatTaiKhoan(dto, serverPath, sourcePath);
             
             out.print("{\"success\": " + isSuccess + "}");
         }
-        catch (Exception e){
+        catch (Exception e) {
             e.printStackTrace();
-            out.print("{\"success\": false, \"Tin nhắn\": \"Lỗi Server: " + e.getMessage() + "\"}");
-        }
-        finally{
+            out.print("{\"success\": false, \"message\": \"Lỗi cập nhật Server: " + e.getMessage() + "\"}");
+        } finally {
             out.close();
         }
     }
