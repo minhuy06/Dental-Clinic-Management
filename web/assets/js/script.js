@@ -29,7 +29,27 @@ function normalizeServiceFromDb(service) {
         time: service.time || (service.thoiLuongDuKien ? `${service.thoiLuongDuKien} phút` : '')
     };
 }
+// Bật/tắt dropdown
+        function toggleUserDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
 
+        // Tự động đóng dropdown khi click ra ngoài màn hình
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                var dropdown = document.getElementById("userDropdown");
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Hàm xử lý đăng xuất
+        function doLogoutNow() {
+            if (confirm('Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?')) {
+                window.location.href = window.CONTEXT_PATH + '/index.jsp?logout=true';
+            }
+        }
 function initServicesList() {
     const injected = Array.isArray(window.SERVICE_LIST_FROM_DB) ? window.SERVICE_LIST_FROM_DB : null;
     const source = (injected && injected.length > 0) ? injected : [];

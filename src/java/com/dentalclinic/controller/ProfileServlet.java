@@ -29,6 +29,7 @@ public class ProfileServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
 
+        // 1. Kiểm tra đăng nhập
         HttpSession session = request.getSession();
         TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
 
@@ -68,8 +69,12 @@ public class ProfileServlet extends HttpServlet {
             }
         }
 
+        // ==========================================
+        // 4. BUILD JSON: DANH SÁCH LỊCH HẸN CỦA BỆNH NHÂN
+        // ==========================================
         JsonArray appointmentsJsonArray = new JsonArray();
         LichHenDAO lhDAO = new LichHenDAO();
+        // Lấy danh sách lịch hẹn dựa vào ID tài khoản
         List<LichHen> listLichHen = lhDAO.getLichHenByBenhNhan(loggedInUser.getTaiKhoanID());
 
         if (listLichHen != null) {
@@ -117,12 +122,15 @@ public class ProfileServlet extends HttpServlet {
             }
         }
 
+        // ==========================================
+        // 5. GẮN VÀO REQUEST VÀ ĐẨY SANG GIAO DIỆN
+        // ==========================================
         request.setAttribute("hosoUserJson", gson.toJson(userJson));
         request.setAttribute("hosoServicesJson", gson.toJson(servicesJsonArray));
         request.setAttribute("hosoAppointmentsJson", gson.toJson(appointmentsJsonArray));
 
         String role = loggedInUser.getVaiTro();
-        String targetJSP = "/account/hoso.jsp";
+        String targetJSP = "/account/hoso.jsp"; // Mặc định nếu không thuộc các role dưới
 
         if ("Lễ tân".equalsIgnoreCase(role)) {
             targetJSP = "/reception/hoso.jsp";

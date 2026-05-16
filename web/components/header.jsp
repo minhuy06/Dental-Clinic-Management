@@ -46,6 +46,7 @@
                     <% } else { %>
                         <a href="<%= isStaff ? workspaceUrl : (ctx + "/hoso") %>" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></a>
                     <% } %>
+
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
                 <% } %>

@@ -65,18 +65,21 @@ async function handleLogin(e) {
     var acc = document.getElementById('loginAccount').value.trim();
     var pass = document.getElementById('loginPassword').value;
     var submitBtn = e.target.querySelector('button[type="submit"]');
+    
     if (!acc) {
         document.getElementById('accountGroup').classList.add('error');
         ok = false;
     } else {
         document.getElementById('accountGroup').classList.remove('error');
     }
+    
     if (!pass) {
         document.getElementById('passGroup').classList.add('error');
         ok = false;
     } else {
         document.getElementById('passGroup').classList.remove('error');
     }
+    
     if (ok) {
         try {
             if (submitBtn) {
@@ -87,11 +90,11 @@ async function handleLogin(e) {
 
             var ctx = getLoginContextPath();
             var response = await fetch(ctx + '/login', {
+
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ account: acc, password: pass })
             });
-
             if (!response.ok) {
                 throw new Error('Lỗi máy chủ: HTTP ' + response.status);
             }
@@ -99,12 +102,9 @@ async function handleLogin(e) {
             var res = await response.json();
 
             if (res && res.success) {
-                var qp = new URLSearchParams(window.location.search);
-                if (qp.get('redirect') === 'datlich') {
-                    window.location.href = getLoginContextPath() + '/Infor/Schedule#datlich';
-                } else {
-                    window.location.href = res.redirectUrl;
-                }
+
+                // SỬA TẠI ĐÂY: Chỉ chuyển hướng về trang chủ một cách sạch sẽ
+                window.location.href = res.redirectUrl;
             } else {
                 showLoginError((res && res.message) || 'Sai tài khoản hoặc mật khẩu');
             }

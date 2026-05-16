@@ -20,19 +20,22 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-@WebServlet("/api/hoso/*")
+@WebServlet("/api/hoso/*") // Dùng dấu * để bắt tất cả các request có tiền tố này
 public class HoSoAPIServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+
+        // 1. Cấu hình tiếng Việt và kiểu trả về JSON
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json;charset=UTF-8");
 
         Gson gson = new Gson();
         JsonObject jsonResponse = new JsonObject();
 
+        // 2. Kiểm tra đăng nhập (Bảo mật API)
         HttpSession session = request.getSession(false);
         TaiKhoan loggedInUser = (session != null) ? (TaiKhoan) session.getAttribute("loggedInUser") : null;
 
@@ -44,6 +47,7 @@ public class HoSoAPIServlet extends HttpServlet {
         }
 
         try {
+            // 3. Đọc dữ liệu JSON từ JavaScript gửi lên
             BufferedReader reader = request.getReader();
             StringBuilder sb = new StringBuilder();
             String line;
@@ -52,8 +56,10 @@ public class HoSoAPIServlet extends HttpServlet {
             }
             JsonObject jsObj = gson.fromJson(sb.toString(), JsonObject.class);
 
-            String action = request.getPathInfo();
 
+            // 4. Lấy đuôi URL để biết JS đang muốn làm gì (Đổi pass hay Cập nhật thông tin?)
+            String action = request.getPathInfo(); // Sẽ trả về "/update-info" hoặc "/change-password"
+            
             if (action == null) {
                 throw new Exception("Hành động không hợp lệ!");
             }

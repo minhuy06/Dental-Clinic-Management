@@ -2,6 +2,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
+<%
+    // Lấy thông tin người dùng từ Session
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -30,12 +35,29 @@
             <li><a href="${pageContext.request.contextPath}/reception-report">Báo cáo</a></li>
             <li><a href="${pageContext.request.contextPath}/reception/cskh.jsp">CSKH</a></li>
         </ul>
-        <a href="${pageContext.request.contextPath}/reception-dashboard" class="user-info" style="text-decoration:none;color:inherit;" title="Trang lễ tân">
-            <div class="avatar" id="avatarBtn">
+        <div class="user-info dropdown-container">
+            <div class="avatar" id="avatarBtn" onclick="toggleUserDropdown()" style="cursor: pointer;">
                 <i class="fas fa-user" style="color: white;"></i>
             </div>
-            <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/></span>
-        </a>
+            <span class="staff-name" onclick="toggleUserDropdown()" style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                <c:out value="${sessionScope.loggedInUser.hoTen}" default="Lễ tân"/>
+                <i class="fas fa-caret-down" style="font-size: 0.8rem; opacity: 0.8;"></i>
+            </span>
+
+            <!-- Menu Dropdown -->
+            <div class="user-dropdown-menu" id="userDropdown">
+                <a href="${pageContext.request.contextPath}/hoso?tab=info" class="dropdown-item">
+                    <i class="fas fa-id-card"></i> Hồ sơ cá nhân
+                </a>
+                <a href="${pageContext.request.contextPath}/hoso?tab=password" class="dropdown-item">
+                    <i class="fas fa-key"></i> Đổi mật khẩu
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="javascript:void(0)" onclick="doLogoutNow()" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
     </div>
 
     <div class="container">
@@ -471,5 +493,294 @@
     <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
     <script src="${pageContext.request.contextPath}/assets/js/script.js?v=20260518b"></script>
+    <style>
+        body#receptionDashboardPage .reception-toolbar,
+        body#receptionDashboardPage .reception-date-picker {
+            overflow: visible;
+        }
+        .reception-calendar-panel {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            z-index: 12000;
+            min-width: 260px;
+            background: var(--bg-white, #fff);
+            border: 1px solid var(--border-color, #e5e7eb);
+            border-radius: 12px;
+            padding: 14px;
+            box-shadow: 0 12px 28px rgba(0,0,0,.12);
+        }
+        .reception-calendar-apply-btn {
+            margin-top: 12px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .reception-calendar-apply-btn:hover {
+            background: var(--primary-dark);
+        }
+        .reception-toolbar {
+            gap: 12px !important;
+        }
+        .reception-period-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 0 auto;
+            flex: 1;
+            justify-content: center;
+        }
+        .reception-period-toggle .period-btn {
+            padding: 8px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-gray);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .reception-period-toggle .period-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+        .reception-period-toggle .period-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: #fff;
+        }
+
+        body#receptionDashboardPage #appointmentTable {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-thead-row th {
+            background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+            border-bottom: 2px solid #c7d2fe;
+            padding: 14px 10px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            color: var(--text-main, #334155);
+            text-transform: uppercase;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-thead-row th:first-child { border-radius: 12px 0 0 0; }
+        body#receptionDashboardPage #appointmentTable .rcv-thead-row th:last-child { border-radius: 0 12px 0 0; }
+        body#receptionDashboardPage #appointmentTable .rcv-th { display: inline-block; vertical-align: middle; }
+
+        body#receptionDashboardPage #appointmentTable td {
+            padding: 12px 10px;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--border-color, #e5e7eb);
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-td-muted {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-sub, #64748b);
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-time-pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        body#receptionDashboardPage #appointmentTable .rcv-patient-pill {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-patient-pill__av {
+            width: 38px;
+            height: 38px;
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            color: #fff;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            flex-shrink: 0;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-patient-pill__nm {
+            font-weight: 600;
+            color: var(--text-main);
+            font-size: 0.92rem;
+        }
+
+        body#receptionDashboardPage #appointmentTable .rcv-td-phone { min-width: 118px; }
+        body#receptionDashboardPage #appointmentTable .rcv-phone-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #0f766e;
+            background: #ccfbf1;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid #5eead4;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-phone-pill .fa-phone { opacity: .85; font-size: .75rem; }
+
+        body#receptionDashboardPage #appointmentTable .rcv-dash {
+            color: var(--text-sub);
+            opacity: .6;
+            font-weight: 600;
+        }
+
+        body#receptionDashboardPage #appointmentTable .rcv-dr-chip {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 220px;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__badge {
+            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #7c3aed;
+            background: linear-gradient(145deg, #fae8ff 0%, #ede9fe 100%);
+            border: 2px solid #ddd6fe;
+            box-shadow: 0 1px 3px rgba(124,58,237,0.12);
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__txt {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.3;
+            word-break: break-word;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-dr-chip__spec {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-sub);
+        }
+
+        body#receptionDashboardPage #appointmentTable .status-badge.rcv-status-settled {
+            background: #f3e8ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-pay-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            border: 1px solid transparent;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-pay-pill .fa-hourglass-half,
+        body#receptionDashboardPage #appointmentTable .rcv-pay-pill .fa-sack-dollar { opacity: .9; }
+        body#receptionDashboardPage #appointmentTable .rcv-pay-pill--done {
+            background: #e8fdfa;
+            color: #059669;
+            border-color: #6ee7b7;
+            box-shadow: 0 0 0 1px rgba(16,185,129,0.12) inset;
+        }
+        body#receptionDashboardPage #appointmentTable .rcv-pay-pill--open {
+            background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+            color: #b45309;
+            border-color: #fcd34d;
+        }
+        /* ==================== USER DROPDOWN CSS ==================== */
+        .dropdown-container {
+            position: relative;
+        }
+        .user-dropdown-menu {
+            display: none;
+            position: absolute;
+            top: 130%;
+            right: 0;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            min-width: 220px;
+            z-index: 9999;
+            overflow: hidden;
+            border: 1px solid var(--border-color, #e5e7eb);
+            animation: fadeInDown 0.2s ease forwards;
+        }
+        .user-dropdown-menu.show {
+            display: block;
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 20px;
+            color: #4b5563;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .dropdown-item i {
+            margin-right: 12px;
+            width: 18px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #9ca3af;
+            transition: color 0.2s;
+        }
+        .dropdown-item:hover {
+            background: #f3f4f6;
+            color: var(--primary-color, #2563eb);
+        }
+        .dropdown-item:hover i {
+            color: var(--primary-color, #2563eb);
+        }
+        .dropdown-divider {
+            height: 1px;
+            background: #e5e7eb;
+            margin: 4px 0;
+        }
+        .dropdown-item.text-danger {
+            color: #dc2626;
+        }
+        .dropdown-item.text-danger:hover {
+            background: #fef2f2;
+        }
+        .dropdown-item.text-danger i {
+            color: #ef4444;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </body>
 </html>

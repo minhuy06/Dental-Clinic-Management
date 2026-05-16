@@ -84,8 +84,8 @@ appointmentList.forEach(function(a) { appointmentDetails[a.id] = a; });
 
 // ── CỜ HIỆU MOCK/REAL + DATA SOURCE ──────────────────────────────
 var HOSO_CONFIG = {
-    USE_MOCK: false,
-    API_BASE: (window.CONTEXT_PATH || '') + '/api/hoso',
+    USE_MOCK: false, 
+    API_BASE: (window.CONTEXT_PATH || '') + '/api/hoso', // Cần viết thêm Servlet xử lý URL này sau
     MOCK_DELAY_MS: 120
 };
 

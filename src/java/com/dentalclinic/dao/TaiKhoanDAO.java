@@ -45,7 +45,6 @@ public class TaiKhoanDAO {
             ps.setInt(2, taiKhoanId);
 
             return ps.executeUpdate() > 0;
-
         } catch (SQLException e) {
             System.out.println("Lỗi đổi mật khẩu TaiKhoanDAO: " + e.getMessage());
             e.printStackTrace();
@@ -54,13 +53,15 @@ public class TaiKhoanDAO {
     }
 
     public boolean updateInfo(TaiKhoan tk) {
+
         String sql = "UPDATE TaiKhoan SET SoDienThoai = ?, NgaySinh = ?, GioiTinh = ? WHERE TaiKhoan_ID = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, tk.getSoDienThoai());
             ps.setDate(2, tk.getNgaySinh() != null ? new java.sql.Date(tk.getNgaySinh().getTime()) : null);
-            ps.setObject(3, tk.isGioiTinh());
+
+            ps.setObject(3, tk.isGioiTinh()); // Dùng setObject để đẩy kiểu BIT (1/0) xuống
             ps.setInt(4, tk.getTaiKhoanID());
 
             return ps.executeUpdate() > 0;

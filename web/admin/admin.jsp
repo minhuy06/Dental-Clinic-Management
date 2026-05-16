@@ -1,5 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ page import="com.dentalclinic.model.TaiKhoan" %>
+<%
+    // Lấy thông tin người dùng từ Session
+    TaiKhoan loggedInUser = (TaiKhoan) session.getAttribute("loggedInUser");
+    String activeTab = request.getParameter("tab");
+    if (activeTab == null) activeTab = "info";
+%>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -25,17 +32,35 @@
             <li><a href="#" onclick="switchTab('accounts',this);return false;"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
             <li><a href="#" onclick="switchTab('revenue',this);return false;"><i class="fas fa-chart-line"></i> Quản lý doanh thu</a></li>
         </ul>
-        <div class="user-info">
-            <div class="admin-bell-wrap" id="adminBellWrap">
+        <div class="user-info dropdown-container" style="display: flex; align-items: center;">
+            <div class="admin-bell-wrap" id="adminBellWrap" style="margin-right: 15px;">
                 <button type="button" class="admin-bell-btn" id="adminBellBtn" aria-label="Thông báo lịch chờ phân ca" aria-expanded="false" onclick="toggleAdminBellPanel(event)">
                     <span class="admin-bell-icon" aria-hidden="true"><i class="fas fa-bell"></i></span>
                     <span class="admin-bell-badge" id="adminBellBadge" aria-hidden="true">0</span>
                 </button>
             </div>
-            <a href="${pageContext.request.contextPath}/admin" class="admin-user-link" title="Trang quản trị">
-                <div class="avatar"><i class="fas fa-user-shield" style="color:white;"></i></div>
-                <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Admin"/></span>
-            </a>
+
+            <div class="avatar" id="avatarBtn" onclick="toggleUserDropdown()" style="cursor: pointer; background: #4f46e5; border: 2px solid #818cf8;">
+                <i class="fas fa-user-shield" style="color:white;font-size:1.1rem;"></i>
+            </div>
+
+            <div class="user-dropdown-menu" id="userDropdown">
+                <div class="dropdown-header" style="padding: 15px 20px; border-bottom: 1px solid #f1f5f9;">
+                    <p style="margin:0; font-size:0.85rem; font-weight:700; color:#1e1b4b;"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Administrator"/></p>
+                    <p style="margin:0; font-size:0.75rem; color:#64748b;">Administrator</p>
+                </div>
+                <a href="${pageContext.request.contextPath}/hoso?tab=info" class="dropdown-item">
+                    <i class="fas fa-id-card"></i> Hồ sơ của tôi
+                </a>
+                <a href="${pageContext.request.contextPath}/hoso?tab=password" class="dropdown-item">
+                    <i class="fas fa-key"></i> Đổi mật khẩu
+                </a>
+                <div class="dropdown-divider"></div>
+                <a href="javascript:void(0)" onclick="doLogoutNow()" class="dropdown-item text-danger">
+                    <i class="fas fa-sign-out-alt"></i> Đăng xuất
+                </a>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -544,11 +569,41 @@
         <p><i class="fas fa-tooth"></i> NHA KHOA 5AE - Chất lượng tạo niềm tin &nbsp;|&nbsp; © 2026 Hệ thống quản trị Admin</p>
     </div>
 
-    <script id="adminServicesJson" type="application/json"><c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/></script>
+<script id="adminServicesJson" type="application/json"><c:out value="${empty adminServicesJson ? '[]' : adminServicesJson}" escapeXml="false"/></script>
     <script id="adminAccountsJson" type="application/json"><c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/></script>
     <script id="adminShiftsJson" type="application/json"><c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/></script>
     <script id="adminRevenueJson" type="application/json"><c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/></script>
     <script id="adminPendingBookingsJson" type="application/json"><c:out value="${empty adminPendingBookingsJson ? '[]' : adminPendingBookingsJson}" escapeXml="false"/></script>
+    
+    <script>
+        window.ADMIN_CONTEXT_PATH = '${pageContext.request.contextPath}';
+        
+        // Xử lý bật/tắt Dropdown Menu của Admin
+        function toggleUserDropdown() {
+            var menu = document.getElementById("userDropdown");
+            if(menu) {
+                menu.classList.toggle("show");
+            }
+        }
+
+        // Tự động đóng Dropdown khi click ra ngoài
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-container')) {
+                var dropdown = document.getElementById("userDropdown");
+                if (dropdown && dropdown.classList.contains('show')) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+
+        // Xử lý Đăng xuất
+        function doLogoutNow() {
+            if (confirm('Xác nhận thoát khỏi phiên quản trị?')) {
+                window.location.href = window.ADMIN_CONTEXT_PATH + '/index.jsp?logout=true';
+            }
+        }
+    </script>
+
     <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
     <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516k"></script>

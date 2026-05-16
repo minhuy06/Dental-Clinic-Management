@@ -214,6 +214,7 @@
 
     <jsp:include page="../components/footer.jsp" />
 
+<<<<<<< HEAD
     <script id="hosoUserJson" type="application/json">${empty hosoUserJson ? 'null' : hosoUserJson}</script>
     <script id="hosoAppointmentsJson" type="application/json">${empty hosoAppointmentsJson ? '[]' : hosoAppointmentsJson}</script>
     <script id="hosoServicesJson" type="application/json">${empty hosoServicesJson ? '[]' : hosoServicesJson}</script>

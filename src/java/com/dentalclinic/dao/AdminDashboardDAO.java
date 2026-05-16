@@ -215,7 +215,7 @@ public class AdminDashboardDAO {
             e.printStackTrace();
         }
 
-        String catSql = "SELECT TOP 6 COALESCE(ck.TenChuyenKhoa, N'Khác') AS CatName, SUM(hd.TongTien) AS TotalRev " +
+        String catSql = "SELECT TOP 8 COALESCE(ck.TenChuyenKhoa, N'Khác') AS CatName, SUM(hd.TongTien) AS TotalRev " +
                         "FROM HoaDon hd " +
                         "JOIN PhieuKham pk ON pk.PhieuKham_ID = hd.PhieuKham_ID " +
                         "LEFT JOIN ChiTietDichVu ctdv ON ctdv.PhieuKham_ID = pk.PhieuKham_ID " +
