@@ -49,7 +49,7 @@ var loginApi = {
 var loginDataSource = LOGIN_CONFIG.USE_MOCK ? loginMockApi : loginApi;
 
 function showLoginError(message) {
-    alert(message || 'Đăng nhập thất bại');
+    AppNotify.error(message || 'Đăng nhập thất bại');
 }
 
 async function handleLogin(e) {

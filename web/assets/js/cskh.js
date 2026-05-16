@@ -205,13 +205,13 @@ function editStaff(id) {
     }
 }
 
-function deleteStaff(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa nhân viên CSKH này?')) {
-        staffList = staffList.filter(s => s.id !== id);
-        if (staffList.length === 0) currentPage = 1;
-        renderStaffGrid();
-        showToast('Đã xóa nhân viên CSKH thành công');
-    }
+async function deleteStaff(id) {
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc chắn muốn xóa nhân viên CSKH này?' });
+    if (!ok) return;
+    staffList = staffList.filter(s => s.id !== id);
+    if (staffList.length === 0) currentPage = 1;
+    renderStaffGrid();
+    showToast('Đã xóa nhân viên CSKH thành công');
 }
 
 function saveStaff() {
@@ -224,7 +224,7 @@ function saveStaff() {
     let notes = document.getElementById('notes').value.trim();
     
     if (!fullName || !phone || !email) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+        AppNotify.warn('Vui lòng điền đầy đủ thông tin bắt buộc!');
         return;
     }
     
@@ -258,7 +258,7 @@ function openMessageModal(staffId) {
 function sendMessage() {
     let content = document.getElementById('messageContent').value.trim();
     if (!content) {
-        alert('Vui lòng nhập nội dung tin nhắn!');
+        AppNotify.warn('Vui lòng nhập nội dung tin nhắn!');
         return;
     }
     

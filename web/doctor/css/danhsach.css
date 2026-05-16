@@ -142,16 +142,16 @@ header {
     overflow-x: auto;
 }
 
-/* Filter Bar */
+/* Filter Bar — một hàng ngang */
 .filter-bar {
     background: var(--white);
-    padding: 20px;
+    padding: 16px 20px;
     border-radius: 16px;
     margin-bottom: 24px;
     display: flex;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 15px;
+    align-items: center;
+    flex-wrap: nowrap;
+    gap: 12px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
@@ -163,8 +163,8 @@ header {
     border-radius: 10px;
     padding: 0 15px;
     gap: 10px;
-    flex: 1;
-    min-width: 250px;
+    flex: 1 1 auto;
+    min-width: 0;
 }
 
 .search-box i {
@@ -182,8 +182,10 @@ header {
 
 .filter-group {
     display: flex;
+    align-items: center;
     gap: 12px;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
 }
 
 .filter-group select {
@@ -194,6 +196,8 @@ header {
     background: #f8fafc;
     cursor: pointer;
     font-size: 0.9rem;
+    min-width: 160px;
+    white-space: nowrap;
 }
 
 .btn-refresh {
@@ -205,6 +209,8 @@ header {
     cursor: pointer;
     transition: 0.3s;
     font-weight: 600;
+    flex-shrink: 0;
+    white-space: nowrap;
 }
 
 .btn-refresh:hover {
@@ -503,7 +509,11 @@ button.btn-complete,
     }
     
     .filter-bar {
-        flex-direction: column;
+        flex-wrap: wrap;
+    }
+    .filter-group {
+        width: 100%;
+        justify-content: flex-end;
     }
     
     .header-left h1 {

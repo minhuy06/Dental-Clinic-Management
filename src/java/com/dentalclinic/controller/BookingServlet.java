@@ -73,9 +73,9 @@ public class BookingServlet extends HttpServlet {
     private void forwardScheduleError(HttpServletRequest request, HttpServletResponse response, String error)
             throws ServletException, IOException {
         request.setAttribute("error", error);
-        request.setAttribute("inforSection", "datlich");
+        request.setAttribute("scrollSection", "datlich");
         request.setAttribute("serviceListJson", InforPageHelper.buildServiceListJson());
-        request.setAttribute("doctorListJson", InforPageHelper.buildDoctorListJson());
+        request.setAttribute("doctorListJson", InforPageHelper.buildSampleDoctorListJson());
         request.setAttribute("pageTitle", "Đặt lịch khám - Nha Khoa 5AE");
         request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
     }

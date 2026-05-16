@@ -21,15 +21,7 @@
 <c:url var="urlReceptionPeriodYear" value="/reception-dashboard"><c:param name="view" value="year"/><c:param name="ngay" value="${selectedDateNgay}"/><c:param name="loc" value="${rcvLoc}"/></c:url>
     <!-- ==================== HEADER MÀU XANH ==================== -->
     <div class="header">
-        <a href="${pageContext.request.contextPath}/" class="logo" style="text-decoration:none;color:inherit;">
-            <div class="logo-icon">
-                <i class="fas fa-tooth"></i>
-            </div>
-            <div class="logo-text">
-                <h1>NHA KHOA 5AE</h1>
-                <p>HỆ THỐNG QUẢN LÝ</p>
-            </div>
-        </a>
+        <jsp:include page="../components/clinic-logo.jsp" />
         <ul class="nav-menu">
             <li><a href="${pageContext.request.contextPath}/reception-dashboard" class="active">Lịch hẹn</a></li>
             <li><a href="${pageContext.request.contextPath}/reception-patient">Bệnh nhân</a></li>
@@ -740,6 +732,7 @@
             gap: 6px;
         }
     </style>
-    <script src="${pageContext.request.contextPath}/assets/js/script.js?v=20260517a"></script>
+    <jsp:include page="../components/notify-resources.jsp" />
+    <script src="${pageContext.request.contextPath}/assets/js/script.js?v=20260518a"></script>
 </body>
 </html>

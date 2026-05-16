@@ -11,20 +11,21 @@
     String serviceUrl = RoleNavHelper.getServiceUrl(ctx);
     String doctorUrl = RoleNavHelper.getDoctorUrl(ctx);
     String workspaceUrl = "";
+    String workspaceLabel = "Trang làm việc";
     boolean isPatient = true;
     boolean isStaff = false;
     if (loggedInUser != null) {
-        workspaceUrl = RoleNavHelper.getWorkspaceUrl(ctx, loggedInUser.getVaiTro());
-        isPatient = RoleNavHelper.isPatient(loggedInUser.getVaiTro());
+        String role = loggedInUser.getVaiTro();
+        workspaceUrl = RoleNavHelper.getWorkspaceUrl(ctx, role);
+        workspaceLabel = RoleNavHelper.getWorkspaceLabel(role);
+        isPatient = RoleNavHelper.isPatient(role);
         isStaff = !isPatient;
     }
     boolean isIndex = currentPage.endsWith("index.jsp")
             || currentPage.endsWith(ctx + "/")
             || currentPage.endsWith("/Dental_Clinic_Management")
             || currentPage.endsWith("/Dental_Clinic_Management/");
-    boolean isSchedule = currentPage.contains("/Infor/Schedule");
-    boolean isService = currentPage.contains("/Infor/service");
-    boolean isDoctor = currentPage.contains("/Infor/Doctor");
+    boolean isInforPage = currentPage.contains("/Infor/");
 %>
 
 <header class="header" id="header">
@@ -35,12 +36,16 @@
         </a>
         <nav class="nav-menu" id="navMenu">
             <a href="<%= homeUrl %>" class="<%= isIndex ? "active" : "" %>">Trang chủ</a>
-            <a href="<%= scheduleUrl %>" class="<%= isSchedule ? "active" : "" %>" data-section="datlich">Đặt lịch</a>
-            <a href="<%= serviceUrl %>" class="<%= isService ? "active" : "" %>" data-section="dichvu">Dịch vụ</a>
-            <a href="<%= doctorUrl %>" class="<%= isDoctor ? "active" : "" %>" data-section="bacsi">Bác sĩ</a>
+            <a href="<%= scheduleUrl %>" data-section="datlich">Đặt lịch</a>
+            <a href="<%= serviceUrl %>" data-section="dichvu">Dịch vụ</a>
+            <a href="<%= doctorUrl %>" data-section="bacsi">Bác sĩ</a>
             <div class="nav-mobile-actions">
                 <% if (loggedInUser != null) { %>
-                    <a href="<%= workspaceUrl %>" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() %></a>
+                    <% if (isStaff && isIndex) { %>
+                        <button type="button" class="btn btn-primary" style="width:100%;" onclick="toggleUserDropdown()">👤 <%= loggedInUser.getHoTen() %></button>
+                    <% } else { %>
+                        <a href="<%= isStaff ? workspaceUrl : (ctx + "/hoso") %>" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() %></a>
+                    <% } %>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
                 <% } %>
@@ -49,8 +54,19 @@
         <div class="header-actions">
             <% if (loggedInUser != null) { %>
                 <div class="user-dropdown-wrapper">
-                    <% if (isStaff) { %>
-                        <a href="<%= workspaceUrl %>" class="user-avatar-btn user-avatar-btn--link" title="Vào trang làm việc">
+                    <% if (isStaff && isIndex) { %>
+                        <div class="user-avatar-btn" onclick="toggleUserDropdown()">
+                            <div class="user-avatar-circle">👤</div>
+                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
+                            <span class="user-arrow">▼</span>
+                        </div>
+                        <div class="user-dropdown" id="userDropdown">
+                            <a href="<%= workspaceUrl %>" class="user-dropdown-item">🏥 <%= workspaceLabel %></a>
+                            <div class="user-dropdown-divider"></div>
+                            <a href="javascript:void(0)" onclick="doLogoutNow()" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
+                        </div>
+                    <% } else if (isStaff) { %>
+                        <a href="<%= workspaceUrl %>" class="user-avatar-btn user-avatar-btn--link" title="<%= workspaceLabel %>">
                             <div class="user-avatar-circle">👤</div>
                             <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
                         </a>
@@ -110,6 +126,8 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-notify.css">
+<script src="${pageContext.request.contextPath}/assets/js/app-notify.js"></script>
 <script>
     window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     window.HOME_URL = '<%= homeUrl %>';

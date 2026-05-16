@@ -26,7 +26,7 @@ function init() {
         addServiceBtn.addEventListener('click', function() {
             const serviceId = serviceSelect.value;
             if (!serviceId) {
-                alert('Vui lòng chọn dịch vụ!');
+                AppNotify.warn('Vui lòng chọn dịch vụ!');
                 return;
             }
             addClinicalService(serviceId);
@@ -59,7 +59,7 @@ function init() {
                     successMessage: 'Đã lưu phiếu khám. Quay lại danh sách lịch hẹn.'
                 });
             } else {
-                alert('Lỗi: Không tìm thấy ID lịch hẹn trên URL!');
+                AppNotify.error('Lỗi: Không tìm thấy ID lịch hẹn trên URL!');
             }
         });
     }
@@ -100,7 +100,7 @@ function addClinicalService(serviceId) {
     if (!service) return;
 
     if (service.tinhTheoRang && currentSelectedTeeth.length === 0) {
-        alert('Dịch vụ này yêu cầu chọn răng trên sơ đồ!');
+        AppNotify.warn('Dịch vụ này yêu cầu chọn răng trên sơ đồ!');
         return;
     }
 
@@ -270,7 +270,7 @@ async function luuPhieuKhamLamSang(lichHenId, options) {
     const redirectTarget = opts.redirectUrl || doctorListUrl();
     const successMessage = opts.successMessage || null;
     if (clinicalSelectedServices.length === 0) {
-        alert('Vui lòng chọn ít nhất một dịch vụ!');
+        AppNotify.warn('Vui lòng chọn ít nhất một dịch vụ!');
         return;
     }
 
@@ -324,26 +324,26 @@ async function luuPhieuKhamLamSang(lichHenId, options) {
             console.error('Phản hồi không phải JSON:', raw);
             const preview = (raw || '').trim().substring(0, 300);
             if (preview.startsWith('<')) {
-                alert('API lưu phiếu khám không hoạt động (máy chủ trả HTML). Kiểm tra deploy WAR Dental_Clinic_Management và URL: ' + DOCTOR_HOSO_CONFIG.API_BASE + '/save-examination');
+                AppNotify.error('API lưu phiếu khám không hoạt động (máy chủ trả HTML). Kiểm tra deploy WAR Dental_Clinic_Management và URL: ' + DOCTOR_HOSO_CONFIG.API_BASE + '/save-examination');
             } else {
-                alert('Phản hồi không hợp lệ từ máy chủ:\n' + (preview || '(rỗng)'));
+                AppNotify.error('Phản hồi không hợp lệ từ máy chủ:<br>' + (preview || '(rỗng)'));
             }
             return;
         }
 
         if (result.success) {
             if (shouldRedirect) {
-                alert(successMessage || result.message || 'Đã lưu phiếu khám. Quay lại danh sách lịch hẹn.');
+                await AppNotify.success(successMessage || result.message || 'Đã lưu phiếu khám. Quay lại danh sách lịch hẹn.');
                 window.location.href = redirectTarget;
             } else {
-                alert(result.message || 'Đã lưu nháp. Bạn có thể tiếp tục chỉnh sửa.');
+                await AppNotify.success(result.message || 'Đã lưu nháp. Bạn có thể tiếp tục chỉnh sửa.');
             }
         } else {
-            alert('Lưu thất bại: ' + result.message);
+            AppNotify.error('Lưu thất bại: ' + result.message);
         }
     } catch (error) {
         console.error('Lỗi khi lưu:', error);
-        alert('Có lỗi xảy ra khi kết nối tới máy chủ!');
+        AppNotify.error('Có lỗi xảy ra khi kết nối tới máy chủ!');
     }
 }
 

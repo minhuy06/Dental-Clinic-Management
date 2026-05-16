@@ -4,25 +4,47 @@ window.addEventListener('scroll', function() {
     else h.classList.remove('scrolled');
 
     if (window.location.pathname.indexOf('/Infor/') > -1 || window.location.pathname.indexOf('dat-lich') > -1) {
-        var sections = ['datlich', 'dichvu', 'bacsi'];
-        var current = '';
-        sections.forEach(function(id) {
-            var sec = document.getElementById(id);
-            if (sec) {
-                var r = sec.getBoundingClientRect();
-                if (r.top <= 150 && r.bottom >= 150) current = id;
+        highlightInforNav();
+    }
+});
+
+function highlightInforNav() {
+    var sections = ['datlich', 'dichvu', 'bacsi'];
+    var current = '';
+    sections.forEach(function(id) {
+        var sec = document.getElementById(id);
+        if (sec) {
+            var r = sec.getBoundingClientRect();
+            if (r.top <= 150 && r.bottom >= 150) current = id;
+        }
+    });
+    if (!current && window.location.hash) {
+        current = window.location.hash.replace('#', '');
+    }
+    if (!current && document.body) {
+        current = document.body.getAttribute('data-scroll-section') || '';
+    }
+    document.querySelectorAll('.nav-menu a[data-section]').forEach(function(a) {
+        a.classList.remove('active');
+    });
+    if (current) {
+        document.querySelectorAll('.nav-menu a[data-section]').forEach(function(a) {
+            if (a.getAttribute('data-section') === current) {
+                a.classList.add('active');
             }
         });
-        document.querySelectorAll('.nav-menu a').forEach(function(a) {
-            a.classList.remove('active');
-        });
-        if (current) {
-            document.querySelectorAll('.nav-menu a').forEach(function(a) {
-                if ((a.getAttribute('href') || '').indexOf('#' + current) > -1) {
-                    a.classList.add('active');
-                }
-            });
-        }
+    }
+}
+
+window.addEventListener('hashchange', function() {
+    if (window.location.pathname.indexOf('/Infor/') > -1 || window.location.pathname.indexOf('dat-lich') > -1) {
+        highlightInforNav();
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.pathname.indexOf('/Infor/') > -1 || window.location.pathname.indexOf('dat-lich') > -1) {
+        highlightInforNav();
     }
 });
 
@@ -55,10 +77,12 @@ document.addEventListener('click', function(e) {
 
 // Logout
 function doLogoutNow() {
-    if (confirm('Bạn có chắc muốn đăng xuất?')) {
-        var home = (typeof window.HOME_URL === 'string' && window.HOME_URL) ? window.HOME_URL : (window.CONTEXT_PATH || '') + '/';
-        window.location.href = home + (home.indexOf('?') >= 0 ? '&' : '?') + 'logout=true';
+    if (typeof AppNotify !== 'undefined' && AppNotify.doLogoutWithConfirm) {
+        AppNotify.doLogoutWithConfirm();
+        return;
     }
+    var home = (typeof window.HOME_URL === 'string' && window.HOME_URL) ? window.HOME_URL : (window.CONTEXT_PATH || '') + '/';
+    window.location.href = home + (home.indexOf('?') >= 0 ? '&' : '?') + 'logout=true';
 }
 
 // System "coming soon" modal

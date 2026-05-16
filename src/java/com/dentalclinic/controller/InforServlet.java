@@ -9,8 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * Trang thông tin công khai: Đặt lịch, Dịch vụ, Bác sĩ.
- * /Infor/Schedule | /Infor/service | /Infor/Doctor
+ * Trang gộp: Đặt lịch + Dịch vụ + Bác sĩ (một trang, cuộn tới mục theo URL).
  */
 @WebServlet("/Infor/*")
 public class InforServlet extends HttpServlet {
@@ -28,17 +27,10 @@ public class InforServlet extends HttpServlet {
             return;
         }
 
-        request.setAttribute("inforSection", section);
+        request.setAttribute("scrollSection", section);
         request.setAttribute("serviceListJson", InforPageHelper.buildServiceListJson());
-        request.setAttribute("doctorListJson", InforPageHelper.buildDoctorListJson());
-
-        if ("datlich".equals(section)) {
-            request.setAttribute("pageTitle", "Đặt lịch khám - Nha Khoa 5AE");
-        } else if ("dichvu".equals(section)) {
-            request.setAttribute("pageTitle", "Dịch vụ & Bảng giá - Nha Khoa 5AE");
-        } else {
-            request.setAttribute("pageTitle", "Đội ngũ bác sĩ - Nha Khoa 5AE");
-        }
+        request.setAttribute("doctorListJson", InforPageHelper.buildSampleDoctorListJson());
+        request.setAttribute("pageTitle", "Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa 5AE");
 
         request.getRequestDispatcher("/dat-lich.jsp").forward(request, response);
     }

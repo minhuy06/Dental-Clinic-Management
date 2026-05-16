@@ -960,10 +960,10 @@ function editAppointment(id) {
 }
 
 async function deleteAppointment(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa lịch hẹn này?')) {
-        let res = await withDataGuard(() => dataSource.removeAppointment(id), 'Đã xóa lịch hẹn');
-        if (res) await loadAppointmentsFromServer();
-    }
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc chắn muốn xóa lịch hẹn này?' });
+    if (!ok) return;
+    let res = await withDataGuard(() => dataSource.removeAppointment(id), 'Đã xóa lịch hẹn');
+    if (res) await loadAppointmentsFromServer();
 }
 
 async function saveAppointment() {
@@ -1169,7 +1169,8 @@ function approveAppointment(id) {
 }
 
 async function deleteReceptionAppointment(id) {
-    if (!confirm('Bạn có chắc muốn xóa lịch hẹn này?')) return;
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa lịch hẹn này?' });
+    if (!ok) return;
     const res = await withDataGuard(async function() {
         return postReceptionAction('delete', id);
     }, 'Đã xóa lịch hẹn');

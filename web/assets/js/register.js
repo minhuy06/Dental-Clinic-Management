@@ -157,11 +157,11 @@ async function handleRegister(e) {
                 startOtpTimer();
                 document.querySelector('.otp-box').focus();
             } else {
-                alert('Lỗi: Không thể gửi SMS. Hãy kiểm tra lại số điện thoại!');
+                AppNotify.error('Lỗi: Không thể gửi SMS. Hãy kiểm tra lại số điện thoại!');
             }
         } catch (err) {
             console.error('[register] submit error:', err);
-            alert('Lỗi kết nối đến máy chủ!');
+            AppNotify.error('Lỗi kết nối đến máy chủ!');
             btnSubmit.innerHTML = originalText;
             btnSubmit.disabled = false;
         }
@@ -177,7 +177,7 @@ async function verifyOtp() {
     document.querySelectorAll('.otp-box').forEach(function(b) { code += b.value; });
 
     if (code.length < 6) {
-        alert('Vui lòng nhập đủ 6 số');
+        AppNotify.warn('Vui lòng nhập đủ 6 số');
         return;
     }
 
@@ -195,19 +195,19 @@ async function verifyOtp() {
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
         if (result.trim() === 'SUCCESS') {
-            alert('✅ Đăng ký thành công!');
+            await AppNotify.success('Đăng ký thành công!');
             document.getElementById('otpModal').classList.remove('show');
             var basePath = window.CONTEXT_PATH ? window.CONTEXT_PATH : '';
             window.location.href = basePath + '/account/login.jsp?msg=success';
         } else {
-            alert('❌ Mã OTP không chính xác. Vui lòng thử lại!');
+            AppNotify.error('Mã OTP không chính xác. Vui lòng thử lại!');
             var boxes = document.querySelectorAll('.otp-box');
             boxes.forEach(function(b) { b.value = ''; });
             boxes[0].focus();
         }
     } catch (err) {
         console.error('[register] verify otp error:', err);
-        alert('Lỗi kết nối đến máy chủ!');
+        AppNotify.error('Lỗi kết nối đến máy chủ!');
         btnVerify.innerHTML = originalText;
         btnVerify.disabled = false;
     }

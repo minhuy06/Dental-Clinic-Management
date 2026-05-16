@@ -23,7 +23,27 @@ body {
     color: var(--text-main);
 }
 
-/* Header */
+/* Sub bar dưới header bác sĩ */
+.doctor-hoso-subbar {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+}
+
+.doctor-hoso-subbar .appointment-time {
+    background: rgba(255,255,255,0.1);
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* Header (legacy) */
 header {
     background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
     color: white;

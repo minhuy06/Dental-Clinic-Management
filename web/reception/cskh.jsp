@@ -214,6 +214,7 @@
         <p>© 2024 Nha Khoa 5AE - Tổng đài CSKH: 1900 1234</p>
     </div>
 
+    <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/cskh.js"></script>
 </body>
 </html>

@@ -581,7 +581,8 @@ async function saveService() {
 }
 
 async function deleteService(id) {
-    if (!confirm('Bạn có chắc muốn xóa dịch vụ này?')) return;
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa dịch vụ này?' });
+    if (!ok) return;
     var res = await withApiGuard(async function() {
         var params = new URLSearchParams();
         params.append('action', 'delete');
@@ -964,7 +965,8 @@ function closeShiftDetailModal() {
 
 async function deleteShiftFromDetail() {
     if (!viewingShiftId) return;
-    if (!confirm('Xóa ca làm này?')) return;
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa ca làm này?' });
+    if (!ok) return;
     async function deleteShiftOnServer(id) {
         var params = new URLSearchParams();
         params.append('action', 'delete');
@@ -1259,7 +1261,8 @@ async function toggleAccStatus(id) {
 }
 
 async function deleteAccount(id) {
-    if (!confirm('Bạn có chắc muốn xóa tài khoản này?')) return;
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa tài khoản này?' });
+    if (!ok) return;
     var res = await withApiGuard(function() { return dataSource.accounts.remove(id); }, 'Đã xóa tài khoản');
     if (res) await loadAccountsFromServer();
 }

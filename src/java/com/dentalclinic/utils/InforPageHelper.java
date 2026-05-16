@@ -1,8 +1,6 @@
 package com.dentalclinic.utils;
 
-import com.dentalclinic.dao.BacSiDAO;
 import com.dentalclinic.dao.DichVuDAO;
-import com.dentalclinic.model.BacSi;
 import com.dentalclinic.model.DichVu;
 import java.util.List;
 
@@ -54,28 +52,16 @@ public final class InforPageHelper {
         return sb.toString();
     }
 
-    public static String buildDoctorListJson() {
-        List<BacSi> doctors = new BacSiDAO().getAllForDisplay();
-        StringBuilder sb = new StringBuilder();
-        sb.append("[");
-        for (int i = 0; i < doctors.size(); i++) {
-            BacSi bs = doctors.get(i);
-            if (i > 0) {
-                sb.append(",");
-            }
-            String name = bs.getTaiKhoan() != null ? bs.getTaiKhoan().getHoTen() : "";
-            String specialty = bs.getChuyenKhoa() != null ? bs.getChuyenKhoa().getTenChuyenKhoa() : "";
-            String degree = bs.getTrinhDo() != null ? bs.getTrinhDo() : "";
-            String img = bs.getAnhDaiDien() != null ? bs.getAnhDaiDien() : "";
-            sb.append("{")
-                    .append("\"name\":\"").append(jsonEscape(name)).append("\",")
-                    .append("\"specialty\":\"").append(jsonEscape(specialty)).append("\",")
-                    .append("\"degree\":\"").append(jsonEscape(degree)).append("\",")
-                    .append("\"imgUrl\":\"").append(jsonEscape(img)).append("\"")
-                    .append("}");
-        }
-        sb.append("]");
-        return sb.toString();
+    /** Dữ liệu mẫu bác sĩ (ảnh Unsplash) cho trang công khai. */
+    public static String buildSampleDoctorListJson() {
+        return "["
+                + "{\"name\":\"BS. Trần Văn An\",\"specialty\":\"Tổng quát\",\"degree\":\"CKI\",\"imgUrl\":\"https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop\"},"
+                + "{\"name\":\"BS. Nguyễn Thị Mai\",\"specialty\":\"Thẩm mỹ\",\"degree\":\"Thạc sĩ\",\"imgUrl\":\"https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop\"},"
+                + "{\"name\":\"BS. Lê Hoàng Nam\",\"specialty\":\"Chỉnh nha\",\"degree\":\"CKII\",\"imgUrl\":\"https://images.unsplash.com/photo-1622253692010-333ef3b4b55a?w=400&h=400&fit=crop\"},"
+                + "{\"name\":\"BS. Phạm Thu Hà\",\"specialty\":\"Nha chu\",\"degree\":\"CKI\",\"imgUrl\":\"https://images.unsplash.com/photo-1594824476967-48c8b964273f?w=400&h=400&fit=crop\"},"
+                + "{\"name\":\"BS. Đỗ Minh Tuấn\",\"specialty\":\"Implant\",\"degree\":\"Tiến sĩ\",\"imgUrl\":\"https://images.unsplash.com/photo-1537368910025-700dbbe09483?w=400&h=400&fit=crop\"},"
+                + "{\"name\":\"BS. Võ Thị Lan\",\"specialty\":\"Nha khoa trẻ em\",\"degree\":\"CKI\",\"imgUrl\":\"https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop\"}"
+                + "]";
     }
 
     /** datlich | dichvu | bacsi */

@@ -11,8 +11,6 @@ let appointments = [
     { id: 10, stt: 10, patientName: 'Vũ Thị Kim Ngân', patientPhone: '0938 765 432', time: '14:30', doctor: 'BS. Trần Thị Mai', reason: 'Cấy ghép Implant', status: 'completed' }
 ];
 
-let currentSelected = null;
-let pendingAction = null;
 
 let DOCTOR_LIST_CONFIG = {
     USE_MOCK: false,
@@ -84,13 +82,13 @@ async function withListGuard(action, onErrorMessage) {
     try {
         const res = await action();
         if (res && res.success === false) {
-            alert(res.message || onErrorMessage || 'Thao tác thất bại');
+            AppNotify.error(res.message || onErrorMessage || 'Thao tác thất bại');
             return null;
         }
         return res || { success: true };
     } catch (error) {
         console.error('[doctor/danhsach] data error:', error);
-        alert(error.message || onErrorMessage || 'Lỗi kết nối dữ liệu');
+        AppNotify.error(error.message || onErrorMessage || 'Lỗi kết nối dữ liệu');
         return null;
     }
 }
@@ -181,13 +179,20 @@ function renderTable() {
     tbody.innerHTML = html;
 }
 
-function startExamination(id) {
+async function startExamination(id) {
     const app = appointments.find(a => a.id === id);
     if (!app) return;
-    currentSelected = app;
-    pendingAction = 'start';
-    document.getElementById('modalMessage').innerHTML = `Bạn có muốn bắt đầu khám cho bệnh nhân <strong>${app.patientName}</strong> không?`;
-    document.getElementById('confirmModal').style.display = 'flex';
+    const ok = await AppNotify.confirm({
+        message: 'Bạn có muốn bắt đầu khám cho bệnh nhân <strong>' + app.patientName + '</strong> không?'
+    });
+    if (!ok) return;
+    const res = await withListGuard(() => listDataSource.startExam(id), 'Không thể bắt đầu khám');
+    if (!res) return;
+    await loadAppointmentsFromServer();
+    window.location.href = 'hoso.jsp?id=' + app.id
+        + '&name=' + encodeURIComponent(app.patientName)
+        + '&phone=' + encodeURIComponent(app.patientPhone || '')
+        + '&reason=' + encodeURIComponent(app.reason || '');
 }
 
 function continueExamination(id) {
@@ -197,25 +202,27 @@ function continueExamination(id) {
     }
 }
 
-function confirmCompleteExam(id) {
+async function confirmCompleteExam(id) {
     const app = appointments.find(a => a.id === id);
     if (!app) return;
-    currentSelected = app;
-    pendingAction = 'complete';
-    document.getElementById('modalMessage').innerHTML = 'Bạn có muốn xác nhận đã khám không?';
-    document.getElementById('confirmModal').style.display = 'flex';
+    const ok = await AppNotify.confirm({
+        message: 'Bạn có muốn xác nhận đã khám cho bệnh nhân <strong>' + app.patientName + '</strong> không?'
+    });
+    if (!ok) return;
+    const res = await withListGuard(() => listDataSource.completeExam(id), 'Không thể xác nhận hoàn tất khám');
+    if (!res) return;
+    await AppNotify.success('Đã xác nhận hoàn tất khám. Bệnh nhân chuyển sang lễ tân để thanh toán.');
+    await loadAppointmentsFromServer();
 }
 
 function viewRecord(id) {
     const app = appointments.find(a => a.id === id);
     if (!app) return;
-    alert(`📋 Hồ sơ bệnh nhân: ${app.patientName}\n📞 SĐT: ${app.patientPhone}\n🦷 Lý do: ${app.reason}\n👨‍⚕️ Bác sĩ: ${app.doctor}`);
-}
-
-function closeModal() {
-    document.getElementById('confirmModal').style.display = 'none';
-    currentSelected = null;
-    pendingAction = null;
+    AppNotify.alert({
+        title: 'Hồ sơ bệnh nhân',
+        html: '<strong>' + app.patientName + '</strong><br>📞 ' + (app.patientPhone || '—')
+            + '<br>🦷 ' + (app.reason || '—') + '<br>👨‍⚕️ ' + (app.doctor || '—')
+    });
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -238,30 +245,4 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const confirmBtn = document.getElementById('confirmBtn');
-    if (confirmBtn) {
-        confirmBtn.addEventListener('click', async () => {
-            if (pendingAction === 'start' && currentSelected) {
-                const { id, patientName, patientPhone, reason } = currentSelected;
-                const res = await withListGuard(() => listDataSource.startExam(id), 'Không thể bắt đầu khám');
-                if (!res) return;
-                await loadAppointmentsFromServer();
-                closeModal();
-                window.location.href = `hoso.jsp?id=${id}&name=${encodeURIComponent(patientName)}&phone=${encodeURIComponent(patientPhone || '')}&reason=${encodeURIComponent(reason || '')}`;
-            } else if (pendingAction === 'complete' && currentSelected) {
-                const res = await withListGuard(() => listDataSource.completeExam(currentSelected.id), 'Không thể xác nhận hoàn tất khám');
-                if (!res) return;
-                closeModal();
-                alert('Đã xác nhận hoàn tất khám. Bệnh nhân chuyển sang lễ tân để thanh toán.');
-                await loadAppointmentsFromServer();
-            }
-        });
-    }
-
-    const cancelModalBtn = document.querySelector('.btn-cancel-modal');
-    if (cancelModalBtn) cancelModalBtn.addEventListener('click', closeModal);
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('confirmModal');
-        if (e.target === modal) closeModal();
-    });
 });

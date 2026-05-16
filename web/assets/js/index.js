@@ -11,8 +11,8 @@ function setRating(n) {
 
 function submitReview() {
     var text = document.getElementById('reviewText').value.trim();
-    if (!selectedRating) { alert('Vui lòng chọn số sao'); return; }
-    if (!text) { alert('Vui lòng nhập nội dung đánh giá'); return; }
+    if (!selectedRating) { AppNotify.warn('Vui lòng chọn số sao'); return; }
+    if (!text) { AppNotify.warn('Vui lòng nhập nội dung đánh giá'); return; }
 
     var userName = window.LOGGED_USER || 'Khách hàng';
     var initials = userName.split(' ').map(function(w){ return w[0]; }).slice(-2).join('').toUpperCase();

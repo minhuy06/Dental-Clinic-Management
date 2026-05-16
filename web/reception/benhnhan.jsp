@@ -222,6 +222,7 @@
             console.error('[benhnhan] parse seed JSON', e);
         }
     </script>
+    <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260516b"></script>
 </body>
 </html>

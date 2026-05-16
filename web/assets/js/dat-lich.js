@@ -59,14 +59,14 @@ async function withBookingGuard(action, successMsg) {
     try {
         var res = await action();
         if (res && res.success === false) {
-            alert(res.message || 'Không thể xử lý đặt lịch');
+            AppNotify.error(res.message || 'Không thể xử lý đặt lịch');
             return null;
         }
-        if (successMsg) alert(successMsg);
+        if (successMsg) AppNotify.success(successMsg);
         return res || {success:true};
     } catch (error) {
         console.error('[dat-lich] data error:', error);
-        alert(error.message || 'Có lỗi kết nối dữ liệu!');
+        AppNotify.error(error.message || 'Có lỗi kết nối dữ liệu!');
         return null;
     }
 }

@@ -529,6 +529,7 @@
         window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
     </script>
 
+    <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/admin.js"></script>
 </body>
 </html>

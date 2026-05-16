@@ -28,15 +28,18 @@
     <title>Phòng Khám Nha Khoa 5AE - Hồ Sơ Khám Bệnh</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style_1.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/hoso.css">
+    <jsp:include page="../components/notify-resources.jsp" />
 </head>
 <body>
 
-<header>
-    <a class="btn-back" id="backBtn"  href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
-    <div class="doctor-info" id="doctorRoomUI"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
+<jsp:include page="../components/doctor-header.jsp" />
+
+<div class="doctor-hoso-subbar">
+    <a class="btn-back" id="backBtn" href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
     <div class="appointment-time"><i class="fa-regular fa-calendar"></i> <%= appointmentDateTime %></div>
-</header>
+</div>
 
 <div class="main-layout">
     <aside class="patient-sidebar">

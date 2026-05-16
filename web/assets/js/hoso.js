@@ -265,7 +265,7 @@ async function saveEditInfo() {
     var phone  = document.getElementById('editPhone').value.trim();
     var dob    = document.getElementById('editDob').value;
     var gender = document.getElementById('editGender').value;
-    if (!phone) { alert('Vui lòng nhập số điện thoại'); return; }
+    if (!phone) { AppNotify.warn('Vui lòng nhập số điện thoại'); return; }
 
     var btn = document.querySelector('#editInfoModal .btn-primary');
     btn.disabled = true; btn.textContent = 'Đang lưu...';

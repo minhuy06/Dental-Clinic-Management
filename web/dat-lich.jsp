@@ -1,11 +1,11 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
-    String inforSection = (String) request.getAttribute("inforSection");
-    if (inforSection == null || inforSection.isEmpty()) {
-        inforSection = "datlich";
+    String scrollSection = (String) request.getAttribute("scrollSection");
+    if (scrollSection == null || scrollSection.isEmpty()) {
+        scrollSection = "datlich";
     }
     String pageTitleAttr = (String) request.getAttribute("pageTitle");
-    String pageTitle = pageTitleAttr != null ? pageTitleAttr : "Nha Khoa 5AE";
+    String pageTitle = pageTitleAttr != null ? pageTitleAttr : "Đặt lịch, Dịch vụ & Bác sĩ - Nha Khoa 5AE";
 %>
 <!DOCTYPE html>
 <html lang="vi">
@@ -15,46 +15,25 @@
     <title><%= pageTitle %></title>
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/datlich.css">
-    <style>
-        body.infor-focus-datlich .services-price-section,
-        body.infor-focus-datlich .doctors-section,
-        body.infor-focus-datlich .infor-divider { display: none !important; }
-        body.infor-focus-dichvu .booking-section,
-        body.infor-focus-dichvu .doctors-section,
-        body.infor-focus-dichvu .infor-divider { display: none !important; }
-        body.infor-focus-bacsi .booking-section,
-        body.infor-focus-bacsi .services-price-section,
-        body.infor-focus-bacsi .infor-divider { display: none !important; }
-    </style>
 </head>
-<body class="infor-focus-<%= inforSection %>">
+<body data-scroll-section="<%= scrollSection %>">
     <jsp:include page="components/header.jsp" />
     <main>
         <section class="page-hero">
             <div class="page-hero-bg"><img src="${pageContext.request.contextPath}/assets/img/cham-soc.jpg" alt="Nha khoa"></div>
             <div class="page-hero-overlay"></div>
             <div class="page-hero-content">
-                <% if ("dichvu".equals(inforSection)) { %>
-                <h1>Dịch vụ &amp; bảng giá</h1>
-                <p>Giá niêm yết công khai, minh bạch — không phát sinh chi phí ẩn</p>
-                <% } else if ("bacsi".equals(inforSection)) { %>
-                <h1>Đội ngũ bác sĩ</h1>
-                <p>Bác sĩ chuyên khoa giàu kinh nghiệm, tận tâm với từng bệnh nhân</p>
-                <% } else { %>
-                <h1>Đặt lịch khám</h1>
-                <p>Chọn dịch vụ, ngày giờ phù hợp — phòng khám xác nhận trong 30 phút</p>
-                <% } %>
+                <h1>Chăm sóc răng miệng toàn diện</h1>
+                <p>Đặt lịch khám nhanh chóng, dịch vụ đa dạng, bác sĩ chuyên khoa hàng đầu</p>
             </div>
         </section>
 
-        <!-- DAT LICH -->
         <section class="booking-section" id="datlich">
             <div class="container">
                 <div class="section-title"><h2>Đặt lịch khám</h2></div>
                 <p class="section-intro">Chọn dịch vụ, ngày giờ phù hợp. Phòng khám sẽ phân bác sĩ và liên hệ xác nhận trong 30 phút.</p>
 
                 <div class="new-booking-card">
-                    <!-- Ngay + Gio -->
                     <div class="nb-row-2">
                         <div class="form-group" id="dateGroup">
                             <label>Ngày khám <span class="req">*</span></label>
@@ -70,14 +49,12 @@
                         </div>
                     </div>
 
-                    <!-- Dich vu checkbox grid -->
                     <div class="form-group" id="serviceGroup">
                         <label>🦷 Chọn dịch vụ (có thể chọn nhiều) <span class="req">*</span></label>
                         <div class="svc-checkbox-grid" id="svcCheckboxGrid"></div>
                         <div class="form-error">Vui lòng chọn ít nhất 1 dịch vụ</div>
                     </div>
 
-                    <!-- Dich vu da chon -->
                     <div id="selectedServicesBox" class="nb-selected-box" style="display:none;">
                         <div class="nb-selected-header">🛒 Dịch vụ đã chọn</div>
                         <div class="nb-selected-list" id="nbSelectedList"></div>
@@ -87,7 +64,6 @@
                         </div>
                     </div>
 
-                    <!-- Ghi chu -->
                     <div class="form-group" style="margin-top:16px;">
                         <label>Ghi chú</label>
                         <textarea class="form-control" id="bookingNote" placeholder="Ghi chú thêm..." rows="3"></textarea>
@@ -101,12 +77,11 @@
             </div>
         </section>
 
-        <div class="infor-divider" style="text-align:center;padding:30px 0;">
+        <div style="text-align:center;padding:30px 0;">
             <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
             <div style="margin-top:-10px;display:inline-block;background:white;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
         </div>
 
-        <!-- DICH VU -->
         <section class="services-price-section" id="dichvu">
             <div class="container">
                 <div class="section-title"><h2>Dịch vụ</h2></div>
@@ -135,19 +110,16 @@
             </div>
         </section>
 
-        <div class="infor-divider" style="text-align:center;padding:30px 0;">
+        <div style="text-align:center;padding:30px 0;">
             <div style="width:80px;height:1px;background:linear-gradient(to right,transparent,#dee2e6,transparent);margin:0 auto;"></div>
             <div style="margin-top:-10px;display:inline-block;background:#f0f4f8;padding:0 16px;font-size:0.85rem;color:#0056b3;font-weight:600;letter-spacing:2px;">● ● ●</div>
         </div>
 
-        <!-- BAC SI -->
         <section class="doctors-section" id="bacsi">
             <div class="container">
                 <div class="section-title"><h2>Đội ngũ bác sĩ</h2></div>
                 <p class="section-intro">Các bác sĩ được đào tạo chuyên sâu, nhiều năm kinh nghiệm.</p>
-                <div class="doctors-grid" id="doctorsGrid">
-                    <%-- Render động từ backend --%>
-                </div>
+                <div class="doctors-grid" id="doctorsGrid"></div>
             </div>
         </section>
     </main>
@@ -157,35 +129,28 @@
     (function() {
         window.allServices = <%= request.getAttribute("serviceListJson") == null ? "[]" : request.getAttribute("serviceListJson") %>;
 
-        var injectedDoctors = '${not empty doctorListJson ? doctorListJson : ""}';
-        var doctors = null;
-
-        if (injectedDoctors && injectedDoctors !== '') {
-            try {
-                doctors = JSON.parse(injectedDoctors);
-            } catch(e) {
-                console.warn('[dat-lich] doctorListJson parse error:', e);
-            }
-        }
-
-        if (!doctors || doctors.length === 0) return;
-
-        // Render doctor cards
+        var doctors = <%= request.getAttribute("doctorListJson") == null ? "[]" : request.getAttribute("doctorListJson") %>;
         var grid = document.getElementById('doctorsGrid');
-        if (grid) {
-            var ctx = '${pageContext.request.contextPath}';
+        if (grid && doctors && doctors.length) {
+            var fallbackImg = 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&h=400&fit=crop';
             grid.innerHTML = doctors.map(function(d) {
-                var img = d.imgUrl
-                    ? (d.imgUrl.indexOf('http') === 0 ? d.imgUrl : ctx + '/' + d.imgUrl)
-                    : ctx + '/assets/img/doctors/default.jpg';
+                var img = d.imgUrl || fallbackImg;
                 return '<div class="doctor-card">'
-                    + '<div class="doctor-img"><img src="' + img + '" alt="' + d.name + '" onerror="this.src=\'' + ctx + '/assets/img/doctors/default.jpg\'"></div>'
+                    + '<div class="doctor-img"><img src="' + img + '" alt="' + d.name + '" loading="lazy" onerror="this.src=\'' + fallbackImg + '\'"></div>'
                     + '<div class="doctor-info">'
                     + '<h3>' + d.name + '</h3>'
                     + '<span class="doctor-specialty">' + (d.specialty || '') + '</span>'
                     + '<span class="doctor-degree">' + (d.degree || '') + '</span>'
                     + '</div></div>';
             }).join('');
+        }
+
+        var hash = window.location.hash ? window.location.hash.replace('#', '') : '<%= scrollSection %>';
+        if (hash) {
+            setTimeout(function() {
+                var el = document.getElementById(hash);
+                if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 200);
         }
     })();
     </script>

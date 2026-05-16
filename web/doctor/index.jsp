@@ -1,23 +1,15 @@
 <!DOCTYPE html>
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.dentalclinic.model.TaiKhoan" %>
-<%
-    TaiKhoan loggedDoctor = (TaiKhoan) session.getAttribute("loggedInUser");
-    String doctorHeaderName = "Bác sĩ";
-    if (loggedDoctor != null && loggedDoctor.getHoTen() != null && !loggedDoctor.getHoTen().trim().isEmpty()) {
-        doctorHeaderName = loggedDoctor.getHoTen().trim();
-        if (!doctorHeaderName.toLowerCase().startsWith("bs")) {
-            doctorHeaderName = "BS. " + doctorHeaderName;
-        }
-    }
-%>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phòng Khám Nha Khoa 5AE - Danh Sách Chờ Khám</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style_1.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/danhsach.css">
+    <jsp:include page="../components/notify-resources.jsp" />
     <style>
         /* Điều chỉnh lại layout do đã xóa sidebar */
         .main-container {
@@ -60,19 +52,7 @@
 </head>
 <body>
 
-    <header>
-        <a href="${pageContext.request.contextPath}/" class="header-left" style="text-decoration:none;color:inherit;">
-            <i class="fa-solid fa-tooth"></i>
-            <h1>NHA KHOA 5AE</h1>
-        </a>
-        <div class="header-right">
-            <a href="${pageContext.request.contextPath}/doctor/dashboard" class="doctor-info" style="text-decoration:none;color:inherit;" title="Trang bác sĩ">
-                <i class="fa-solid fa-user-doctor"></i>
-                <span><%= doctorHeaderName %></span>
-            </a>
-            <div class="date-time" id="currentDateTime"></div>
-        </div>
-    </header>
+    <jsp:include page="../components/doctor-header.jsp" />
 
     <div class="main-container">
         <!-- Đã xóa toàn bộ sidebar (menu Lịch hẹn, Bệnh nhân, Báo cáo, CSKH) -->
@@ -121,22 +101,10 @@
         </main>
     </div>
 
-    <!-- Modal xác nhận (giữ nguyên) -->
-    <div id="confirmModal" class="modal">
-        <div class="modal-content">
-            <h3><i class="fa-solid fa-triangle-exclamation"></i> Xác nhận</h3>
-            <p id="modalMessage">Bạn có muốn bắt đầu khám cho bệnh nhân này không?</p>
-            <div class="modal-buttons">
-                <button class="btn-cancel-modal">Hủy</button>
-                <button class="btn-confirm" id="confirmBtn">Đồng ý</button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script>
         window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     </script>
-    <script src="${pageContext.request.contextPath}/doctor/js/danhsach.js?v=20260516g"></script>
+    <script src="${pageContext.request.contextPath}/doctor/js/danhsach.js?v=20260518a"></script>
 </body>
 </html>

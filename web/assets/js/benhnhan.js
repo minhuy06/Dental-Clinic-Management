@@ -334,7 +334,8 @@ function editPatient(id) {
 }
 
 async function deletePatient(id) {
-    if (confirm('Bạn có chắc chắn muốn xóa bệnh nhân này?')) {
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc chắn muốn xóa bệnh nhân này?' });
+    if (ok) {
         const res = await withDataGuard(() => patientDataSource.remove(id), 'Đã xóa bệnh nhân thành công');
         if (!res) return;
         if (patients.length === 0) currentPage = 1;
