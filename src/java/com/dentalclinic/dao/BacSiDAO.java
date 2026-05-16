@@ -108,6 +108,51 @@ public class BacSiDAO {
         return availableIds;
     }
 
+    public boolean isDoctorFreeForBooking(int bacSiId, String ngayKham, java.time.LocalTime start, int durationMinutes) {
+        if (bacSiId < 1 || ngayKham == null || start == null) return false;
+        int required = Math.max(durationMinutes, 30) + 15;
+        java.time.LocalTime end = start.plusMinutes(required);
+
+        List<TimeRange> shifts = getDoctorShiftsOnDate(bacSiId, ngayKham);
+        if (shifts.isEmpty()) return false;
+
+        boolean inShift = false;
+        for (TimeRange sh : shifts) {
+            if ((!start.isBefore(sh.getStart())) && (!end.isAfter(sh.getEnd()))) {
+                inShift = true;
+                break;
+            }
+        }
+        if (!inShift) return false;
+
+        List<TimeRange> busySlots = getDoctorBusySlotsOnDate(bacSiId, ngayKham);
+        for (TimeRange busy : busySlots) {
+            if (start.isBefore(busy.getEnd()) && end.isAfter(busy.getStart())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public int findPhongIdForDoctorOnDate(int bacSiId, String ngayKham) {
+        String sql = "SELECT TOP 1 lv.Phong_ID FROM LichLamViec lv "
+                + "JOIN BacSi b ON b.TaiKhoan_ID = lv.TaiKhoan_ID "
+                + "WHERE b.BacSi_ID = ? AND lv.NgayLam = ? AND lv.Phong_ID IS NOT NULL";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bacSiId);
+            ps.setDate(2, java.sql.Date.valueOf(ngayKham));
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("Phong_ID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 1;
+    }
+
     public boolean isDoctorAvailable(int bacSiId, String ngayKham, String gioKham, int phongId) {
         String sql = "SELECT 1 FROM BacSi b " +
                      "WHERE b.BacSi_ID = ? " +

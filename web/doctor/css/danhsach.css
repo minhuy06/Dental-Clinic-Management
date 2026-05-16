@@ -142,17 +142,19 @@ header {
     overflow-x: auto;
 }
 
-/* Filter Bar — một hàng ngang */
+/* Filter Bar — một hàng ngang, kích thước gọn */
 .filter-bar {
     background: var(--white);
-    padding: 16px 20px;
-    border-radius: 16px;
-    margin-bottom: 24px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    margin-bottom: 16px;
     display: flex;
     align-items: center;
     flex-wrap: nowrap;
-    gap: 12px;
+    gap: 8px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    width: fit-content;
+    max-width: 100%;
 }
 
 .search-box {
@@ -160,43 +162,49 @@ header {
     align-items: center;
     background: #f8fafc;
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 0 15px;
-    gap: 10px;
-    flex: 1 1 auto;
-    min-width: 0;
+    border-radius: 8px;
+    padding: 0 10px;
+    gap: 6px;
+    flex: 0 1 200px;
+    width: 200px;
+    max-width: 220px;
+    min-width: 140px;
+    height: 36px;
 }
 
 .search-box i {
     color: var(--text-sub);
+    font-size: 0.8rem;
 }
 
 .search-box input {
     border: none;
-    padding: 12px 0;
+    padding: 0;
     width: 100%;
     outline: none;
     background: transparent;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    height: 100%;
 }
 
 .filter-group {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 8px;
     flex-wrap: nowrap;
     flex-shrink: 0;
 }
 
 .filter-group select {
-    padding: 10px 15px;
+    padding: 0 12px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     outline: none;
     background: #f8fafc;
     cursor: pointer;
-    font-size: 0.9rem;
-    min-width: 160px;
+    font-size: 0.85rem;
+    min-width: 150px;
+    height: 36px;
     white-space: nowrap;
 }
 
@@ -204,13 +212,18 @@ header {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 0 14px;
+    border-radius: 8px;
     cursor: pointer;
     transition: 0.3s;
     font-weight: 600;
+    font-size: 0.85rem;
     flex-shrink: 0;
     white-space: nowrap;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .btn-refresh:hover {

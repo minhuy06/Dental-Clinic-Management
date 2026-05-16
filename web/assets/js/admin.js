@@ -84,6 +84,21 @@ var ADMIN_LAST_TAB_KEY = 'admin:lastTab';
 var schCurrentDate = new Date();
 var editingShiftId = null;
 
+// Doanh thu — mặc định rỗng, được ghi đè từ __ADMIN_REVENUE__ (JSP/DB)
+var revenueMonths = [];
+var revenueByCat = [];
+var revenueTopServices = [];
+var revenuePayments = [];
+var revenueTxns = [];
+var allTxns = [];
+var revMode = 'day';
+
+(function initEmptyRevenueMonths() {
+    for (var i = 1; i <= 12; i++) {
+        revenueMonths.push({ month: 'T' + i, revenue: 0, appointments: 0 });
+    }
+})();
+
 // ==================== OVERRIDE DATA TỪ BACKEND ====================
 // JSP inject vào window.__ADMIN_*__ trước khi load file này.
 // Nếu có thì dùng, không thì giữ nguyên demo data ở trên.
@@ -92,7 +107,7 @@ var editingShiftId = null;
         services = window.__ADMIN_SERVICES__;
         console.info('[admin] services loaded from DB:', services.length);
     }
-    if (window.__ADMIN_ACCOUNTS__ && window.__ADMIN_ACCOUNTS__.length > 0) {
+    if (Array.isArray(window.__ADMIN_ACCOUNTS__)) {
         accounts = window.__ADMIN_ACCOUNTS__;
         console.info('[admin] accounts loaded from DB:', accounts.length);
     }
@@ -102,15 +117,16 @@ var editingShiftId = null;
     }
     if (window.__ADMIN_REVENUE__) {
         var r = window.__ADMIN_REVENUE__;
-        if (r.months)      revenueMonths     = r.months;
-        if (r.byCat)       revenueByCat      = r.byCat;
-        if (r.topServices) revenueTopServices= r.topServices;
-        if (r.payments)    revenuePayments   = r.payments;
-        if (r.txns)        revenueTxns       = r.txns;
-        if (r.allTxns)     allTxns           = r.allTxns;
-        console.info('[admin] revenue loaded from DB');
+        if (r.months && r.months.length)      revenueMonths      = r.months;
+        if (r.byCat)                          revenueByCat       = r.byCat;
+        if (r.topServices)                    revenueTopServices = r.topServices;
+        if (r.payments)                       revenuePayments    = r.payments;
+        if (r.txns)                           revenueTxns        = r.txns;
+        if (r.allTxns)                        allTxns            = r.allTxns;
+        window.__ADMIN_REVENUE_SEEDED__ = true;
+        console.info('[admin] revenue loaded from DB:', (allTxns.length || revenueTxns.length) + ' giao dịch');
+        initRevYearSelects();
     }
-    // Set ngày hiện tại cho lịch
     schCurrentDate = new Date();
 })();
 
@@ -284,19 +300,6 @@ var mockDataSource = {
             return {success:true};
         }
     },
-    revenue: {
-        summary: async function() {
-            await waitMs(ADMIN_CONFIG.MOCK_DELAY_MS);
-            return {
-                months: cloneData(revenueMonths),
-                byCat: cloneData(revenueByCat),
-                topServices: cloneData(revenueTopServices),
-                payments: cloneData(revenuePayments),
-                txns: cloneData(revenueTxns),
-                allTxns: cloneData(allTxns)
-            };
-        }
-    }
 };
 
 var apiDataSource = {
@@ -367,7 +370,17 @@ async function loadShiftsFromServer() {
 }
 
 async function loadRevenueFromServer() {
-    var r = await withApiGuard(function() { return dataSource.revenue.summary(); });
+    if (window.__ADMIN_REVENUE_SEEDED__) {
+        initRevYearSelects();
+        renderRevenue();
+        return;
+    }
+    if (ADMIN_CONFIG.USE_MOCK || !apiDataSource.revenue) {
+        initRevYearSelects();
+        renderRevenue();
+        return;
+    }
+    var r = await withApiGuard(function() { return apiDataSource.revenue.summary(); });
     if (!r) return;
     if (r.months) revenueMonths = r.months;
     if (r.byCat) revenueByCat = r.byCat;
@@ -375,6 +388,7 @@ async function loadRevenueFromServer() {
     if (r.payments) revenuePayments = r.payments;
     if (r.txns) revenueTxns = r.txns;
     if (r.allTxns) allTxns = r.allTxns;
+    initRevYearSelects();
     renderRevenue();
 }
 
@@ -1166,6 +1180,27 @@ function onAvatarChange(input) {
 
 function closeAccountModal() { document.getElementById('accountModal').style.display = 'none'; }
 
+function reloadAdminPage() {
+    window.location.reload();
+}
+
+async function postAdminAccount(params, fallbackError) {
+    var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/accounts', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: params.toString()
+    });
+    var json = null;
+    try { json = await response.json(); } catch (e) { json = null; }
+    if (!response.ok || (json && json.success === false)) {
+        throw new Error((json && json.message) ? json.message : fallbackError);
+    }
+    return { success: true };
+}
+
 async function saveAccount() {
     var name = document.getElementById('accName').value.trim();
     var phone = document.getElementById('accPhone').value.trim();
@@ -1185,16 +1220,44 @@ async function saveAccount() {
         avatar: avatar,
         status: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
+    var password = document.getElementById('accPassword').value;
     var res = null;
     if (editingAccId) {
-        data.id = editingAccId;
-        res = await withApiGuard(function() { return dataSource.accounts.update(data); }, 'Đã cập nhật tài khoản');
+        res = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('action', 'update');
+            params.append('id', String(editingAccId));
+            params.append('name', data.name);
+            params.append('phone', data.phone);
+            params.append('password', password || '');
+            params.append('role', data.role);
+            params.append('status', data.status || 'active');
+            params.append('dob', data.dob || '');
+            params.append('gender', data.gender || '');
+            params.append('specialty', data.specialty || '');
+            params.append('degree', data.degree || '');
+            params.append('avatar', data.avatar || '');
+            return postAdminAccount(params, 'Không cập nhật được tài khoản');
+        }, 'Đã cập nhật tài khoản');
     } else {
-        res = await withApiGuard(function() { return dataSource.accounts.create(data); }, 'Đã thêm tài khoản mới');
+        res = await withApiGuard(async function() {
+            var params = new URLSearchParams();
+            params.append('action', 'create');
+            params.append('name', data.name);
+            params.append('phone', data.phone);
+            params.append('password', password);
+            params.append('role', data.role);
+            params.append('dob', data.dob || '');
+            params.append('gender', data.gender || '');
+            params.append('specialty', data.specialty || '');
+            params.append('degree', data.degree || '');
+            params.append('avatar', data.avatar || '');
+            return postAdminAccount(params, 'Không thêm được tài khoản');
+        }, 'Đã thêm tài khoản mới');
     }
     if (!res) return;
     closeAccountModal();
-    await loadAccountsFromServer();
+    reloadAdminPage();
 }
 
 // ===== POPUP THÔNG TIN NHÂN SỰ =====
@@ -1256,135 +1319,92 @@ async function toggleAccStatus(id) {
     if (!a) return;
     var newStatus = a.status === 'active' ? 'inactive' : 'active';
     var msg = newStatus === 'active' ? 'Đã mở khóa tài khoản' : 'Đã khóa tài khoản';
-    var res = await withApiGuard(function() { return dataSource.accounts.toggleStatus(id, newStatus); }, msg);
-    if (res) await loadAccountsFromServer();
+    var res = await withApiGuard(async function() {
+        var params = new URLSearchParams();
+        params.append('action', 'toggle-status');
+        params.append('id', String(id));
+        params.append('status', newStatus);
+        return postAdminAccount(params, 'Không cập nhật được trạng thái');
+    }, msg);
+    if (res) reloadAdminPage();
 }
 
 async function deleteAccount(id) {
     const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa tài khoản này?' });
     if (!ok) return;
-    var res = await withApiGuard(function() { return dataSource.accounts.remove(id); }, 'Đã xóa tài khoản');
-    if (res) await loadAccountsFromServer();
+    var res = await withApiGuard(async function() {
+        var params = new URLSearchParams();
+        params.append('action', 'delete');
+        params.append('id', String(id));
+        return postAdminAccount(params, 'Không xóa được tài khoản');
+    }, 'Đã xóa tài khoản');
+    if (res) reloadAdminPage();
 }
 
 // ==================== DOANH THU ====================
 
-// Dữ liệu tháng năm 2026 (tháng 4 là tháng hiện tại)
-var revenueMonths = [
-    {month:'T1', revenue:125400000, appointments:112},
-    {month:'T2', revenue:118700000, appointments:105},
-    {month:'T3', revenue:138900000, appointments:124},
-    {month:'T4', revenue:142600000, appointments:128},
-    {month:'T5', revenue:0,         appointments:0},
-    {month:'T6', revenue:0,         appointments:0},
-    {month:'T7', revenue:0,         appointments:0},
-    {month:'T8', revenue:0,         appointments:0},
-    {month:'T9', revenue:0,         appointments:0},
-    {month:'T10', revenue:0,        appointments:0},
-    {month:'T11', revenue:0,        appointments:0},
-    {month:'T12', revenue:0,        appointments:0}
-];
+function revMethodBadge(method) {
+    var m = (method || '').toLowerCase();
+    if (m === 'transfer' || m.indexOf('chuy') >= 0) return { label: method || 'Chuyển khoản', cls: 'rev-transfer' };
+    if (m === 'installment' || m.indexOf('góp') >= 0 || m.indexOf('gop') >= 0) return { label: method || 'Trả góp', cls: 'rev-installment' };
+    if (m === 'card' || m.indexOf('thẻ') >= 0 || m.indexOf('the') >= 0) return { label: method || 'Thẻ ngân hàng', cls: 'rev-card' };
+    if (m === 'cash' || m.indexOf('mặt') >= 0 || m.indexOf('mat') >= 0) return { label: method || 'Tiền mặt', cls: 'rev-cash' };
+    return { label: method || 'Khác', cls: 'rev-cash' };
+}
 
-var revenueByCat = [
-    {name:'Chỉnh nha',        color:'#2563eb', revenue:198000000},
-    {name:'Phục hình',        color:'#8b5cf6', revenue:156000000},
-    {name:'Phẫu thuật',       color:'#ef4444', revenue:112000000},
-    {name:'Thẩm mỹ',          color:'#f59e0b', revenue:89000000},
-    {name:'Khám & Điều trị',  color:'#10b981', revenue:70600000}
-];
-
-var revenueTopServices = [
-    {name:'Niềng răng Invisalign',    cat:'Chỉnh nha',  amount:112000000},
-    {name:'Cấy ghép Implant cao cấp', cat:'Phẫu thuật', amount:90000000},
-    {name:'Bọc sứ Zirconia',          cat:'Phục hình',  amount:72000000},
-    {name:'Niềng mắc cài sứ',         cat:'Chỉnh nha',  amount:56000000},
-    {name:'Mặt dán sứ Veneer',        cat:'Thẩm mỹ',    amount:42000000}
-];
-
-var revenuePayments = [
-    {method:'Chuyển khoản', icon:'fa-building-columns', color:'#2563eb', bg:'#dbeafe', pct:50, amount:313300000},
-    {method:'Tiền mặt',     icon:'fa-money-bills',      color:'#10b981', bg:'#d1fae5', pct:28, amount:175448000},
-    {method:'Trả góp',      icon:'fa-calendar-days',    color:'#f59e0b', bg:'#fef3c7', pct:16, amount:100256000},
-    {method:'Thẻ ngân hàng',icon:'fa-credit-card',      color:'#8b5cf6', bg:'#ede9fe', pct:6,  amount:37593000}
-];
-
-var revenueTxns = [
-    {id:'GD001', date:'25/04/2026', patient:'Nguyễn Văn Hiển',  service:'Bọc sứ Zirconia x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000},
-    {id:'GD002', date:'23/04/2026', patient:'Trần Thị Thảo',    service:'Niềng Invisalign',        doctor:'BS. Trần Tâm',   method:'installment', amount:80000000},
-    {id:'GD003', date:'21/04/2026', patient:'Lê Anh Nam',        service:'Implant cao cấp x1',     doctor:'BS. Hoàng Quân', method:'cash',        amount:30000000},
-    {id:'GD004', date:'19/04/2026', patient:'Phạm Thu Hà',       service:'Tẩy trắng Laser',        doctor:'BS. Phạm Hương', method:'transfer',    amount:2500000},
-    {id:'GD005', date:'17/04/2026', patient:'Hoàng Văn Tuấn',    service:'Khám + Cạo vôi',         doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000},
-    {id:'GD006', date:'15/04/2026', patient:'Đặng Thị Hoa',      service:'Bọc sứ Cercon x3',       doctor:'BS. Lê Quang',   method:'transfer',    amount:15000000},
-    {id:'GD007', date:'12/04/2026', patient:'Bùi Minh Quân',     service:'Nhổ răng khôn x2',       doctor:'BS. Hoàng Quân', method:'cash',        amount:6000000},
-    {id:'GD008', date:'10/04/2026', patient:'Ngô Thị Lan',       service:'Veneer x4',              doctor:'BS. Phạm Hương', method:'installment', amount:28000000},
-    {id:'GD009', date:'08/04/2026', patient:'Vũ Minh Đức',       service:'Niềng kim loại',         doctor:'BS. Trần Tâm',   method:'transfer',    amount:25000000},
-    {id:'GD010', date:'05/04/2026', patient:'Đinh Bảo Ngọc',     service:'Lấy tủy x3 răng',       doctor:'BS. Nguyễn Hải', method:'card',        amount:4500000}
-];
-
-// ==================== DỮ LIỆU GIAO DỊCH THEO NGÀY (demo - năm 2025 & 2026) ====================
-var allTxns = [
-    // ===== NĂM 2026 =====
-    // Tháng 4/2026
-    {id:'GD001',date:'2026-04-25',patient:'Nguyễn Văn Hiển',  service:'Bọc sứ Zirconia x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000, appointments:1},
-    {id:'GD002',date:'2026-04-23',patient:'Trần Thị Thảo',    service:'Niềng Invisalign',        doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
-    {id:'GD003',date:'2026-04-21',patient:'Lê Anh Nam',        service:'Implant cao cấp x1',     doctor:'BS. Hoàng Quân', method:'cash',        amount:30000000, appointments:1},
-    {id:'GD004',date:'2026-04-19',patient:'Phạm Thu Hà',       service:'Tẩy trắng Laser',        doctor:'BS. Phạm Hương', method:'transfer',    amount:2500000,  appointments:1},
-    {id:'GD005',date:'2026-04-17',patient:'Hoàng Văn Tuấn',    service:'Khám + Cạo vôi',         doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
-    {id:'GD006',date:'2026-04-15',patient:'Đặng Thị Hoa',      service:'Bọc sứ Cercon x3',       doctor:'BS. Lê Quang',   method:'transfer',    amount:15000000, appointments:1},
-    {id:'GD007',date:'2026-04-12',patient:'Bùi Minh Quân',     service:'Nhổ răng khôn x2',       doctor:'BS. Hoàng Quân', method:'cash',        amount:6000000,  appointments:1},
-    {id:'GD008',date:'2026-04-10',patient:'Ngô Thị Lan',       service:'Veneer x4',              doctor:'BS. Phạm Hương', method:'installment', amount:28000000, appointments:1},
-    {id:'GD009',date:'2026-04-08',patient:'Vũ Minh Đức',       service:'Niềng kim loại',         doctor:'BS. Trần Tâm',   method:'transfer',    amount:25000000, appointments:1},
-    {id:'GD010',date:'2026-04-05',patient:'Đinh Bảo Ngọc',     service:'Lấy tủy x3 răng',       doctor:'BS. Nguyễn Hải', method:'card',        amount:4500000,  appointments:1},
-    {id:'GD011',date:'2026-04-03',patient:'Trương Quốc Bảo',   service:'Implant TC x1',          doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
-    {id:'GD012',date:'2026-04-01',patient:'Lý Thị Nhung',      service:'Tẩy trắng tại nhà',     doctor:'BS. Phạm Hương', method:'cash',        amount:1500000,  appointments:1},
-    // Tháng 3/2026
-    {id:'GD013',date:'2026-03-28',patient:'Cao Minh Khoa',     service:'Niềng Invisalign',       doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
-    {id:'GD014',date:'2026-03-25',patient:'Phan Thị Kiều',     service:'Bọc sứ Zirconia x3',    doctor:'BS. Lê Quang',   method:'transfer',    amount:18000000, appointments:1},
-    {id:'GD015',date:'2026-03-20',patient:'Nguyễn Thành Long', service:'Veneer x5',              doctor:'BS. Phạm Hương', method:'installment', amount:35000000, appointments:1},
-    {id:'GD016',date:'2026-03-18',patient:'Trần Khánh Ly',     service:'Implant cao cấp x2',    doctor:'BS. Hoàng Quân', method:'transfer',    amount:60000000, appointments:1},
-    {id:'GD017',date:'2026-03-15',patient:'Lê Văn Sơn',        service:'Niềng mắc cài sứ',      doctor:'BS. Trần Tâm',   method:'installment', amount:35000000, appointments:1},
-    {id:'GD018',date:'2026-03-10',patient:'Hoàng Thu Hà',      service:'Tẩy trắng Laser',       doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
-    {id:'GD019',date:'2026-03-05',patient:'Phạm Bình An',      service:'Lấy tủy x2',            doctor:'BS. Nguyễn Hải', method:'transfer',    amount:1600000,  appointments:1},
-    {id:'GD020',date:'2026-03-02',patient:'Đỗ Thị Minh',       service:'Cạo vôi + Khám',        doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
-    // Tháng 2/2026
-    {id:'GD021',date:'2026-02-25',patient:'Võ Minh Tuấn',      service:'Implant TC x1',          doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
-    {id:'GD022',date:'2026-02-20',patient:'Bùi Thị Nga',       service:'Bọc sứ Cercon x4',      doctor:'BS. Lê Quang',   method:'transfer',    amount:20000000, appointments:1},
-    {id:'GD023',date:'2026-02-15',patient:'Nguyễn Anh Dũng',   service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
-    {id:'GD024',date:'2026-02-10',patient:'Trần Thị Bích',     service:'Veneer x3',             doctor:'BS. Phạm Hương', method:'card',        amount:21000000, appointments:1},
-    {id:'GD025',date:'2026-02-05',patient:'Lê Quốc Huy',       service:'Tẩy trắng tại nhà',    doctor:'BS. Phạm Hương', method:'cash',        amount:1500000,  appointments:1},
-    // Tháng 1/2026
-    {id:'GD026',date:'2026-01-28',patient:'Phạm Lan Anh',      service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
-    {id:'GD027',date:'2026-01-20',patient:'Hoàng Văn Nam',     service:'Niềng mắc cài kim loại',doctor:'BS. Trần Tâm',   method:'installment', amount:25000000, appointments:1},
-    {id:'GD028',date:'2026-01-15',patient:'Đặng Thu Trang',    service:'Bọc sứ Zirconia x2',   doctor:'BS. Lê Quang',   method:'transfer',    amount:12000000, appointments:1},
-    {id:'GD029',date:'2026-01-10',patient:'Nguyễn Minh Châu',  service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
-    {id:'GD030',date:'2026-01-05',patient:'Trần Hải Đăng',     service:'Lấy tủy + Trám x2',   doctor:'BS. Nguyễn Hải', method:'card',        amount:1500000,  appointments:1},
-    // ===== NĂM 2025 =====
-    // Tháng 12/2025
-    {id:'GD031',date:'2025-12-22',patient:'Lê Thị Thu',        service:'Implant TC x2',         doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
-    {id:'GD032',date:'2025-12-18',patient:'Nguyễn Quang Vinh', service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
-    {id:'GD033',date:'2025-12-12',patient:'Phạm Thị Hồng',     service:'Veneer x4',             doctor:'BS. Phạm Hương', method:'transfer',    amount:28000000, appointments:1},
-    {id:'GD034',date:'2025-12-08',patient:'Trương Minh Hiếu',  service:'Bọc sứ Zirconia x3',   doctor:'BS. Lê Quang',   method:'card',        amount:18000000, appointments:1},
-    {id:'GD035',date:'2025-12-03',patient:'Bùi Thanh Tú',      service:'Khám + Cạo vôi',       doctor:'BS. Nguyễn Hải', method:'cash',        amount:300000,   appointments:1},
-    // Tháng 11/2025
-    {id:'GD036',date:'2025-11-25',patient:'Cao Thị Lan',        service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1},
-    {id:'GD037',date:'2025-11-18',patient:'Đỗ Văn Mạnh',       service:'Niềng mắc cài sứ',     doctor:'BS. Trần Tâm',   method:'installment', amount:35000000, appointments:1},
-    {id:'GD038',date:'2025-11-10',patient:'Vũ Thị Ngọc',       service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'cash',        amount:2500000,  appointments:1},
-    // Tháng 9/2025
-    {id:'GD039',date:'2025-09-20',patient:'Lý Văn Đức',        service:'Bọc sứ Cercon x2',     doctor:'BS. Lê Quang',   method:'transfer',    amount:10000000, appointments:1},
-    {id:'GD040',date:'2025-09-10',patient:'Phan Thị Mai',      service:'Veneer x3',             doctor:'BS. Phạm Hương', method:'installment', amount:21000000, appointments:1},
-    // Tháng 6/2025
-    {id:'GD041',date:'2025-06-18',patient:'Ngô Văn Hùng',      service:'Niềng Invisalign',      doctor:'BS. Trần Tâm',   method:'installment', amount:80000000, appointments:1},
-    {id:'GD042',date:'2025-06-05',patient:'Đinh Thị Phương',   service:'Implant TC x1',         doctor:'BS. Hoàng Quân', method:'transfer',    amount:15000000, appointments:1},
-    // Tháng 3/2025
-    {id:'GD043',date:'2025-03-22',patient:'Trần Văn Khoa',     service:'Bọc sứ Zirconia x4',   doctor:'BS. Lê Quang',   method:'transfer',    amount:24000000, appointments:1},
-    {id:'GD044',date:'2025-03-10',patient:'Nguyễn Thị Hằng',  service:'Tẩy trắng Laser',      doctor:'BS. Phạm Hương', method:'card',        amount:2500000,  appointments:1},
-    // Tháng 1/2025
-    {id:'GD045',date:'2025-01-15',patient:'Lê Minh Quân',      service:'Niềng mắc cài kim loại',doctor:'BS. Trần Tâm',   method:'installment', amount:25000000, appointments:1},
-    {id:'GD046',date:'2025-01-08',patient:'Phạm Hoàng Anh',    service:'Implant cao cấp x1',   doctor:'BS. Hoàng Quân', method:'transfer',    amount:30000000, appointments:1}
-];
+function formatRevTxnDate(dateStr) {
+    if (!dateStr) return '';
+    if (dateStr.indexOf('-') >= 0) return formatDate(dateStr);
+    return dateStr;
+}
 
 // ==================== CHẾ ĐỘ LỌC ====================
-var revMode = 'day';
+
+/** Điền danh sách năm cho lọc tháng/năm (từ dữ liệu DB + khoảng mở rộng). */
+function initRevYearSelects() {
+    var now = new Date();
+    var currentYear = now.getFullYear();
+    var minY = currentYear;
+    var maxY = currentYear;
+
+    allTxns.forEach(function(t) {
+        if (!t.date || t.date.length < 4) return;
+        var y = parseInt(String(t.date).substring(0, 4), 10);
+        if (!isNaN(y)) {
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+        }
+    });
+
+    minY = Math.min(minY, currentYear - 15);
+    maxY = Math.max(maxY, currentYear + 2);
+
+    var years = [];
+    for (var y = maxY; y >= minY; y--) years.push(y);
+
+    function fillSelect(elId, selectedYear) {
+        var el = document.getElementById(elId);
+        if (!el) return;
+        el.innerHTML = years.map(function(y) {
+            return '<option value="' + y + '"' + (y === selectedYear ? ' selected' : '') + '>' + y + '</option>';
+        }).join('');
+    }
+
+    fillSelect('revMonthYear', currentYear);
+    fillSelect('revYearSel', currentYear);
+
+    var monthSel = document.getElementById('revMonthSel');
+    if (monthSel) monthSel.value = String(now.getMonth() + 1);
+
+    var fromEl = document.getElementById('revDateFrom');
+    var toEl = document.getElementById('revDateTo');
+    if (fromEl && toEl) {
+        var firstDay = new Date(currentYear, now.getMonth(), 1);
+        var lastDay = new Date(currentYear, now.getMonth() + 1, 0);
+        fromEl.value = firstDay.toISOString().slice(0, 10);
+        toEl.value = lastDay.toISOString().slice(0, 10);
+    }
+}
 
 function setRevMode(mode) {
     revMode = mode;
@@ -1447,11 +1467,10 @@ function applyRevFilter() {
         }).join('');
 
     // --- Bảng giao dịch ---
-    var methodMap = {cash:{label:'Tiền mặt',cls:'rev-cash'}, transfer:{label:'Chuyển khoản',cls:'rev-transfer'}, installment:{label:'Trả góp',cls:'rev-installment'}, card:{label:'Thẻ NH',cls:'rev-card'}};
     document.getElementById('revFrTableBody').innerHTML = filtered.length === 0
         ? '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--text-sub)">Không có giao dịch nào trong khoảng thời gian này</td></tr>'
         : filtered.sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(t) {
-            var m = methodMap[t.method] || {label:t.method, cls:'rev-cash'};
+            var m = revMethodBadge(t.method);
             return '<tr>' +
                 '<td><span class="rev-txn-id">#'+t.id+'</span></td>' +
                 '<td style="color:var(--text-sub)">'+formatDate(t.date)+'</td>' +
@@ -1519,7 +1538,7 @@ function renderRevenue() {
         var pct = hasData ? Math.max(4, Math.round(r.revenue / maxRev * 100)) : 3;
         var valM = hasData ? (r.revenue/1000000).toFixed(0) + 'Tr' : '';
         var barColor = hasData ? 'var(--primary-color)' : 'var(--border-color)';
-        return '<div class="rev-bc-col" title="' + r.month + '/2026: ' + (hasData ? r.revenue.toLocaleString('vi-VN') + 'đ' : 'Chưa có dữ liệu') + '">' +
+        return '<div class="rev-bc-col" title="' + r.month + '/' + new Date().getFullYear() + ': ' + (hasData ? r.revenue.toLocaleString('vi-VN') + 'đ' : 'Chưa có dữ liệu') + '">' +
             '<div class="rev-bc-val">' + valM + '</div>' +
             '<div class="rev-bc-bar" style="height:' + pct + '%;background:' + barColor + '"></div>' +
             '<div class="rev-bc-month">' + r.month + '</div>' +
@@ -1528,6 +1547,11 @@ function renderRevenue() {
 
     // --- Donut chart ---
     var catTotal = revenueByCat.reduce(function(a,c){return a+c.revenue;},0);
+    if (catTotal <= 0) {
+        document.getElementById('donutSvg').innerHTML = '';
+        document.getElementById('donutTotal').innerText = '0';
+        document.getElementById('donutLegend').innerHTML = '<p style="color:var(--text-sub);font-size:0.85rem;padding:8px 0">Chưa có dữ liệu doanh thu theo chuyên khoa</p>';
+    } else {
     var cx=60, cy=60, r=50, stroke=14, dashTotal=2*Math.PI*r;
     var offset=0;
     var paths = revenueByCat.map(function(c) {
@@ -1557,10 +1581,13 @@ function renderRevenue() {
             '<span class="rev-dl-pct">'+pct+'%</span>' +
         '</div>';
     }).join('');
+    }
 
     // --- Top services ---
     var rankClasses = ['gold','silver','bronze','',''];
-    document.getElementById('revTopServices').innerHTML = revenueTopServices.map(function(s,i) {
+    document.getElementById('revTopServices').innerHTML = revenueTopServices.length === 0
+        ? '<p style="color:var(--text-sub);font-size:0.85rem;padding:12px 0">Chưa có dữ liệu</p>'
+        : revenueTopServices.map(function(s,i) {
         return '<div class="rev-top-item">' +
             '<div class="rev-top-rank '+(rankClasses[i]||'')+'">'+(i+1)+'</div>' +
             '<div class="rev-top-info">' +
@@ -1572,7 +1599,9 @@ function renderRevenue() {
     }).join('');
 
     // --- Payment methods ---
-    document.getElementById('revPaymentMethods').innerHTML = revenuePayments.map(function(p) {
+    document.getElementById('revPaymentMethods').innerHTML = revenuePayments.length === 0
+        ? '<p style="color:var(--text-sub);font-size:0.85rem;padding:12px 0">Chưa có dữ liệu</p>'
+        : revenuePayments.map(function(p) {
         return '<div class="rev-pay-item">' +
             '<div class="rev-pay-row">' +
                 '<div class="rev-pay-left">' +
@@ -1602,7 +1631,7 @@ function renderRevenue() {
         return amt;
     });
     document.getElementById('revQuarters').innerHTML = quarters.map(function(q,i) {
-        var pct = Math.round(qAmts[i]/maxQ*100);
+        var pct = maxQ > 0 ? Math.round(qAmts[i]/maxQ*100) : 0;
         var appts = q.months.reduce(function(a,m){return a+revenueMonths[m].appointments;},0);
         return '<div class="rev-q-item">' +
             '<div class="rev-q-header"><span class="rev-q-label">'+q.label+'</span><span class="rev-q-amt">'+fmtRev(qAmts[i])+'</span></div>' +
@@ -1612,17 +1641,13 @@ function renderRevenue() {
     }).join('');
 
     // --- Transactions table ---
-    var methodMap = {
-        'cash':        {label:'Tiền mặt',      cls:'rev-cash'},
-        'transfer':    {label:'Chuyển khoản',   cls:'rev-transfer'},
-        'installment': {label:'Trả góp',         cls:'rev-installment'},
-        'card':        {label:'Thẻ ngân hàng',  cls:'rev-card'}
-    };
-    document.getElementById('revTableBody').innerHTML = revenueTxns.map(function(t) {
-        var m = methodMap[t.method] || {label:t.method, cls:'rev-cash'};
+    document.getElementById('revTableBody').innerHTML = revenueTxns.length === 0
+        ? '<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sub)">Chưa có giao dịch thanh toán</td></tr>'
+        : revenueTxns.map(function(t) {
+        var m = revMethodBadge(t.method);
         return '<tr>' +
             '<td><span class="rev-txn-id">#'+t.id+'</span></td>' +
-            '<td style="color:var(--text-sub)">'+t.date+'</td>' +
+            '<td style="color:var(--text-sub)">'+formatRevTxnDate(t.date)+'</td>' +
             '<td style="font-weight:600">'+t.patient+'</td>' +
             '<td style="color:var(--text-sub);font-size:0.8rem">'+t.service+'</td>' +
             '<td style="color:var(--text-sub);font-size:0.8rem">'+t.doctor+'</td>' +

@@ -193,11 +193,11 @@
                             <option value="9">Tháng 9</option><option value="10">Tháng 10</option><option value="11">Tháng 11</option><option value="12">Tháng 12</option>
                         </select>
                         <label>Năm</label>
-                        <select id="revMonthYear"><option value="2025">2025</option><option value="2026" selected>2026</option></select>
+                        <select id="revMonthYear"></select>
                     </div>
                     <div id="revInputYear" class="rev-input-group" style="display:none">
                         <label>Năm</label>
-                        <select id="revYearSel"><option value="2025">2025</option><option value="2026" selected>2026</option></select>
+                        <select id="revYearSel"></select>
                     </div>
                 </div>
                 <button class="rev-search-btn" onclick="applyRevFilter()"><i class="fas fa-search"></i> Thống kê</button>
@@ -530,6 +530,6 @@
     </script>
 
     <jsp:include page="../components/notify-resources.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/admin.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260518f"></script>
 </body>
 </html>

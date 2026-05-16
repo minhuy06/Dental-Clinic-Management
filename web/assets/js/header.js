@@ -75,10 +75,19 @@ document.addEventListener('click', function(e) {
     }
 });
 
-// Logout
+// Logout — luôn dùng AppNotify (tránh window.confirm)
 function doLogoutNow() {
     if (typeof AppNotify !== 'undefined' && AppNotify.doLogoutWithConfirm) {
         AppNotify.doLogoutWithConfirm();
+        return;
+    }
+    if (typeof AppNotify !== 'undefined' && AppNotify.confirm) {
+        AppNotify.confirm({ message: 'Bạn có chắc muốn đăng xuất?' }).then(function(ok) {
+            if (ok) {
+                var home = (typeof window.HOME_URL === 'string' && window.HOME_URL) ? window.HOME_URL : (window.CONTEXT_PATH || '') + '/';
+                window.location.href = home + (home.indexOf('?') >= 0 ? '&' : '?') + 'logout=true';
+            }
+        });
         return;
     }
     var home = (typeof window.HOME_URL === 'string' && window.HOME_URL) ? window.HOME_URL : (window.CONTEXT_PATH || '') + '/';

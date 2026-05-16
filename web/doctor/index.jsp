@@ -8,7 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style_1.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/danhsach.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/doctor/css/danhsach.css?v=20260518b">
     <jsp:include page="../components/notify-resources.jsp" />
     <style>
         /* Điều chỉnh lại layout do đã xóa sidebar */

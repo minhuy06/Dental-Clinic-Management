@@ -303,6 +303,42 @@ public class BenhNhanDAO {
         return null;
     }
 
+    public int findBenhNhanIdByTaiKhoanId(int taiKhoanId) {
+        if (taiKhoanId < 1) return -1;
+        String sql = "SELECT BenhNhan_ID FROM BenhNhan WHERE TaiKhoan_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, taiKhoanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("BenhNhan_ID");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /** Đảm bảo tài khoản bệnh nhân có bản ghi BenhNhan (tạo mới nếu thiếu). */
+    public int ensureBenhNhanForTaiKhoan(int taiKhoanId) {
+        int existing = findBenhNhanIdByTaiKhoanId(taiKhoanId);
+        if (existing > 0) return existing;
+        if (taiKhoanId < 1) return -1;
+        String insertBn = "INSERT INTO BenhNhan (TaiKhoan_ID) VALUES (?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(insertBn, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setInt(1, taiKhoanId);
+            ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) return keys.getInt(1);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return findBenhNhanIdByTaiKhoanId(taiKhoanId);
+    }
+
     public boolean phoneExists(String phone) {
         if (phone == null || phone.isBlank()) {
             return false;

@@ -62,6 +62,30 @@ public class DichVuDAO {
         return 0;
     }
 
+    public int getTotalDurationMinutes(java.util.Map<Integer, Integer> qtyByDvId) {
+        if (qtyByDvId == null || qtyByDvId.isEmpty()) return 0;
+        int total = 0;
+        String sql = "SELECT ISNULL(ThoiLuongDuKien, 30) FROM DichVu WHERE DichVu_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (java.util.Map.Entry<Integer, Integer> e : qtyByDvId.entrySet()) {
+                if (e.getKey() == null || e.getKey() < 1) continue;
+                int qty = e.getValue() == null || e.getValue() < 1 ? 1 : e.getValue();
+                ps.setInt(1, e.getKey());
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        total += rs.getInt(1) * qty;
+                    } else {
+                        total += 30 * qty;
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return total;
+    }
+
     public boolean createFromAdmin(String tenDichVu, double giaTien, int thoiLuongDuKien, int chuyenKhoaId, boolean tinhTheoRang) {
         String sql = "INSERT INTO DichVu (TenDichVu, GiaTien, ThoiLuongDuKien, ChuyenKhoa_ID, TinhTheoRang) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();

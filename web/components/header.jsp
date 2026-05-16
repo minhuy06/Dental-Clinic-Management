@@ -42,9 +42,9 @@
             <div class="nav-mobile-actions">
                 <% if (loggedInUser != null) { %>
                     <% if (isStaff && isIndex) { %>
-                        <button type="button" class="btn btn-primary" style="width:100%;" onclick="toggleUserDropdown()">👤 <%= loggedInUser.getHoTen() %></button>
+                        <button type="button" class="btn btn-primary" style="width:100%;" onclick="toggleUserDropdown()">👤 <%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></button>
                     <% } else { %>
-                        <a href="<%= isStaff ? workspaceUrl : (ctx + "/hoso") %>" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() %></a>
+                        <a href="<%= isStaff ? workspaceUrl : (ctx + "/hoso") %>" class="btn btn-primary" style="width:100%;">👤 <%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></a>
                     <% } %>
                 <% } else { %>
                     <a href="${pageContext.request.contextPath}/account/login.jsp" class="btn btn-outline" style="width:100%;">Đăng nhập</a>
@@ -57,23 +57,23 @@
                     <% if (isStaff && isIndex) { %>
                         <div class="user-avatar-btn" onclick="toggleUserDropdown()">
                             <div class="user-avatar-circle">👤</div>
-                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
+                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></span>
                             <span class="user-arrow">▼</span>
                         </div>
                         <div class="user-dropdown" id="userDropdown">
                             <a href="<%= workspaceUrl %>" class="user-dropdown-item">🏥 <%= workspaceLabel %></a>
                             <div class="user-dropdown-divider"></div>
-                            <a href="javascript:void(0)" onclick="doLogoutNow()" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
+                            <a href="javascript:void(0)" onclick="AppNotify.doLogoutWithConfirm(); return false;" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
                         </div>
                     <% } else if (isStaff) { %>
                         <a href="<%= workspaceUrl %>" class="user-avatar-btn user-avatar-btn--link" title="<%= workspaceLabel %>">
                             <div class="user-avatar-circle">👤</div>
-                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
+                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></span>
                         </a>
                     <% } else { %>
                         <div class="user-avatar-btn" onclick="toggleUserDropdown()">
                             <div class="user-avatar-circle">👤</div>
-                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() %></span>
+                            <span class="user-avatar-name"><%= loggedInUser.getHoTen() != null && !loggedInUser.getHoTen().trim().isEmpty() ? loggedInUser.getHoTen() : "Người dùng" %></span>
                             <span class="user-arrow">▼</span>
                         </div>
                         <div class="user-dropdown" id="userDropdown">
@@ -81,7 +81,7 @@
                             <a href="${pageContext.request.contextPath}/hoso?tab=history" class="user-dropdown-item">📅 Quản lý lịch hẹn</a>
                             <a href="${pageContext.request.contextPath}/hoso?tab=password" class="user-dropdown-item">🔒 Bảo mật</a>
                             <div class="user-dropdown-divider"></div>
-                            <a href="javascript:void(0)" onclick="doLogoutNow()" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
+                            <a href="javascript:void(0)" onclick="AppNotify.doLogoutWithConfirm(); return false;" class="user-dropdown-item logout-item">🚪 Đăng xuất</a>
                         </div>
                     <% } %>
                 </div>
@@ -127,7 +127,7 @@
 </div>
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/app-notify.css">
-<script src="${pageContext.request.contextPath}/assets/js/app-notify.js"></script>
+<script src="${pageContext.request.contextPath}/assets/js/app-notify.js?v=20260518b"></script>
 <script>
     window.CONTEXT_PATH = '${pageContext.request.contextPath}';
     window.HOME_URL = '<%= homeUrl %>';
