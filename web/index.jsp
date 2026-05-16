@@ -4,7 +4,6 @@
 <%@ page import="com.dentalclinic.model.TaiKhoan" %>
 <%@ page import="com.dentalclinic.utils.RoleNavHelper" %>
 <%@ page import="java.util.List" %>
-<<<<<<< HEAD
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="java.util.HashMap" %>
 <%@ page import="java.util.Map" %>
