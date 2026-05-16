@@ -1267,18 +1267,6 @@ SET NgayKham = GETDATE(), TrangThai = N'Đã đến'
 WHERE LichHen_ID IN (1, 2, 3, 4) ;
 go
 
--- Test Ca làm
-update LichLamViec
-set NgayLam = GetDate()
-where TaiKhoan_ID in  (21, 22, 23)
-go
-INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, Phong_ID) VALUES 
-(21, 1, '2026-05-17', 3),
-(22, 2, '2026-05-17', 1)
-go
-INSERT INTO LichLamViec (TaiKhoan_ID, Ca_ID, NgayLam, Phong_ID) VALUES 
-(21, 1, '2026-05-18', 3)
-go
 ------ STORED PROCEDURE ------
 ---- Admin: Quản lý tài khoản
 -- Thêm tài khoản bác sĩ/lễ tân
