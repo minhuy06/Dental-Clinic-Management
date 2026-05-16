@@ -119,6 +119,7 @@ var revMode = 'day';
     if (Array.isArray(window.__ADMIN_PENDING_BOOKINGS__)) {
         pendingShiftBookings = window.__ADMIN_PENDING_BOOKINGS__;
         console.info('[admin] pending shift bookings:', pendingShiftBookings.length);
+        renderAdminBellNotifications();
     }
     if (window.__ADMIN_REVENUE__) {
         var r = window.__ADMIN_REVENUE__;
@@ -660,7 +661,7 @@ function toYMD(d) {
 
 function renderSchedule() {
     updateSchStats();
-    renderPendingShiftAlerts();
+    renderAdminBellNotifications();
     renderMonthCalendar();
 }
 
@@ -671,26 +672,90 @@ function formatPendingDate(dateStr) {
     return p[2] + '/' + p[1] + '/' + p[0];
 }
 
-function renderPendingShiftAlerts() {
-    var box = document.getElementById('schPendingAlerts');
-    if (!box) return;
-    if (!pendingShiftBookings || pendingShiftBookings.length === 0) {
-        box.style.display = 'none';
-        box.innerHTML = '';
-        return;
+function buildPendingBellItemHtml(b) {
+    var svcs = b.services ? escapeHtml(b.services) : '—';
+    var noteRow = b.note ? ('<div class="form-group bell-pending-full"><label>Ghi chú</label><div class="bell-readonly">' + escapeHtml(b.note) + '</div></div>') : '';
+    return '<div class="bell-pending-card">' +
+        '<div class="bell-pending-card-head"><strong>' + escapeHtml(b.patientName || 'Bệnh nhân') + '</strong><span class="bell-pending-tag">Chờ phân ca</span></div>' +
+        '<div class="form-row">' +
+            '<div class="form-group"><label>Số điện thoại</label><div class="bell-readonly">' + escapeHtml(b.phone || '—') + '</div></div>' +
+            '<div class="form-group"><label>Ngày · Giờ khám</label><div class="bell-readonly">' + formatPendingDate(b.date) + ' · ' + escapeHtml(b.time || '') + '</div></div>' +
+        '</div>' +
+        '<div class="form-group bell-pending-full"><label>Dịch vụ</label><div class="bell-readonly">' + svcs + '</div></div>' +
+        noteRow +
+        '<button type="button" class="btn-save bell-pending-btn" data-pending-date="' + escapeHtml(b.date || '') + '" data-pending-time="' + escapeHtml(b.time || '') + '" onclick="openScheduleFromBellItem(this)"><i class="fas fa-plus-circle"></i> Phân công ca</button>' +
+        '</div>';
+}
+
+function renderAdminBellNotifications() {
+    var badge = document.getElementById('adminBellBadge');
+    var list = document.getElementById('adminBellList');
+    var btn = document.getElementById('adminBellBtn');
+    var count = (pendingShiftBookings && pendingShiftBookings.length) || 0;
+    if (badge) {
+        badge.textContent = count > 99 ? '99+' : String(count);
+        badge.classList.toggle('is-visible', count > 0);
+        badge.setAttribute('aria-hidden', count > 0 ? 'false' : 'true');
     }
-    box.style.display = 'flex';
-    box.innerHTML = pendingShiftBookings.map(function(b) {
-        var svcs = b.services ? (' — ' + escapeHtml(b.services)) : '';
-        var note = b.note ? ('<div class="sch-pending-meta">Ghi chú: ' + escapeHtml(b.note) + '</div>') : '';
-        return '<div class="sch-pending-alert">' +
-            '<h4><i class="fas fa-user-clock"></i> Cần thêm ca bác sĩ</h4>' +
-            '<p>Có bệnh nhân <strong>' + escapeHtml(b.patientName || '—') + '</strong> (' + escapeHtml(b.phone || '') + ') ' +
-            'đã đặt lịch <strong>' + formatPendingDate(b.date) + ' lúc ' + escapeHtml(b.time || '') + '</strong>' + svcs + '.</p>' +
-            note +
-            '<div class="sch-pending-action"><i class="fas fa-plus-circle"></i> Vui lòng thêm ca làm việc bác sĩ cho khung giờ trên — sau đó lịch sẽ chuyển sang lễ tân xác nhận.</div>' +
-            '</div>';
-    }).join('');
+    if (btn) {
+        btn.classList.toggle('has-notify', count > 0);
+        btn.setAttribute('aria-label', count > 0
+            ? ('Thông báo: ' + count + ' lịch chờ phân ca')
+            : 'Thông báo lịch chờ phân ca');
+    }
+    if (list) {
+        list.innerHTML = count === 0
+            ? '<p class="bell-empty-msg"><i class="fas fa-check-circle"></i> Không có lịch chờ phân ca.</p>'
+            : '<div class="bell-pending-list">' + pendingShiftBookings.map(buildPendingBellItemHtml).join('') + '</div>';
+    }
+}
+
+function toggleAdminBellPanel(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    var modal = document.getElementById('adminBellModal');
+    var btn = document.getElementById('adminBellBtn');
+    if (!modal) return;
+    if (modal.style.display === 'flex') {
+        closeAdminBellPanel();
+    } else {
+        renderAdminBellNotifications();
+        modal.style.display = 'flex';
+        if (btn) btn.setAttribute('aria-expanded', 'true');
+    }
+}
+
+function closeAdminBellPanel() {
+    var modal = document.getElementById('adminBellModal');
+    var btn = document.getElementById('adminBellBtn');
+    if (modal) modal.style.display = 'none';
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+}
+
+function openScheduleFromBellItem(el) {
+    if (!el) return;
+    openScheduleFromBell(el.getAttribute('data-pending-date') || '', el.getAttribute('data-pending-time') || '');
+}
+
+function inferShiftTypeFromTime(timeStr) {
+    if (!timeStr) return 'morning';
+    var h = parseInt(String(timeStr).split(':')[0], 10);
+    return (isNaN(h) || h < 12) ? 'morning' : 'afternoon';
+}
+
+function openScheduleFromBell(dateStr, timeStr) {
+    closeAdminBellPanel();
+    if (dateStr) {
+        var p = dateStr.split('-');
+        if (p.length === 3) {
+            schCurrentDate = new Date(parseInt(p[0], 10), parseInt(p[1], 10) - 1, parseInt(p[2], 10));
+        }
+    }
+    var link = document.querySelector('.nav-menu a[onclick*="switchTab(\'schedule\'"]');
+    switchTab('schedule', link || null);
+    if (dateStr) {
+        var shiftType = inferShiftTypeFromTime(timeStr || '');
+        setTimeout(function() { schOpenModalFor(dateStr, shiftType); }, 200);
+    }
 }
 
 function updateSchStats() {
@@ -1706,12 +1771,17 @@ window.onclick = function(e) {
 };
 
 // ==================== KHỞI TẠO ====================
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeAdminBellPanel();
+});
+
 document.addEventListener('DOMContentLoaded', async function() {
     if (ADMIN_CONFIG.USE_MOCK) {
         console.info('[admin] mode: MOCK data');
     } else {
         console.info('[admin] mode: REAL API');
     }
+    renderAdminBellNotifications();
     await loadServicesFromServer();
     await loadShiftsFromServer();
     await loadAccountsFromServer();

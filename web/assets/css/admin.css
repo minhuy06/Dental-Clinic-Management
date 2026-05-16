@@ -42,8 +42,149 @@ body { font-family: 'Inter', sans-serif; background: var(--bg-gray); min-height:
 .nav-menu li a::after { content: ''; position: absolute; bottom: 0; left: 0; width: 0; height: 2px; background: white; transition: width 0.3s; }
 .nav-menu li a:hover::after, .nav-menu li a.active::after { width: 100%; }
 .nav-menu li a.active { color: white; }
-.user-info { display: flex; align-items: center; gap: 20px; }
+.user-info { display: flex; align-items: center; gap: 20px; position: relative; }
+.admin-user-link {
+    display: flex; align-items: center; gap: 8px;
+    text-decoration: none; color: inherit;
+}
+.admin-user-link .staff-name { color: #fff; font-weight: 600; font-size: .9rem; }
 .avatar { width: 40px; height: 40px; background: var(--primary-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+
+/* Chuông thông báo — nút tròn đỏ, badge số góc trên */
+.header .admin-bell-wrap {
+    position: relative;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.header .admin-bell-btn {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
+    border: 2px solid #fca5a5;
+    border-radius: 50%;
+    background: #b91c1c;
+    color: #fff;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    overflow: visible;
+    font-family: inherit;
+    line-height: 1;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: background .2s, border-color .2s, box-shadow .2s, transform .15s;
+}
+
+.header .admin-bell-btn:hover {
+    background: #dc2626;
+    border-color: #fecaca;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.45);
+}
+
+.header .admin-bell-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.header .admin-bell-icon .fa-bell {
+    font-size: 1.1rem;
+    color: #ffffff;
+}
+
+.header .admin-bell-btn.has-notify {
+    background: #ef4444;
+    border-color: #fecaca;
+    animation: bellPulse 2.2s ease-in-out infinite;
+}
+
+.header .admin-bell-btn.has-notify .fa-bell {
+    color: #ffffff;
+}
+
+@keyframes bellPulse {
+    0%, 100% {
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 0 0 rgba(254, 202, 202, 0.55);
+    }
+    50% {
+        box-shadow: 0 4px 16px rgba(239, 68, 68, 0.5), 0 0 0 6px rgba(254, 202, 202, 0);
+    }
+}
+
+.header .admin-bell-badge {
+    display: none !important;
+    position: absolute;
+    top: -7px;
+    right: -7px;
+    z-index: 5;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #dc2626;
+    color: #ffffff !important;
+    font-size: 11px;
+    font-weight: 800;
+    font-family: 'Inter', sans-serif;
+    border-radius: 999px;
+    border: 2px solid var(--header-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+    pointer-events: none;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.header .admin-bell-badge.is-visible {
+    display: flex !important;
+}
+
+/* Modal chuông — nội dung giống form phân ca */
+.bell-pending-list { display: flex; flex-direction: column; gap: 1rem; }
+.bell-pending-card {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 1rem;
+    background: var(--bg-gray);
+}
+.bell-pending-card-head {
+    display: flex; justify-content: space-between; align-items: center;
+    gap: .5rem; margin-bottom: .85rem; flex-wrap: wrap;
+}
+.bell-pending-card-head strong { font-size: .95rem; color: var(--text-main); }
+.bell-pending-tag {
+    font-size: .72rem; font-weight: 700;
+    background: #fee2e2; color: #b91c1c;
+    padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+}
+.bell-readonly {
+    padding: .55rem .75rem;
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: .88rem;
+    color: var(--text-main);
+    min-height: 38px;
+    display: flex; align-items: center;
+    line-height: 1.4;
+}
+.bell-pending-card .form-row { margin-bottom: .5rem; }
+.bell-pending-full { width: 100%; margin-bottom: .5rem; }
+.bell-pending-btn { width: 100%; margin-top: .35rem; justify-content: center; }
+.bell-empty-msg {
+    text-align: center; color: var(--text-sub);
+    padding: 2.5rem 1rem; font-size: .9rem; margin: 0;
+}
+.bell-empty-msg .fa-check-circle { color: var(--success); margin-right: 6px; }
 
 /* ==================== FOOTER ==================== */
 .footer { background: var(--header-bg); color: white; text-align: center; padding: 15px; margin-top: 30px; }
@@ -689,31 +830,6 @@ tr:hover { background: #f8fafc; }
 
 
 /* ==================== LỊCH LÀM VIỆC ==================== */
-.sch-pending-wrap { margin-bottom: 1.2rem; display: flex; flex-direction: column; gap: .75rem; }
-.sch-pending-alert {
-    background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
-    border: 1px solid #fdba74;
-    border-left: 4px solid #ea580c;
-    border-radius: 12px;
-    padding: .9rem 1.1rem;
-    box-shadow: 0 2px 8px rgba(234, 88, 12, .08);
-}
-.sch-pending-alert h4 {
-    margin: 0 0 .35rem;
-    font-size: .95rem;
-    color: #9a3412;
-    display: flex;
-    align-items: center;
-    gap: .45rem;
-}
-.sch-pending-alert p { margin: 0; font-size: .84rem; color: #7c2d12; line-height: 1.45; }
-.sch-pending-meta { margin-top: .45rem; font-size: .8rem; color: #b45309; }
-.sch-pending-alert .sch-pending-action {
-    margin-top: .6rem;
-    font-size: .8rem;
-    font-weight: 600;
-    color: #c2410c;
-}
 .sch-toolbar {
     display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;
     background: var(--bg-white); border-radius: 14px; padding: .9rem 1.3rem;

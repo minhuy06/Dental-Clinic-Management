@@ -8,7 +8,7 @@
     <title>Nha Khoa 5AE - Quản Trị Hệ Thống</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/admin.css?v=20260516k">
 </head>
 <body>
 
@@ -24,11 +24,18 @@
             <li><a href="#" onclick="switchTab('accounts',this);return false;"><i class="fas fa-users-cog"></i> Quản lý tài khoản</a></li>
             <li><a href="#" onclick="switchTab('revenue',this);return false;"><i class="fas fa-chart-line"></i> Quản lý doanh thu</a></li>
         </ul>
-        <a href="${pageContext.request.contextPath}/admin" class="user-info" style="text-decoration:none;color:inherit;" title="Trang quản trị">
-            <i class="fas fa-bell" style="color:#bfdbfe;cursor:pointer;"></i>
-            <div class="avatar"><i class="fas fa-user-shield" style="color:white;"></i></div>
-            <span class="staff-name" style="margin-left:8px;"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Admin"/></span>
-        </a>
+        <div class="user-info">
+            <div class="admin-bell-wrap" id="adminBellWrap">
+                <button type="button" class="admin-bell-btn" id="adminBellBtn" aria-label="Thông báo lịch chờ phân ca" aria-expanded="false" onclick="toggleAdminBellPanel(event)">
+                    <span class="admin-bell-icon" aria-hidden="true"><i class="fas fa-bell"></i></span>
+                    <span class="admin-bell-badge" id="adminBellBadge" aria-hidden="true">0</span>
+                </button>
+            </div>
+            <a href="${pageContext.request.contextPath}/admin" class="admin-user-link" title="Trang quản trị">
+                <div class="avatar"><i class="fas fa-user-shield" style="color:white;"></i></div>
+                <span class="staff-name"><c:out value="${sessionScope.loggedInUser.hoTen}" default="Admin"/></span>
+            </a>
+        </div>
     </div>
 
     <div class="container">
@@ -97,8 +104,6 @@
                     <div class="stat-change"><i class="fas fa-user-clock"></i> Chưa phân công</div>
                 </div>
             </div>
-
-            <div id="schPendingAlerts" class="sch-pending-wrap" style="display:none" aria-live="polite"></div>
 
             <!-- Toolbar -->
             <div class="sch-toolbar">
@@ -385,6 +390,21 @@
         </div>
     </div>
 
+    <!-- MODAL: THÔNG BÁO LỊCH CHỜ PHÂN CA -->
+    <div id="adminBellModal" class="modal" onclick="if(event.target===this)closeAdminBellPanel()">
+        <div class="modal-content" style="max-width:520px">
+            <div class="modal-header">
+                <h3><i class="fas fa-bell" style="color:#ef4444;margin-right:6px"></i> Lịch chờ phân ca</h3>
+                <span class="close" onclick="closeAdminBellPanel()">&times;</span>
+            </div>
+            <div class="modal-body" id="adminBellList" style="max-height:55vh;overflow-y:auto"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" onclick="closeAdminBellPanel()">Đóng</button>
+                <button type="button" class="btn-save" onclick="openScheduleFromBell()"><i class="fas fa-calendar-alt"></i> Mở lịch làm việc</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL: CA LÀM VIỆC -->
     <div id="shiftModal" class="modal">
         <div class="modal-content" style="max-width:460px">
@@ -533,6 +553,6 @@
     </script>
 
     <jsp:include page="../components/notify-resources.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516g"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516j"></script>
 </body>
 </html>
