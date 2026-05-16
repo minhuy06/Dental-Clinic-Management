@@ -89,6 +89,9 @@ public class ProfileServlet extends HttpServlet {
                 if (lh.getBacSi() != null && lh.getBacSi().getTaiKhoan() != null) {
                     aObj.addProperty("doctorName", lh.getBacSi().getTaiKhoan().getHoTen());
                     aObj.addProperty("doctorSpec", "Nha Khoa");
+                } else if ("Chờ phân ca".equalsIgnoreCase(dbStatus)) {
+                    aObj.addProperty("doctorName", "Chờ phân bác sĩ");
+                    aObj.addProperty("doctorSpec", "Phòng khám sẽ sắp xếp ca");
                 }
 
                 JsonArray apptServices = new JsonArray();
@@ -138,7 +141,8 @@ public class ProfileServlet extends HttpServlet {
         if (dbStatus == null || dbStatus.isEmpty()) {
             return "pending";
         }
-        if ("Chờ xác nhận".equalsIgnoreCase(dbStatus) || "Chờ duyệt".equalsIgnoreCase(dbStatus)) {
+        if ("Chờ xác nhận".equalsIgnoreCase(dbStatus) || "Chờ duyệt".equalsIgnoreCase(dbStatus)
+                || "Chờ phân ca".equalsIgnoreCase(dbStatus)) {
             return "pending";
         }
         if ("Đã xác nhận".equalsIgnoreCase(dbStatus) || "Đã duyệt".equalsIgnoreCase(dbStatus)

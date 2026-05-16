@@ -45,9 +45,9 @@ public class LichHenDAO {
 
                      "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
 
-                     "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
+                     "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
-                     "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+                     "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
 
                      "WHERE bn.TaiKhoan_ID = ?";
 
@@ -67,15 +67,14 @@ public class LichHenDAO {
 
                     LichHen lh = mapResultSetToLichHen(rs, hasPhong);
 
-                    TaiKhoan tkBs = new TaiKhoan();
-
-                    tkBs.setHoTen(rs.getNString("TenBacSi"));
-
-                    BacSi bs = new BacSi();
-
-                    bs.setTaiKhoan(tkBs);
-
-                    lh.setBacSi(bs);
+                    String tenBs = rs.getNString("TenBacSi");
+                    if (tenBs != null && !tenBs.isBlank()) {
+                        TaiKhoan tkBs = new TaiKhoan();
+                        tkBs.setHoTen(tenBs);
+                        BacSi bs = new BacSi();
+                        bs.setTaiKhoan(tkBs);
+                        lh.setBacSi(bs);
+                    }
 
                     ganDanhSachDichVuDatChoLichHen(lh);
                     list.add(lh);
@@ -164,7 +163,11 @@ public class LichHenDAO {
 
                 ps.setInt(1, lh.getBenhNhanID());
 
-                ps.setInt(2, lh.getBacSiID());
+                if (lh.getBacSiID() > 0) {
+                    ps.setInt(2, lh.getBacSiID());
+                } else {
+                    ps.setNull(2, Types.INTEGER);
+                }
 
                 ps.setDate(3, lh.getNgayKham());
 
@@ -1425,12 +1428,164 @@ public class LichHenDAO {
         }
     }
 
+    /** Lịch chờ admin xếp ca (bệnh nhân đặt khi chưa có BS rảnh). */
+    public String getPendingShiftBookingsJson() {
+        String sql = "SELECT lh.LichHen_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, "
+                + "tk.HoTen, tk.SoDienThoai, "
+                + "STUFF((SELECT N', ' + dv.TenDichVu FROM ChiTietLichHen ctlh "
+                + "JOIN DichVu dv ON dv.DichVu_ID = ctlh.DichVu_ID "
+                + "WHERE ctlh.LichHen_ID = lh.LichHen_ID FOR XML PATH('')), 1, 2, N'') AS TenDichVu "
+                + "FROM LichHen lh "
+                + "INNER JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
+                + "INNER JOIN TaiKhoan tk ON bn.TaiKhoan_ID = tk.TaiKhoan_ID "
+                + "WHERE lh.TrangThai = N'Chờ phân ca' AND lh.BacSi_ID IS NULL "
+                + "ORDER BY lh.NgayKham ASC, lh.GioKham ASC";
+        StringBuilder sb = new StringBuilder("[");
+        java.text.SimpleDateFormat iso = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            boolean first = true;
+            while (rs.next()) {
+                if (!first) sb.append(",");
+                first = false;
+                Date ngay = rs.getDate("NgayKham");
+                Time gio = rs.getTime("GioKham");
+                String gioStr = gio == null ? "" : gio.toString().substring(0, 5);
+                sb.append("{")
+                  .append("\"id\":").append(rs.getInt("LichHen_ID")).append(",")
+                  .append("\"date\":\"").append(ngay == null ? "" : iso.format(ngay)).append("\",")
+                  .append("\"time\":\"").append(gioStr).append("\",")
+                  .append("\"patientName\":\"").append(escJson(rs.getNString("HoTen"))).append("\",")
+                  .append("\"phone\":\"").append(escJson(rs.getString("SoDienThoai"))).append("\",")
+                  .append("\"services\":\"").append(escJson(rs.getNString("TenDichVu"))).append("\",")
+                  .append("\"note\":\"").append(escJson(rs.getNString("GhiChu"))).append("\"")
+                  .append("}");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private static String escJson(String s) {
+        if (s == null) return "";
+        return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", " ");
+    }
+
+    /**
+     * Sau khi admin thêm ca làm, gán lịch Chờ phân ca phù hợp cho bác sĩ đó và chuyển sang Chờ xác nhận (lễ tân).
+     */
+    public int assignPendingBookingsForShift(int taiKhoanId, java.sql.Date ngayLam, int caId, int phongId) {
+        if (taiKhoanId < 1 || ngayLam == null || caId < 1) return 0;
+        BacSiDAO bsDAO = new BacSiDAO();
+        int bacSiId = findBacSiIdByTaiKhoan(taiKhoanId);
+        if (bacSiId < 1) return 0;
+
+        String ngayStr = ngayLam.toLocalDate().toString();
+        List<Integer> pendingIds = new ArrayList<>();
+        String sql = "SELECT lh.LichHen_ID, lh.GioKham FROM LichHen lh "
+                + "WHERE lh.TrangThai = N'Chờ phân ca' AND lh.BacSi_ID IS NULL AND lh.NgayKham = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setDate(1, ngayLam);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    pendingIds.add(rs.getInt("LichHen_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return 0;
+        }
+
+        int assigned = 0;
+        DichVuDAO dichVuDAO = new DichVuDAO();
+        for (Integer lichHenId : pendingIds) {
+            try {
+                LichHen lh = getById(lichHenId);
+                if (lh == null || lh.getGioKham() == null) continue;
+                java.time.LocalTime start = lh.getGioKham().toLocalTime();
+                java.util.Map<Integer, Integer> qty = loadServiceQtyMap(lichHenId);
+                int duration = dichVuDAO.getTotalDurationMinutes(qty);
+                if (!bsDAO.isDoctorFreeForBooking(bacSiId, ngayStr, start, duration)) {
+                    continue;
+                }
+                int room = phongId > 0 ? phongId : bsDAO.findPhongIdForDoctorOnDate(bacSiId, ngayStr);
+                String update = "UPDATE LichHen SET BacSi_ID = ?, Phong_ID = ?, TrangThai = N'Chờ xác nhận' "
+                        + "WHERE LichHen_ID = ? AND TrangThai = N'Chờ phân ca' AND BacSi_ID IS NULL";
+                try (Connection conn = DBConnection.getConnection();
+                     PreparedStatement ps = conn.prepareStatement(update)) {
+                    ps.setInt(1, bacSiId);
+                    ps.setInt(2, room);
+                    ps.setInt(3, lichHenId);
+                    if (ps.executeUpdate() > 0) assigned++;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return assigned;
+    }
+
+    private int findBacSiIdByTaiKhoan(int taiKhoanId) {
+        String sql = "SELECT BacSi_ID FROM BacSi WHERE TaiKhoan_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, taiKhoanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("BacSi_ID");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
+
+    private java.util.Map<Integer, Integer> loadServiceQtyMap(int lichHenId) {
+        java.util.Map<Integer, Integer> map = new java.util.LinkedHashMap<>();
+        String sql = "SELECT DichVu_ID, ISNULL(SoLuong, 1) AS SoLuong FROM ChiTietLichHen WHERE LichHen_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lichHenId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int dvId = rs.getInt("DichVu_ID");
+                    int qty = rs.getInt("SoLuong");
+                    map.put(dvId, map.getOrDefault(dvId, 0) + Math.max(1, qty));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    public LichHen getById(int lichHenId) {
+        if (lichHenId < 1) return null;
+        String sql = "SELECT lh.* FROM LichHen lh WHERE lh.LichHen_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, lichHenId);
+            try (ResultSet rs = ps.executeQuery()) {
+                ResultSetMetaData md = rs.getMetaData();
+                if (rs.next()) {
+                    return mapResultSetToLichHen(rs, hasColumn(md, "Phong_ID"));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     /** Bệnh nhân hủy lịch chờ xác nhận. */
     public boolean benhNhanHuyLichHen(int lichHenId, int taiKhoanId) {
         String sql = "UPDATE lh SET lh.TrangThai = N'Đã hủy' FROM LichHen lh "
                 + "INNER JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                 + "WHERE lh.LichHen_ID = ? AND bn.TaiKhoan_ID = ? "
-                + "AND lh.TrangThai IN (N'Chờ xác nhận', N'Chờ duyệt')";
+                + "AND lh.TrangThai IN (N'Chờ xác nhận', N'Chờ duyệt', N'Chờ phân ca')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, lichHenId);

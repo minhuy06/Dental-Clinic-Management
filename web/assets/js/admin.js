@@ -29,6 +29,7 @@ var accounts = [
 ];
 
 // Ca làm việc demo - Tháng 4 & 5/2026
+var pendingShiftBookings = [];
 var shifts = [
     // ---- Tuần 20–25/4 ----
     {id:1,  staffId:2, staffName:'BS. Nguyễn Hải',  shiftType:'morning',   date:'2026-04-20', note:''},
@@ -114,6 +115,10 @@ var revMode = 'day';
     if (window.__ADMIN_SHIFTS__ && window.__ADMIN_SHIFTS__.length > 0) {
         shifts = window.__ADMIN_SHIFTS__;
         console.info('[admin] shifts loaded from DB:', shifts.length);
+    }
+    if (Array.isArray(window.__ADMIN_PENDING_BOOKINGS__)) {
+        pendingShiftBookings = window.__ADMIN_PENDING_BOOKINGS__;
+        console.info('[admin] pending shift bookings:', pendingShiftBookings.length);
     }
     if (window.__ADMIN_REVENUE__) {
         var r = window.__ADMIN_REVENUE__;
@@ -655,7 +660,37 @@ function toYMD(d) {
 
 function renderSchedule() {
     updateSchStats();
+    renderPendingShiftAlerts();
     renderMonthCalendar();
+}
+
+function formatPendingDate(dateStr) {
+    if (!dateStr) return '';
+    var p = dateStr.split('-');
+    if (p.length !== 3) return dateStr;
+    return p[2] + '/' + p[1] + '/' + p[0];
+}
+
+function renderPendingShiftAlerts() {
+    var box = document.getElementById('schPendingAlerts');
+    if (!box) return;
+    if (!pendingShiftBookings || pendingShiftBookings.length === 0) {
+        box.style.display = 'none';
+        box.innerHTML = '';
+        return;
+    }
+    box.style.display = 'flex';
+    box.innerHTML = pendingShiftBookings.map(function(b) {
+        var svcs = b.services ? (' — ' + escapeHtml(b.services)) : '';
+        var note = b.note ? ('<div class="sch-pending-meta">Ghi chú: ' + escapeHtml(b.note) + '</div>') : '';
+        return '<div class="sch-pending-alert">' +
+            '<h4><i class="fas fa-user-clock"></i> Cần thêm ca bác sĩ</h4>' +
+            '<p>Có bệnh nhân <strong>' + escapeHtml(b.patientName || '—') + '</strong> (' + escapeHtml(b.phone || '') + ') ' +
+            'đã đặt lịch <strong>' + formatPendingDate(b.date) + ' lúc ' + escapeHtml(b.time || '') + '</strong>' + svcs + '.</p>' +
+            note +
+            '<div class="sch-pending-action"><i class="fas fa-plus-circle"></i> Vui lòng thêm ca làm việc bác sĩ cho khung giờ trên — sau đó lịch sẽ chuyển sang lễ tân xác nhận.</div>' +
+            '</div>';
+    }).join('');
 }
 
 function updateSchStats() {
@@ -911,6 +946,10 @@ async function saveShift() {
         res = await withApiGuard(function() { return saveShiftToServer(data, false); }, 'Đã phân công ca làm');
     }
     if (!res) return;
+    var assigned = res.assignedBookings || 0;
+    if (assigned > 0) {
+        showToast('Đã phân công ca và gán ' + assigned + ' lịch hẹn sang lễ tân xác nhận.', 'success');
+    }
     closeShiftModal();
     try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}
     window.location.reload();

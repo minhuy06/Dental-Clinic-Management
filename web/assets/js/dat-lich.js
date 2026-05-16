@@ -364,10 +364,14 @@ async function submitBooking() {
         totalAmount: totalAmount
     };
 
-    var res = await withBookingGuard(
-        function() { return bookingSource.createBooking(payload); },
-        '✅ Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.'
-    );
+    var res = await withBookingGuard(function() { return bookingSource.createBooking(payload); }, null);
+    if (res && res.message) {
+        if (window.AppNotify) AppNotify.success(res.message);
+        else alert(res.message);
+    } else if (res) {
+        if (window.AppNotify) AppNotify.success('Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.');
+        else alert('Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.');
+    }
     if (res) {
         resetBookingForm();
         var ctx = window.BOOKING_CONTEXT_PATH || '';

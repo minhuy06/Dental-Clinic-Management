@@ -14,6 +14,11 @@ import java.util.List;
 import java.util.Map;
 
 public class LichHenService {
+    public static final String STATUS_CHO_PHAN_CA = "Chờ phân ca";
+    public static final String STATUS_CHO_XAC_NHAN = "Chờ xác nhận";
+    public static final String RESULT_SUCCESS = "SUCCESS";
+    public static final String RESULT_SUCCESS_PENDING_SHIFT = "SUCCESS_PENDING_SHIFT";
+
     private final LichHenDAO lhDAO = new LichHenDAO();
     private final BacSiDAO bsDAO = new BacSiDAO();
     private final BenhNhanDAO benhNhanDAO = new BenhNhanDAO();
@@ -38,10 +43,15 @@ public class LichHenService {
                 qtyMap.put(id, qtyMap.getOrDefault(id, 0) + 1);
             }
         }
-        return createBooking(lh, qtyMap, requestedDoctorId);
+        return createBooking(lh, qtyMap, requestedDoctorId, false);
     }
 
     public String createBooking(LichHen lh, Map<Integer, Integer> qtyByDvId, Integer requestedDoctorId) {
+        return createBooking(lh, qtyByDvId, requestedDoctorId, false);
+    }
+
+    /** patientSelfBooking=true: không có BS rảnh vẫn lưu trạng thái Chờ phân ca cho admin xếp ca. */
+    public String createBooking(LichHen lh, Map<Integer, Integer> qtyByDvId, Integer requestedDoctorId, boolean patientSelfBooking) {
         if (lh == null) return "Thiếu thông tin lịch hẹn.";
         if (lh.getBenhNhanID() <= 0) return "Không xác định được tài khoản bệnh nhân.";
         if (lh.getNgayKham() == null || lh.getGioKham() == null) {
@@ -79,6 +89,12 @@ public class LichHenService {
         } else {
             List<Integer> freeDoctors = bsDAO.findAvailableDoctorIdsForBooking(ngayStr, gio, durationMinutes);
             if (freeDoctors.isEmpty()) {
+                if (patientSelfBooking) {
+                    lh.setBacSiID(0);
+                    lh.setTrangThai(STATUS_CHO_PHAN_CA);
+                    int pendingId = lhDAO.insertBooking(lh, qtyByDvId);
+                    return pendingId != -1 ? RESULT_SUCCESS_PENDING_SHIFT : "Lỗi khi lưu lịch hẹn vào hệ thống.";
+                }
                 return "Hiện không có bác sĩ rảnh trong khung giờ này. Vui lòng chọn ngày/giờ khác hoặc liên hệ lễ tân.";
             }
             Collections.shuffle(freeDoctors);
@@ -87,10 +103,15 @@ public class LichHenService {
             lh.setPhongID(bsDAO.findPhongIdForDoctorOnDate(assigned, ngayStr));
         }
 
-        lh.setTrangThai("Chờ xác nhận");
+        if (lh.getTrangThai() == null || lh.getTrangThai().isBlank()) {
+            lh.setTrangThai(STATUS_CHO_XAC_NHAN);
+        }
 
         int result = lhDAO.insertBooking(lh, qtyByDvId);
-        return (result != -1) ? "SUCCESS" : "Lỗi khi lưu lịch hẹn vào hệ thống.";
+        if (result == -1) {
+            return "Lỗi khi lưu lịch hẹn vào hệ thống.";
+        }
+        return STATUS_CHO_PHAN_CA.equals(lh.getTrangThai()) ? RESULT_SUCCESS_PENDING_SHIFT : RESULT_SUCCESS;
     }
 
     public int resolveOrCreateDeskPatient(String hoTen, String soDienThoai) {

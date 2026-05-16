@@ -1,6 +1,7 @@
 package com.dentalclinic.controller;
 
 import com.dentalclinic.dao.LichLamViecDAO;
+import com.dentalclinic.dao.LichHenDAO;
 import com.dentalclinic.model.LichLamViec;
 import java.io.IOException;
 import java.sql.Date;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpServletResponse;
 @WebServlet("/admin/shifts")
 public class AdminShiftServlet extends HttpServlet {
     private final LichLamViecDAO dao = new LichLamViecDAO();
+    private final LichHenDAO lichHenDAO = new LichHenDAO();
 
     private static int parseRoomId(String roomRaw) {
         if (roomRaw == null || roomRaw.isBlank()) return 1;
@@ -57,7 +59,8 @@ public class AdminShiftServlet extends HttpServlet {
                 lv.setPhongID(roomId);
                 boolean ok = dao.insert(lv);
                 if (!ok) throw new IllegalStateException("Không thể lưu ca làm việc.");
-                response.getWriter().write("{\"success\":true}");
+                int assigned = lichHenDAO.assignPendingBookingsForShift(staffId, ngay, caId, roomId);
+                response.getWriter().write("{\"success\":true,\"assignedBookings\":" + assigned + "}");
                 return;
             }
 

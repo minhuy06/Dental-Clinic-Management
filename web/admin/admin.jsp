@@ -98,6 +98,8 @@
                 </div>
             </div>
 
+            <div id="schPendingAlerts" class="sch-pending-wrap" style="display:none" aria-live="polite"></div>
+
             <!-- Toolbar -->
             <div class="sch-toolbar">
                 <div class="sch-nav">
@@ -527,9 +529,10 @@
         window.__ADMIN_ACCOUNTS__ = <c:out value="${empty adminAccountsJson ? '[]' : adminAccountsJson}" escapeXml="false"/>;
         window.__ADMIN_SHIFTS__ = <c:out value="${empty adminShiftsJson ? '[]' : adminShiftsJson}" escapeXml="false"/>;
         window.__ADMIN_REVENUE__ = <c:out value="${empty adminRevenueJson ? '{}' : adminRevenueJson}" escapeXml="false"/>;
+        window.__ADMIN_PENDING_BOOKINGS__ = <c:out value="${empty adminPendingBookingsJson ? '[]' : adminPendingBookingsJson}" escapeXml="false"/>;
     </script>
 
     <jsp:include page="../components/notify-resources.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260518f"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/admin.js?v=20260516g"></script>
 </body>
 </html>
