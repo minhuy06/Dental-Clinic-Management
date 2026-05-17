@@ -194,8 +194,8 @@ function renderPagination(containerId, total, perPage, currentPage, onClickFn) {
 // ==================== CỜ HIỆU MOCK/REAL + DATA SOURCE ====================
 var ADMIN_CONFIG = {
     // true: dùng dữ liệu giả (mảng local), false: gọi backend thật
-    USE_MOCK: true,
-    API_BASE: '/api',
+    USE_MOCK: false,
+    API_BASE: '/Dental_Clinic_Management/api',
     MOCK_DELAY_MS: 120
 };
 
@@ -1332,14 +1332,28 @@ async function saveAccount() {
     var prevSrc = document.getElementById('accAvatarPreview').src;
     var avatar = (prevSrc && prevSrc.indexOf('data:') === 0) ? prevSrc : (editingAccId ? (accounts.find(function(a){return a.id===editingAccId;})||{}).avatar||'' : '');
     var data = {
-        name: name, role: role, phone: phone,
-        dob: document.getElementById('accDob').value,
-        gender: document.getElementById('accGender').value,
-        specialty: role === 'doctor' ? document.getElementById('accSpecialty').value : '',
-        degree: role === 'doctor' ? document.getElementById('accDegree').value.trim() : '',
-        avatar: avatar,
-        status: editingAccId ? document.getElementById('accStatus').value : 'active'
+        hoTen: name, 
+        vaiTro: role, 
+        soDienThoai: phone, 
+        matKhau: document.getElementById('accPassword').value,
+        ngaySinh: document.getElementById('accDob').value,
+        gioiTinh: document.getElementById('accGender').value === 'male',
+        chuyenKhoaID: role === 'doctor' ? parseInt(document.getElementById('accSpecialty').value) || 0 : 0,
+        trinhDo: role === 'doctor' ? document.getElementById('accDegree').value.trim() : '',
+        anhDaiDien: avatar,
+        trangThai: editingAccId ? document.getElementById('accStatus').value : 'active'
     };
+    // Map English properties to data for AdminAccountServlet
+    data.name = name;
+    data.phone = phone;
+    data.role = role;
+    data.dob = data.ngaySinh;
+    data.gender = document.getElementById('accGender').value;
+    data.specialty = role === 'doctor' ? document.getElementById('accSpecialty').value : '';
+    data.degree = data.trinhDo;
+    data.avatar = data.anhDaiDien;
+    data.status = data.trangThai;
+
     var password = document.getElementById('accPassword').value;
     var res = null;
     if (editingAccId) {

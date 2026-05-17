@@ -39,6 +39,7 @@
 
 <div class="doctor-hoso-subbar">
     <a class="btn-back" id="backBtn" href="index.jsp"><i class="fa-solid fa-arrow-left"></i> Quay lại danh sách lịch hẹn</a>
+    <div class="doctor-info" id="doctorRoomUI"><i class="fa-solid fa-user-doctor"></i> PHÒNG KHÁM SỐ 01 - <%= doctorName %></div>
     <div class="appointment-time"><i class="fa-regular fa-calendar"></i> <%= appointmentDateTime %></div>
 </div>
 

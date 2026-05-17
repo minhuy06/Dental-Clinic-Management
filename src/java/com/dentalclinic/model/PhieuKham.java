@@ -14,16 +14,15 @@ public class PhieuKham {
 
     // --- Các đối tượng quan hệ (Phục vụ lấy thông tin liên kết hiển thị lên UI) ---
     private LichHen lichHen;      // Để từ Phiếu Khám lấy ngược ra Tên Bệnh Nhân
-    private BacSi bacSi;          // Bác sĩ phụ trách chính
-    private PhongKham phongKham;  // Phòng thực hiện khám
+    private HoaDon hoaDon;
 
     private List<ChiTietDichVu> danhSachDichVu; 
     // Constructor mặc định
     public PhieuKham() {}
 
     // Constructor tham số cơ bản (Dành cho INSERT)
-    public PhieuKham(int phieuKhamID, int lichHenID, int bacSiID, int phongID, String lyDoKham, 
-                     String trieuChung, String chanDoan, String ghiChu, Timestamp ngayTao, String trangThai) {
+    public PhieuKham(int phieuKhamID, int lichHenID, String lyDoKham
+                     , String chanDoan, String ghiChu, Timestamp ngayTao) {
         this.phieuKhamID = phieuKhamID;
         this.lichHenID = lichHenID;
         this.lyDoKham = lyDoKham;
@@ -57,11 +56,8 @@ public class PhieuKham {
     public LichHen getLichHen() { return lichHen; }
     public void setLichHen(LichHen lichHen) { this.lichHen = lichHen; }
 
-    public BacSi getBacSi() { return bacSi; }
-    public void setBacSi(BacSi bacSi) { this.bacSi = bacSi; }
-
-    public PhongKham getPhongKham() { return phongKham; }
-    public void setPhongKham(PhongKham phongKham) { this.phongKham = phongKham; }
+    public HoaDon getHoaDon(){return hoaDon;}
+    public void setHoaDon(HoaDon hoaDon){this.hoaDon = hoaDon;}
 
     public List<ChiTietDichVu> getDanhSachDichVu() { return danhSachDichVu; }
     public void setDanhSachDichVu(List<ChiTietDichVu> danhSachDichVu) { this.danhSachDichVu = danhSachDichVu; }

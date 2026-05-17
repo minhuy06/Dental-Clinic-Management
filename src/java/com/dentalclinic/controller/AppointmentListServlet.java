@@ -58,15 +58,14 @@ public class AppointmentListServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter out = response.getWriter();
-
-        try {
+        
+        try{
             StringBuilder sb = new StringBuilder();
             BufferedReader reader = request.getReader();
             String line;
             while ((line = reader.readLine()) != null) {
                 sb.append(line);
             }
-
             JsonObject jsonObject = gson.fromJson(sb.toString(), JsonObject.class);
             if (jsonObject == null || !jsonObject.has("id")) {
                 out.print("{\"success\": false, \"message\": \"Thiếu mã lịch hẹn!\"}");

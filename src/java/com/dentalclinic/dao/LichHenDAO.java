@@ -1,72 +1,40 @@
 package com.dentalclinic.dao;
 
-
-
 import com.dentalclinic.utils.DBConnection;
-
 import com.dentalclinic.model.LichHen;
-
 import com.dentalclinic.model.TaiKhoan;
-
 import com.dentalclinic.model.BenhNhan;
-
 import com.dentalclinic.model.BacSi;
-
 import com.dentalclinic.model.DanhSachLichHenDTO;
-
 import com.dentalclinic.model.HoSo;
-
 import com.dentalclinic.model.PhongKham;
 import com.dentalclinic.model.ChiTietLichHen;
 import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.PhieuKham;
-
 import java.sql.*;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.List;
-
-
 
 public class LichHenDAO {
 
-
-
     public List<LichHen> getLichHenByBenhNhan(int taiKhoanID) {
-
         List<LichHen> list = new ArrayList<>();
-
         String sql = "SELECT lh.*, tkBS.HoTen AS TenBacSi " +
-
                      "FROM LichHen lh " +
-
                      "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                      "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
-
                      "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
-
                      "WHERE bn.TaiKhoan_ID = ?";
-
         try (Connection conn = DBConnection.getConnection();
-
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, taiKhoanID);
-
             try (ResultSet rs = ps.executeQuery()) {
-
                 ResultSetMetaData md = rs.getMetaData();
-
                 boolean hasPhong = hasColumn(md, "Phong_ID");
-
                 while (rs.next()) {
-
                     LichHen lh = mapResultSetToLichHen(rs, hasPhong);
-
                     String tenBs = rs.getNString("TenBacSi");
                     if (tenBs != null && !tenBs.isBlank()) {
                         TaiKhoan tkBs = new TaiKhoan();
@@ -75,69 +43,37 @@ public class LichHenDAO {
                         bs.setTaiKhoan(tkBs);
                         lh.setBacSi(bs);
                     }
-
                     ganDanhSachDichVuDatChoLichHen(lh);
                     list.add(lh);
-
                 }
-
             }
-
         } catch (SQLException e) { e.printStackTrace(); }
-
         return list;
-
     }
-
-
 
     public List<LichHen> getAllLichHen() {
-
         List<LichHen> list = new ArrayList<>();
-
         String sql = "SELECT lh.*, tkBN.HoTen AS TenBenhNhan FROM LichHen lh " +
-
                      "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                      "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-
                      "ORDER BY lh.NgayKham DESC";
-
         try (Connection conn = DBConnection.getConnection();
-
              PreparedStatement ps = conn.prepareStatement(sql);
-
              ResultSet rs = ps.executeQuery()) {
-
             ResultSetMetaData md = rs.getMetaData();
-
             boolean hasPhong = hasColumn(md, "Phong_ID");
-
             while (rs.next()) {
-
                 LichHen lh = mapResultSetToLichHen(rs, hasPhong);
-
                 TaiKhoan tk = new TaiKhoan();
-
                 tk.setHoTen(rs.getNString("TenBenhNhan"));
-
                 BenhNhan bn = new BenhNhan();
-
                 bn.setTaiKhoan(tk);
-
                 lh.setBenhNhan(bn);
-
                 list.add(lh);
-
             }
-
         } catch (SQLException e) { e.printStackTrace(); }
-
         return list;
-
     }
-
-
 
     public int insertBooking(LichHen lh, List<Integer> dichVuIds) {
         Map<Integer, Integer> qtyMap = new HashMap<>();
@@ -152,45 +88,27 @@ public class LichHenDAO {
 
     public int insertBooking(LichHen lh, Map<Integer, Integer> qtyByDvId) {
         if (qtyByDvId == null || qtyByDvId.isEmpty()) return -1;
-
         String sql = "INSERT INTO LichHen (BenhNhan_ID, BacSi_ID, NgayKham, GioKham, GhiChu, TrangThai, Phong_ID) VALUES (?, ?, ?, ?, ?, ?, ?)";
-
         try (Connection conn = DBConnection.getConnection()) {
-
             conn.setAutoCommit(false);
-
             try (PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
-
                 ps.setInt(1, lh.getBenhNhanID());
-
                 if (lh.getBacSiID() > 0) {
                     ps.setInt(2, lh.getBacSiID());
                 } else {
                     ps.setNull(2, Types.INTEGER);
                 }
-
                 ps.setDate(3, lh.getNgayKham());
-
                 ps.setTime(4, lh.getGioKham());
-
                 ps.setNString(5, lh.getGhiChu());
-
                 ps.setNString(6, lh.getTrangThai());
-
                 ps.setInt(7, lh.getPhongID());
-
                 ps.executeUpdate();
-
                 ResultSet rs = ps.getGeneratedKeys();
-
                 if (rs.next()) {
-
                     int lhID = rs.getInt(1);
-
                     String sqlDV = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID, SoLuong) VALUES (?, ?, ?)";
-
                     try (PreparedStatement psDV = conn.prepareStatement(sqlDV)) {
-
                         for (Map.Entry<Integer, Integer> e : qtyByDvId.entrySet()) {
                             if (e.getKey() == null || e.getKey() < 1) continue;
                             int qty = e.getValue() == null || e.getValue() < 1 ? 1 : e.getValue();
@@ -199,318 +117,158 @@ public class LichHenDAO {
                             psDV.setInt(3, qty);
                             psDV.addBatch();
                         }
-
                         psDV.executeBatch();
-
                     }
-
                     conn.commit();
-
                     return lhID;
-
                 }
-
             } catch (SQLException e) {
-
                 conn.rollback();
-
                 e.printStackTrace();
-
             }
-
         } catch (SQLException e) { e.printStackTrace(); }
-
         return -1;
-
     }
-
-
 
     private static boolean hasColumn(ResultSetMetaData md, String name) throws SQLException {
-
         int n = md.getColumnCount();
-
         for (int i = 1; i <= n; i++) {
-
             String label = md.getColumnLabel(i);
-
             if (label != null && label.equalsIgnoreCase(name)) {
-
                 return true;
-
             }
-
         }
-
         return false;
-
     }
-
-
 
     private LichHen mapResultSetToLichHen(ResultSet rs, boolean hasPhongColumn) throws SQLException {
-
         LichHen lh = new LichHen();
-
         lh.setLichHenID(rs.getInt("LichHen_ID"));
-
         lh.setBenhNhanID(rs.getInt("BenhNhan_ID"));
-
         lh.setBacSiID(rs.getInt("BacSi_ID"));
-
         lh.setNgayKham(rs.getDate("NgayKham"));
-
         lh.setGioKham(rs.getTime("GioKham"));
-
         lh.setGhiChu(rs.getNString("GhiChu"));
-
         lh.setTrangThai(rs.getNString("TrangThai"));
-
         lh.setPhongID(hasPhongColumn ? rs.getInt("Phong_ID") : 0);
-
         return lh;
-
     }
-
-
 
     private void attachReceptionDisplay(LichHen lh, ResultSet rs) throws SQLException {
-
         TaiKhoan tkBn = new TaiKhoan();
-
         tkBn.setHoTen(rs.getNString("TenBenhNhan"));
-
         tkBn.setSoDienThoai(rs.getString("SdtBenhNhan"));
-
         BenhNhan bnObj = new BenhNhan();
-
         bnObj.setTaiKhoan(tkBn);
-
         lh.setBenhNhan(bnObj);
-
         TaiKhoan tkBs = new TaiKhoan();
-
         tkBs.setHoTen(rs.getNString("TenBacSi"));
-
         BacSi bsObj = new BacSi();
-
         bsObj.setTaiKhoan(tkBs);
-
         lh.setBacSi(bsObj);
-
         String tenPhong = rs.getNString("TenPhong");
-
         lh.setTenPhong(tenPhong != null && !tenPhong.isEmpty()
-
                 ? tenPhong : (lh.getPhongID() > 0 ? ("Phòng " + lh.getPhongID()) : "—"));
-
     }
-
-
-
-    /** Full schema: có lh.Phong_ID + TenPhong. */
 
     private List<LichHen> runReceptionQueryFull(String sql, Integer dateParamIndex, java.sql.Date ngay)
-
             throws SQLException {
-
         List<LichHen> list = new ArrayList<>();
-
         try (Connection conn = DBConnection.getConnection();
-
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             if (dateParamIndex != null) {
-
                 ps.setDate(dateParamIndex, ngay);
-
             }
-
             try (ResultSet rs = ps.executeQuery()) {
-
                 ResultSetMetaData md = rs.getMetaData();
-
                 boolean hasPhongCol = hasColumn(md, "Phong_ID");
-
                 while (rs.next()) {
-
                     LichHen lh = mapResultSetToLichHen(rs, hasPhongCol);
-
                     attachReceptionDisplay(lh, rs);
-
                     list.add(lh);
-
                 }
-
             }
-
         }
-
         return list;
-
     }
-
-
-
-    /** Cũ hoặc thiếu Phong_ID: không tham chiếu Phong trong SQL. */
 
     private List<LichHen> runReceptionQueryLegacy(String sql, Integer dateParamIndex, java.sql.Date ngay) {
-
         List<LichHen> list = new ArrayList<>();
-
         try (Connection conn = DBConnection.getConnection();
-
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             if (dateParamIndex != null) {
-
                 ps.setDate(dateParamIndex, ngay);
-
             }
-
             try (ResultSet rs = ps.executeQuery()) {
-
                 ResultSetMetaData md = rs.getMetaData();
-
                 boolean hasPhongCol = hasColumn(md, "Phong_ID");
-
                 while (rs.next()) {
-
                     LichHen lh = mapResultSetToLichHen(rs, hasPhongCol);
-
                     attachReceptionDisplay(lh, rs);
-
                     list.add(lh);
-
                 }
-
             }
-
         } catch (SQLException e) {
-
             e.printStackTrace();
-
         }
-
         return list;
-
     }
-
-
 
     public List<LichHen> getLichHenByNgayKham(java.sql.Date ngay) {
-
         try {
-
             String sql = "SELECT lh.*, tkBN.HoTen AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, " +
-
                          "tkBS.HoTen AS TenBacSi, pk.TenPhong AS TenPhong " +
-
                          "FROM LichHen lh " +
-
                          "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                          "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-
                          "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
-
                          "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
-
                          "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID " +
-
                          "WHERE CAST(lh.NgayKham AS DATE) = CAST(? AS DATE) " +
-
                          "ORDER BY lh.GioKham ASC";
-
             return runReceptionQueryFull(sql, 1, ngay);
-
         } catch (SQLException e) {
-
-            System.err.println("[LichHenDAO] getLichHenByNgayKham fallback (no Phong join): " + e.getMessage());
-
             String legacy = "SELECT lh.LichHen_ID, lh.BenhNhan_ID, lh.BacSi_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, lh.TrangThai, " +
-
                          "COALESCE(tkBN.HoTen, N'') AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, " +
-
                          "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong " +
-
                          "FROM LichHen lh " +
-
                          "LEFT JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                          "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-
                          "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
-
                          "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
-
                          "WHERE CAST(lh.NgayKham AS DATE) = CAST(? AS DATE) " +
-
                          "ORDER BY lh.GioKham ASC";
-
             return runReceptionQueryLegacy(legacy, 1, ngay);
-
         }
-
     }
-
-
 
     public List<LichHen> getLichHenReceptionLatest(int limit) {
-
         if (limit <= 0) limit = 100;
-
         try {
-
             String sql = "SELECT TOP (" + limit + ") lh.*, tkBN.HoTen AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, " +
-
                          "tkBS.HoTen AS TenBacSi, pk.TenPhong AS TenPhong " +
-
                          "FROM LichHen lh " +
-
                          "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                          "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-
                          "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
-
                          "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
-
                          "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID " +
-
                          "ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
-
             return runReceptionQueryFull(sql, null, null);
-
         } catch (SQLException e) {
-
-            System.err.println("[LichHenDAO] getLichHenReceptionLatest fallback (no Phong join): " + e.getMessage());
-
             String legacy = "SELECT TOP (" + limit + ") lh.LichHen_ID, lh.BenhNhan_ID, lh.BacSi_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, lh.TrangThai, " +
-
                          "COALESCE(tkBN.HoTen, N'') AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, " +
-
                          "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong " +
-
                          "FROM LichHen lh " +
-
                          "LEFT JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID " +
-
                          "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
-
                          "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
-
                          "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
-
                          "ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
-
             return runReceptionQueryLegacy(legacy, null, null);
-
         }
-
     }
 
-    /** Thống kê toàn cục trên bảng LichHen (không lọc theo tuần/tháng). */
     public static final class ReceptionTotals {
         public final int total;
         public final int pending;
@@ -542,13 +300,11 @@ public class LichHenDAO {
                         rs.getInt("CComp"));
             }
         } catch (SQLException e) {
-            System.err.println("[LichHenDAO] countReceptionDashboardTotals: " + e.getMessage());
             e.printStackTrace();
         }
         return new ReceptionTotals(0, 0, 0, 0);
     }
 
-    /** loc: pending | confirmed | completed — toàn bộ lịch sử có trạng thái đó. */
     public List<LichHen> getLichHenReceptionByLocAllTime(String loc, int top) {
         if (top <= 0) top = 800;
         String where;
@@ -577,7 +333,6 @@ public class LichHenDAO {
                     + " ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
             return runReceptionQueryFullNoParam(sql);
         } catch (SQLException e) {
-            System.err.println("[LichHenDAO] getLichHenReceptionByLocAllTime full: " + e.getMessage());
             String legacy = "SELECT TOP (" + top + ") lh.LichHen_ID, lh.BenhNhan_ID, lh.BacSi_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, lh.TrangThai, "
                     + "COALESCE(tkBN.HoTen, N'') AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, "
                     + "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong FROM LichHen lh "
@@ -591,7 +346,6 @@ public class LichHenDAO {
         }
     }
 
-    /** Lọc ngày khám trong khoảng [start, end] (cận dưới trên inclusives). */
     public List<LichHen> getLichHenReceptionBetweenDates(java.sql.Date start, java.sql.Date endInclusive, int top) {
         if (top <= 0) top = 2500;
         try {
@@ -606,7 +360,6 @@ public class LichHenDAO {
                     + "ORDER BY lh.NgayKham ASC, lh.GioKham ASC";
             return runReceptionTwoDates(sql, start, endInclusive);
         } catch (SQLException e) {
-            System.err.println("[LichHenDAO] between full: " + e.getMessage());
             String legacy = "SELECT TOP (" + top + ") lh.LichHen_ID, lh.BenhNhan_ID, lh.BacSi_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, lh.TrangThai, "
                     + "COALESCE(tkBN.HoTen, N'') AS TenBenhNhan, tkBN.SoDienThoai AS SdtBenhNhan, "
                     + "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong FROM LichHen lh "
@@ -907,9 +660,6 @@ public class LichHenDAO {
         d.items.add(item);
     }
 
-    /**
-     * Lễ tân xác nhận thanh toán. Trả về null nếu thành công, ngược lại trả thông báo lỗi.
-     */
     public String xacNhanThanhToan(int lichHenId, String phuongThucThanhToan, double tongTien, Integer leTanId) {
         if (lichHenId <= 0 || tongTien <= 0) {
             return "Thiếu mã lịch hẹn hoặc tổng tiền không hợp lệ.";
@@ -950,7 +700,6 @@ public class LichHenDAO {
         }
     }
 
-    /** Trigger cũ tg_CapNhatTrangThai_ThanhToan ghi PhieuKham.TrangThai (cột không tồn tại) — chạy patch SQL. */
     private static String mapPaymentSqlError(SQLException e) {
         Throwable t = e;
         while (t != null) {
@@ -978,7 +727,6 @@ public class LichHenDAO {
         return -1;
     }
 
-    /** Gắn trạng thái HoaDon (Chưa/Đã thanh toán) cho danh sách lịch hẹn lễ tân. */
     public void attachTrangThaiHoaDonForAppointments(List<LichHen> appointments) {
         if (appointments == null || appointments.isEmpty()) {
             return;
@@ -1034,7 +782,6 @@ public class LichHenDAO {
         return map;
     }
 
-    /** Gắn danh sách tên dịch vụ đặt (ChiTietLichHen) cho danh sách lịch hẹn lễ tân. */
     public void attachTenDichVuForAppointments(List<LichHen> appointments) {
         if (appointments == null || appointments.isEmpty()) {
             return;
@@ -1080,7 +827,6 @@ public class LichHenDAO {
         return result;
     }
 
-    /** Dịch vụ phiếu khám (bác sĩ) + đặt lịch — ưu tiên số lượng từ phiếu khám. */
     private void loadMergedDichVuForDetail(Connection conn, int lichHenId, ReceptionBookingDetail d) throws SQLException {
         java.util.LinkedHashMap<Integer, Integer> merged = new java.util.LinkedHashMap<>();
         String sqlPk = "SELECT ctd.DichVu_ID, ISNULL(ctd.SoLuong, 1) AS SoLuong FROM PhieuKham pk "
@@ -1149,7 +895,6 @@ public class LichHenDAO {
         return layDanhSachChoKhamNgayHienTai(null);
     }
 
-    /** Hàng chờ khám hôm nay; lọc theo bác sĩ nếu bacSiId > 0. */
     public List<DanhSachLichHenDTO> layDanhSachChoKhamNgayHienTai(Integer bacSiId) {
         List<DanhSachLichHenDTO> list = new ArrayList<>();
         boolean filterDoctor = bacSiId != null && bacSiId > 0;
@@ -1169,7 +914,6 @@ public class LichHenDAO {
                 ps.setInt(1, bacSiId);
             }
             try (ResultSet rs = ps.executeQuery()) {
-
                 while (rs.next()) {
                     DanhSachLichHenDTO ds = new DanhSachLichHenDTO();
                     ds.setLichHenID(rs.getInt("LichHen_ID"));
@@ -1207,7 +951,6 @@ public class LichHenDAO {
         return false;
     }
 
-    /** Lễ tân thu tiền xong → Đã hoàn thành. */
     public boolean capNhatTrangThaiSauThanhToan(int lichHenID) {
         String sql = "UPDATE LichHen SET TrangThai = N'Đã hoàn thành' "
                 + "WHERE LichHen_ID = ? AND TrangThai <> N'Đã hủy' AND TrangThai <> N'Đã hoàn thành'";
@@ -1221,7 +964,6 @@ public class LichHenDAO {
         return false;
     }
 
-    /** Bác sĩ xác nhận hoàn tất khám → Đã khám (lễ tân thu tiền sau). */
     public boolean capNhatTrangThaiDaHoanThanh(int lichHenID, Integer bacSiId) {
         String sql = "UPDATE LichHen SET TrangThai = N'Đã khám' "
                 + "WHERE LichHen_ID = ? AND TrangThai IN (N'Đang khám', N'Đã đến')";
@@ -1256,7 +998,6 @@ public class LichHenDAO {
 
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-
             ps.setInt(1, lichHenID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -1337,7 +1078,6 @@ public class LichHenDAO {
         lh.setDanhSachDichVuDat(list);
     }
 
-    /** Dòng dịch vụ hiển thị trên hồ sơ bệnh nhân (phiếu khám + đặt lịch). */
     public static class PatientApptService {
         public int id;
         public String name;
@@ -1428,7 +1168,6 @@ public class LichHenDAO {
         }
     }
 
-    /** Lịch chờ admin xếp ca (bệnh nhân đặt khi chưa có BS rảnh). */
     public String getPendingShiftBookingsJson() {
         String sql = "SELECT lh.LichHen_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, "
                 + "tk.HoTen, tk.SoDienThoai, "
@@ -1474,9 +1213,6 @@ public class LichHenDAO {
         return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", " ");
     }
 
-    /**
-     * Sau khi admin thêm ca làm, gán lịch Chờ phân ca phù hợp cho bác sĩ đó và chuyển sang Chờ xác nhận (lễ tân).
-     */
     public int assignPendingBookingsForShift(int taiKhoanId, java.sql.Date ngayLam, int caId, int phongId) {
         if (taiKhoanId < 1 || ngayLam == null || caId < 1) return 0;
         BacSiDAO bsDAO = new BacSiDAO();
@@ -1580,7 +1316,6 @@ public class LichHenDAO {
         return null;
     }
 
-    /** Bệnh nhân hủy lịch chờ xác nhận. */
     public boolean benhNhanHuyLichHen(int lichHenId, int taiKhoanId) {
         String sql = "UPDATE lh SET lh.TrangThai = N'Đã hủy' FROM LichHen lh "
                 + "INNER JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
@@ -1597,7 +1332,6 @@ public class LichHenDAO {
         }
     }
 
-    /** Bệnh nhân gửi yêu cầu hủy lịch đã xác nhận. */
     public boolean benhNhanYeuCauHuyLichHen(int lichHenId, int taiKhoanId) {
         String sql = "UPDATE lh SET lh.GhiChu = CASE "
                 + "WHEN lh.GhiChu IS NULL OR lh.GhiChu NOT LIKE N'%[Yêu cầu hủy lịch]%' "
@@ -1616,7 +1350,6 @@ public class LichHenDAO {
         }
     }
 
-    /** Bệnh nhân cập nhật lịch chờ xác nhận (ngày, giờ, ghi chú, dịch vụ). */
     public boolean benhNhanCapNhatLichHen(int lichHenId, int taiKhoanId, java.sql.Date ngayKham,
             java.sql.Time gioKham, String ghiChu, java.util.List<int[]> dichVuIdQty) {
         if (dichVuIdQty == null || dichVuIdQty.isEmpty()) {
@@ -1690,7 +1423,4 @@ public class LichHenDAO {
             }
         }
     }
-
 }
-
-

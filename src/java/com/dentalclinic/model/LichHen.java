@@ -21,7 +21,6 @@ public class LichHen {
     // --- Các đối tượng quan hệ (Dùng để JOIN và hiển thị thông tin lên UI) ---
     private BenhNhan benhNhan;
     private BacSi bacSi;
-    /** Phòng khám (API khám lâm sàng / Gson) */
     private PhongKham phongKham;
     private List<ChiTietLichHen> danhSachDichVuDat;
     /** Phiếu khám nháp / đã lưu (nếu có) */

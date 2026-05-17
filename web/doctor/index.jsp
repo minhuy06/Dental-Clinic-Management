@@ -31,8 +31,6 @@
                         <option value="all">Tất cả trạng thái</option>
                         <option value="waiting">Đang chờ</option>
                         <option value="examining">Đang khám</option>
-                        <option value="completed">Đã khám</option>
-                        <option value="cancelled">Đã hủy</option>
                     </select>
                     
                     <button class="btn-refresh" id="refreshBtn"><i class="fa-solid fa-rotate-right"></i> Làm mới</button>

@@ -16,33 +16,34 @@ import javax.servlet.http.HttpServletResponse;
 public class PatientProfileServlet extends HttpServlet {
     private final LichHenDAO lichHenDAO = new LichHenDAO();
     private final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("application/json; charset=UTF-8");
         PrintWriter out = response.getWriter();
-
-        try {
+        
+        try{
             String idParam = request.getParameter("id");
-            if (idParam == null || idParam.trim().isEmpty()) {
+            if(idParam == null || idParam.trim().isEmpty()){
                 out.print("{\"success\": false, \"message\": \"Thiếu mã lịch hẹn!\"}");
                 return;
             }
-
+            
             int lichHenID = Integer.parseInt(idParam);
+            // Lấy thông tin Lịch Hẹn lồng nhau (LichHen -> BenhNhan -> HoSo)
             LichHen lh = lichHenDAO.layChiTietLichHen(lichHenID);
-
-            if (lh != null) {
+            
+            if(lh != null){
                 String jsonData = gson.toJson(lh);
                 out.print("{\"success\": true, \"data\": " + jsonData + "}");
-            } else {
+            }
+            else{
                 out.print("{\"success\": false, \"message\": \"Không tìm thấy thông tin lịch hẹn!\"}");
             }
-        } catch (Exception e) {
+        } catch(Exception e){
             e.printStackTrace();
             out.print("{\"success\": false, \"message\": \"Lỗi Server: " + e.getMessage() + "\"}");
-        } finally {
+        } finally{
             out.flush();
         }
     }
