@@ -159,6 +159,11 @@ public class BacSiDAO {
     }
 
     public boolean isDoctorFreeForBooking(int bacSiId, String ngayKham, java.time.LocalTime start, int durationMinutes) {
+        return isDoctorFreeForBooking(bacSiId, ngayKham, start, durationMinutes, null);
+    }
+
+    public boolean isDoctorFreeForBooking(int bacSiId, String ngayKham, java.time.LocalTime start,
+            int durationMinutes, Integer excludeLichHenId) {
         if (bacSiId < 1 || ngayKham == null || start == null) return false;
         int blockMinutes = Math.max(durationMinutes, 15);
         java.time.LocalTime end = start.plusMinutes(blockMinutes);
@@ -175,13 +180,35 @@ public class BacSiDAO {
         }
         if (!inShift) return false;
 
-        List<TimeRange> busySlots = getDoctorBusySlotsOnDate(bacSiId, ngayKham);
+        List<TimeRange> busySlots = getDoctorBusySlotsOnDate(bacSiId, ngayKham, excludeLichHenId);
         for (TimeRange busy : busySlots) {
             if (start.isBefore(busy.getEnd()) && end.isAfter(busy.getStart())) {
                 return false;
             }
         }
         return true;
+    }
+
+    /** Bác sĩ có ca làm tại phòng trong ngày (theo LichLamViec). */
+    public boolean isDoctorScheduledInRoomOnDate(int bacSiId, int phongId, String ngayKham) {
+        if (bacSiId < 1 || phongId < 1 || ngayKham == null || ngayKham.isBlank()) {
+            return false;
+        }
+        String sql = "SELECT 1 FROM LichLamViec lv "
+                + "INNER JOIN BacSi b ON b.TaiKhoan_ID = lv.TaiKhoan_ID "
+                + "WHERE b.BacSi_ID = ? AND lv.NgayLam = ? AND lv.Phong_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bacSiId);
+            ps.setDate(2, java.sql.Date.valueOf(ngayKham));
+            ps.setInt(3, phongId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     public int findPhongIdForDoctorOnDate(int bacSiId, String ngayKham) {
@@ -264,8 +291,12 @@ public class BacSiDAO {
     }
 
     public List<TimeRange> getDoctorBusySlotsOnDate(int bacSiId, String ngayKham) {
+        return getDoctorBusySlotsOnDate(bacSiId, ngayKham, null);
+    }
+
+    public List<TimeRange> getDoctorBusySlotsOnDate(int bacSiId, String ngayKham, Integer excludeLichHenId) {
         List<TimeRange> ranges = new ArrayList<>();
-        String sql = "SELECT lh.GioKham AS StartTime, " +
+        String sql = "SELECT lh.LichHen_ID, lh.GioKham AS StartTime, " +
                      "DATEADD(MINUTE, ISNULL(( " +
                      "   SELECT SUM(ISNULL(dv.ThoiLuongDuKien, 30) * ISNULL(ctlh.SoLuong, 1)) " +
                      "   FROM ChiTietLichHen ctlh " +
@@ -280,6 +311,10 @@ public class BacSiDAO {
             ps.setDate(2, java.sql.Date.valueOf(ngayKham));
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
+                    if (excludeLichHenId != null && excludeLichHenId > 0
+                            && rs.getInt("LichHen_ID") == excludeLichHenId) {
+                        continue;
+                    }
                     Time start = rs.getTime("StartTime");
                     Timestamp end = rs.getTimestamp("EndTime");
                     if (start != null && end != null) {

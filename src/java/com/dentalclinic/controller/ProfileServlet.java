@@ -92,9 +92,13 @@ public class ProfileServlet extends HttpServlet {
                 if (lh.getBacSi() != null && lh.getBacSi().getTaiKhoan() != null) {
                     aObj.addProperty("doctorName", lh.getBacSi().getTaiKhoan().getHoTen());
                     aObj.addProperty("doctorSpec", "Nha Khoa");
+                } else if (lh.getBacSiID() <= 0
+                        && ("Đã xác nhận".equalsIgnoreCase(dbStatus) || "Đã duyệt".equalsIgnoreCase(dbStatus))) {
+                    aObj.addProperty("doctorName", "Chờ gán bác sĩ");
+                    aObj.addProperty("doctorSpec", "Lễ tân đã xác nhận");
                 } else if ("Chờ phân ca".equalsIgnoreCase(dbStatus)) {
-                    aObj.addProperty("doctorName", "Chờ phân bác sĩ");
-                    aObj.addProperty("doctorSpec", "Phòng khám sẽ sắp xếp ca");
+                    aObj.addProperty("doctorName", "Chưa có bác sĩ");
+                    aObj.addProperty("doctorSpec", "");
                 }
                 aObj.addProperty("doctorAvatar", "");
                 aObj.addProperty("doctorDegree", "");

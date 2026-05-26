@@ -845,6 +845,8 @@ function updateQuantity(serviceId, value) {
 function resetForm() {
     let form = document.getElementById('appointmentForm');
     if (form) form.reset();
+    var bnHidden = document.getElementById('bookingBenhNhanId');
+    if (bnHidden) bnHidden.value = '';
     let today = new Date();
     let todayStr = formatDate(today);
     let dateInput = document.getElementById('appointmentDate');
@@ -871,6 +873,10 @@ function applyBookingPrefillToForm(data) {
     if (pn && nameVal) pn.value = nameVal;
     if (pp && phoneVal) pp.value = phoneVal;
     if (nt && data.notes != null) nt.value = data.notes;
+    var bnHidden = document.getElementById('bookingBenhNhanId');
+    if (bnHidden) {
+        bnHidden.value = data.benhNhanId != null && data.benhNhanId !== '' ? String(data.benhNhanId) : '';
+    }
 }
 
 function readBookingPrefillPayload() {
@@ -880,6 +886,7 @@ function readBookingPrefillPayload() {
     var data = {
         patientName: params.get('patientName') ? decodeURIComponent(params.get('patientName')) : '',
         patientPhone: params.get('patientPhone') ? decodeURIComponent(params.get('patientPhone')) : '',
+        benhNhanId: params.get('benhNhanId') || '',
         notes: ''
     };
 
@@ -891,6 +898,7 @@ function readBookingPrefillPayload() {
             if (stored) {
                 if (!data.patientName && stored.patientName) data.patientName = stored.patientName;
                 if (!data.patientPhone && stored.patientPhone) data.patientPhone = stored.patientPhone;
+                if (!data.benhNhanId && stored.benhNhanId) data.benhNhanId = stored.benhNhanId;
                 if (stored.notes) data.notes = stored.notes;
             }
         } catch (err) { /* noop */ }
@@ -943,6 +951,9 @@ function openAddModal(prefill) {
     resetForm();
     if (prefill) {
         applyBookingPrefillToForm(prefill);
+    } else {
+        var bnHidden = document.getElementById('bookingBenhNhanId');
+        if (bnHidden) bnHidden.value = '';
     }
     document.getElementById('appointmentModal').style.display = 'flex';
 }
@@ -1005,6 +1016,10 @@ async function saveAppointment() {
         const params = new URLSearchParams();
         params.append('patientName', patientName);
         params.append('patientPhone', patientPhone);
+        var bnIdEl = document.getElementById('bookingBenhNhanId');
+        if (bnIdEl && bnIdEl.value) {
+            params.append('benhNhanId', bnIdEl.value);
+        }
         params.append('ngayKham', date);
         params.append('gioKham', time);
         params.append('bacSiId', doctor);

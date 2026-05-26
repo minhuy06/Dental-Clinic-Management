@@ -169,8 +169,22 @@
             <c:set var="bsName">${lh.bacSi ne null && lh.bacSi.taiKhoan ne null ? fn:escapeXml(lh.bacSi.taiKhoan.hoTen) : ''}</c:set>
             <c:set var="bsSpec">${lh.bacSi ne null && not empty lh.bacSi.chuyenKhoa ? lh.bacSi.chuyenKhoa.tenChuyenKhoa : ''}</c:set>
             <td class="rcv-td-doctor">
-                <span class="rcv-dr-name">${bsName}</span>
-                <c:if test="${not empty bsSpec}"><span class="rcv-dr-spec">${fn:escapeXml(bsSpec)}</span></c:if>
+                <c:choose>
+                    <c:when test="${lh.bacSiID le 0 or empty bsName}">
+                        <c:choose>
+                            <c:when test="${lh.trangThai eq 'Đã xác nhận' or lh.trangThai eq 'Đã duyệt'}">
+                                <span class="rcv-dash">Chờ gán BS</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="rcv-dash">—</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </c:when>
+                    <c:otherwise>
+                        <span class="rcv-dr-name">${bsName}</span>
+                        <c:if test="${not empty bsSpec}"><span class="rcv-dr-spec">${fn:escapeXml(bsSpec)}</span></c:if>
+                    </c:otherwise>
+                </c:choose>
             </td>
             
             <td class="service-tags-cell">
@@ -303,6 +317,7 @@
             <div class="modal-body">
                 <form id="appointmentForm">
                     <input type="hidden" id="appointmentId">
+                    <input type="hidden" id="bookingBenhNhanId" value="">
                     
                     <div class="form-row">
                         <div class="form-group">

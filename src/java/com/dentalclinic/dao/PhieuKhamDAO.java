@@ -52,6 +52,7 @@ public class PhieuKhamDAO {
             psDel.executeUpdate();
         }
         insertChiTietDichVuRows(conn, phieuKhamId, pk.getDanhSachDichVu());
+        new LichHenDAO().syncChiTietLichHenFromClinical(conn, pk.getLichHenID(), pk.getDanhSachDichVu());
         capNhatHoaDonTheoPhieu(conn, phieuKhamId);
         capNhatTrangThaiLichHen(conn, pk.getLichHenID());
     }
@@ -70,6 +71,7 @@ public class PhieuKhamDAO {
             cs.setStructured(5, "Type_ChiTietDichVu", tvpTable);
             cs.execute();
         }
+        new LichHenDAO().syncChiTietLichHenFromClinical(pk.getLichHenID(), pk.getDanhSachDichVu());
     }
 
     private void capNhatHoaDonTheoPhieu(Connection conn, int phieuKhamId) throws SQLException {
@@ -158,6 +160,7 @@ public class PhieuKhamDAO {
             }
 
             insertChiTietDichVuRows(conn, phieuKhamId, pk.getDanhSachDichVu());
+            new LichHenDAO().syncChiTietLichHenFromClinical(conn, pk.getLichHenID(), pk.getDanhSachDichVu());
             conn.commit();
         } catch (SQLException e) {
             conn.rollback();

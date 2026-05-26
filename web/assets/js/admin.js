@@ -692,7 +692,7 @@ function buildPendingBellItemHtml(b) {
     var svcs = b.services ? escapeHtml(b.services) : '—';
     var noteRow = b.note ? ('<div class="form-group bell-pending-full"><label>Ghi chú</label><div class="bell-readonly">' + escapeHtml(b.note) + '</div></div>') : '';
     return '<div class="bell-pending-card">' +
-        '<div class="bell-pending-card-head"><strong>' + escapeHtml(b.patientName || 'Bệnh nhân') + '</strong><span class="bell-pending-tag">Chờ phân ca</span></div>' +
+        '<div class="bell-pending-card-head"><strong>' + escapeHtml(b.patientName || 'Bệnh nhân') + '</strong><span class="bell-pending-tag">Chờ gán BS</span></div>' +
         '<div class="form-row">' +
             '<div class="form-group"><label>Số điện thoại</label><div class="bell-readonly">' + escapeHtml(b.phone || '—') + '</div></div>' +
             '<div class="form-group"><label>Ngày · Giờ khám</label><div class="bell-readonly">' + formatPendingDate(b.date) + ' · ' + escapeHtml(b.time || '') + '</div></div>' +
@@ -716,12 +716,12 @@ function renderAdminBellNotifications() {
     if (btn) {
         btn.classList.toggle('has-notify', count > 0);
         btn.setAttribute('aria-label', count > 0
-            ? ('Thông báo: ' + count + ' lịch chờ phân ca')
-            : 'Thông báo lịch chờ phân ca');
+            ? ('Thông báo: ' + count + ' lịch đã xác nhận, chờ gán bác sĩ')
+            : 'Thông báo lịch chờ gán bác sĩ');
     }
     if (list) {
         list.innerHTML = count === 0
-            ? '<p class="bell-empty-msg"><i class="fas fa-check-circle"></i> Không có lịch chờ phân ca.</p>'
+            ? '<p class="bell-empty-msg"><i class="fas fa-check-circle"></i> Không có lịch chờ gán bác sĩ.</p>'
             : '<div class="bell-pending-list">' + pendingShiftBookings.map(buildPendingBellItemHtml).join('') + '</div>';
     }
 }
@@ -1029,7 +1029,7 @@ async function saveShift() {
     if (!res) return;
     var assigned = res.assignedBookings || 0;
     if (assigned > 0) {
-        showToast('Đã phân công ca và gán ' + assigned + ' lịch hẹn sang lễ tân xác nhận.', 'success');
+        showToast('Đã phân ca và gán bác sĩ/phòng cho ' + assigned + ' lịch hẹn.', 'success');
     }
     closeShiftModal();
     try { localStorage.setItem(ADMIN_LAST_TAB_KEY, 'schedule'); } catch (e) {}

@@ -17,6 +17,7 @@ import com.dentalclinic.model.DanhSachLichHenDTO;
 import com.dentalclinic.model.HoSo;
 
 import com.dentalclinic.model.PhongKham;
+import com.dentalclinic.model.ChiTietDichVu;
 import com.dentalclinic.model.ChiTietLichHen;
 import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.PhieuKham;
@@ -25,7 +26,10 @@ import java.sql.*;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import java.util.List;
 
@@ -186,7 +190,11 @@ public class LichHenDAO {
 
                 ps.setNString(6, lh.getTrangThai());
 
-                ps.setInt(7, lh.getPhongID());
+                if (lh.getPhongID() > 0) {
+                    ps.setInt(7, lh.getPhongID());
+                } else {
+                    ps.setNull(7, Types.INTEGER);
+                }
 
                 ps.executeUpdate();
 
@@ -289,6 +297,59 @@ public class LichHenDAO {
         return false;
     }
 
+    /** Kiểm tra phòng không bị trùng lịch hẹn khác trong cùng khung giờ. */
+    public boolean isRoomFreeForBooking(int phongId, String ngayKham, java.time.LocalTime start,
+            int durationMinutes, Integer excludeLichHenId) {
+        if (phongId < 1 || ngayKham == null || ngayKham.isBlank() || start == null) {
+            return false;
+        }
+        int blockMinutes = Math.max(durationMinutes, 15);
+        java.time.LocalTime end = start.plusMinutes(blockMinutes);
+        for (BacSiDAO.TimeRange busy : getRoomBusySlotsOnDate(phongId, ngayKham, excludeLichHenId)) {
+            if (start.isBefore(busy.getEnd()) && end.isAfter(busy.getStart())) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public List<BacSiDAO.TimeRange> getRoomBusySlotsOnDate(int phongId, String ngayKham, Integer excludeLichHenId) {
+        List<BacSiDAO.TimeRange> ranges = new ArrayList<>();
+        if (phongId < 1 || ngayKham == null || ngayKham.isBlank()) {
+            return ranges;
+        }
+        String sql = "SELECT lh.LichHen_ID, lh.GioKham AS StartTime, "
+                + "DATEADD(MINUTE, ISNULL(( "
+                + "   SELECT SUM(ISNULL(dv.ThoiLuongDuKien, 30) * ISNULL(ctlh.SoLuong, 1)) "
+                + "   FROM ChiTietLichHen ctlh "
+                + "   JOIN DichVu dv ON dv.DichVu_ID = ctlh.DichVu_ID "
+                + "   WHERE ctlh.LichHen_ID = lh.LichHen_ID "
+                + "), 30) + 15, CAST(lh.GioKham AS DATETIME)) AS EndTime "
+                + "FROM LichHen lh "
+                + "WHERE lh.Phong_ID = ? AND lh.NgayKham = ? AND lh.TrangThai <> N'Đã hủy'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, phongId);
+            ps.setDate(2, Date.valueOf(ngayKham));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (excludeLichHenId != null && excludeLichHenId > 0
+                            && rs.getInt("LichHen_ID") == excludeLichHenId) {
+                        continue;
+                    }
+                    Time start = rs.getTime("StartTime");
+                    Timestamp endTs = rs.getTimestamp("EndTime");
+                    if (start != null && endTs != null) {
+                        ranges.add(new BacSiDAO.TimeRange(start.toLocalTime(), endTs.toLocalDateTime().toLocalTime()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ranges;
+    }
+
     private static boolean hasColumn(ResultSetMetaData md, String name) throws SQLException {
 
         int n = md.getColumnCount();
@@ -351,15 +412,16 @@ public class LichHenDAO {
 
         lh.setBenhNhan(bnObj);
 
-        TaiKhoan tkBs = new TaiKhoan();
-
-        tkBs.setHoTen(rs.getNString("TenBacSi"));
-
-        BacSi bsObj = new BacSi();
-
-        bsObj.setTaiKhoan(tkBs);
-
-        lh.setBacSi(bsObj);
+        String tenBs = rs.getNString("TenBacSi");
+        if (tenBs != null && !tenBs.isBlank()) {
+            TaiKhoan tkBs = new TaiKhoan();
+            tkBs.setHoTen(tenBs);
+            BacSi bsObj = new BacSi();
+            bsObj.setTaiKhoan(tkBs);
+            lh.setBacSi(bsObj);
+        } else {
+            lh.setBacSi(null);
+        }
 
         String tenPhong = rs.getNString("TenPhong");
 
@@ -475,9 +537,9 @@ public class LichHenDAO {
 
                          "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
 
-                         "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
+                         "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
-                         "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+                         "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
 
                          "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID " +
 
@@ -503,9 +565,9 @@ public class LichHenDAO {
 
                          "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
 
-                         "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
+                         "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
-                         "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+                         "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
 
                          "WHERE CAST(lh.NgayKham AS DATE) = CAST(? AS DATE) " +
 
@@ -535,9 +597,9 @@ public class LichHenDAO {
 
                          "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
 
-                         "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
+                         "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
-                         "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+                         "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
 
                          "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID " +
 
@@ -561,9 +623,9 @@ public class LichHenDAO {
 
                          "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID " +
 
-                         "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
+                         "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
-                         "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+                         "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
 
                          "ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
 
@@ -633,8 +695,8 @@ public class LichHenDAO {
                     + "tkBS.HoTen AS TenBacSi, pk.TenPhong AS TenPhong FROM LichHen lh "
                     + "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                     + "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID "
-                    + "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
-                    + "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
+                    + "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
+                    + "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
                     + "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID "
                     + " WHERE 1=1 " + where
                     + " ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
@@ -646,8 +708,8 @@ public class LichHenDAO {
                     + "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong FROM LichHen lh "
                     + "LEFT JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                     + "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID "
-                    + "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
-                    + "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
+                    + "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
+                    + "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
                     + " WHERE 1=1 " + where
                     + " ORDER BY lh.NgayKham DESC, lh.GioKham DESC";
             return runReceptionLegacyNoParam(legacy);
@@ -662,8 +724,8 @@ public class LichHenDAO {
                     + "tkBS.HoTen AS TenBacSi, pk.TenPhong AS TenPhong FROM LichHen lh "
                     + "JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                     + "JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID "
-                    + "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
-                    + "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
+                    + "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
+                    + "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
                     + "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID "
                     + "WHERE CAST(lh.NgayKham AS DATE) >= CAST(? AS DATE) AND CAST(lh.NgayKham AS DATE) <= CAST(? AS DATE) "
                     + "ORDER BY lh.NgayKham ASC, lh.GioKham ASC";
@@ -675,8 +737,8 @@ public class LichHenDAO {
                     + "COALESCE(tkBS.HoTen, N'') AS TenBacSi, CAST(NULL AS NVARCHAR(100)) AS TenPhong FROM LichHen lh "
                     + "LEFT JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                     + "LEFT JOIN TaiKhoan tkBN ON bn.TaiKhoan_ID = tkBN.TaiKhoan_ID "
-                    + "JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
-                    + "JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
+                    + "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID "
+                    + "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID "
                     + "WHERE CAST(lh.NgayKham AS DATE) >= CAST(? AS DATE) AND CAST(lh.NgayKham AS DATE) <= CAST(? AS DATE) "
                     + "ORDER BY lh.NgayKham ASC, lh.GioKham ASC";
             return runReceptionTwoDatesLegacy(legacy, start, endInclusive);
@@ -816,7 +878,13 @@ public class LichHenDAO {
                     d.lichHenId = rs.getInt("LichHen_ID");
                     d.benhNhanId = rs.getInt("BenhNhan_ID");
                     d.bacSiId = rs.getInt("BacSi_ID");
+                    if (rs.wasNull()) {
+                        d.bacSiId = 0;
+                    }
                     d.phongId = rs.getInt("Phong_ID");
+                    if (rs.wasNull()) {
+                        d.phongId = 0;
+                    }
                     d.ngayKham = rs.getDate("NgayKham");
                     d.gioKham = rs.getTime("GioKham");
                     d.ghiChu = rs.getNString("GhiChu");
@@ -841,11 +909,19 @@ public class LichHenDAO {
             conn.setAutoCommit(false);
             try (PreparedStatement psUp = conn.prepareStatement(sqlUpdate)) {
                 psUp.setInt(1, lh.getBenhNhanID());
-                psUp.setInt(2, lh.getBacSiID());
+                if (lh.getBacSiID() > 0) {
+                    psUp.setInt(2, lh.getBacSiID());
+                } else {
+                    psUp.setNull(2, Types.INTEGER);
+                }
                 psUp.setDate(3, lh.getNgayKham());
                 psUp.setTime(4, lh.getGioKham());
                 psUp.setNString(5, lh.getGhiChu());
-                psUp.setInt(6, lh.getPhongID());
+                if (lh.getPhongID() > 0) {
+                    psUp.setInt(6, lh.getPhongID());
+                } else {
+                    psUp.setNull(6, Types.INTEGER);
+                }
                 psUp.setInt(7, lh.getLichHenID());
                 if (psUp.executeUpdate() <= 0) {
                     conn.rollback();
@@ -1133,17 +1209,124 @@ public class LichHenDAO {
                 + "WHERE ctlh.LichHen_ID IN (" + inClause + ") "
                 + "ORDER BY ctlh.LichHen_ID, dv.TenDichVu";
         try (Connection conn = DBConnection.getConnection()) {
+            Set<Integer> hasClinical = loadLichHenIdsWithClinicalServices(conn, ids);
             napTenDichVuTuQuery(conn, sqlPk, ids, result);
-            napTenDichVuTuQuery(conn, sqlLh, ids, result);
+            List<Integer> bookingOnlyIds = new ArrayList<>();
+            for (Integer id : ids) {
+                if (!hasClinical.contains(id)) {
+                    bookingOnlyIds.add(id);
+                }
+            }
+            if (!bookingOnlyIds.isEmpty()) {
+                napTenDichVuTuQuery(conn, sqlLh, bookingOnlyIds, result);
+            }
         } catch (SQLException e) {
             System.err.println("[LichHenDAO] loadTenDichVuByLichHenIds: " + e.getMessage());
         }
         return result;
     }
 
-    /** Dịch vụ phiếu khám (bác sĩ) + đặt lịch — ưu tiên số lượng từ phiếu khám. */
+    private Set<Integer> loadLichHenIdsWithClinicalServices(Connection conn, List<Integer> lichHenIds)
+            throws SQLException {
+        Set<Integer> found = new HashSet<>();
+        if (lichHenIds == null || lichHenIds.isEmpty()) {
+            return found;
+        }
+        StringBuilder inClause = new StringBuilder();
+        for (int i = 0; i < lichHenIds.size(); i++) {
+            if (i > 0) inClause.append(',');
+            inClause.append('?');
+        }
+        String sql = "SELECT DISTINCT pk.LichHen_ID FROM PhieuKham pk "
+                + "INNER JOIN ChiTietDichVu ctd ON ctd.PhieuKham_ID = pk.PhieuKham_ID "
+                + "WHERE pk.LichHen_ID IN (" + inClause + ")";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            for (int i = 0; i < lichHenIds.size(); i++) {
+                ps.setInt(i + 1, lichHenIds.get(i));
+            }
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    found.add(rs.getInt("LichHen_ID"));
+                }
+            }
+        }
+        return found;
+    }
+
+    /**
+     * Đồng bộ ChiTietLichHen từ dịch vụ phiếu khám (bác sĩ lưu) — lễ tân và hồ sơ BN đọc cùng nguồn.
+     */
+    public void syncChiTietLichHenFromClinical(int lichHenId, List<ChiTietDichVu> clinicalLines) {
+        if (lichHenId < 1) {
+            return;
+        }
+        LinkedHashMap<Integer, Integer> qtyByDv = aggregateClinicalQty(clinicalLines);
+        try (Connection conn = DBConnection.getConnection()) {
+            syncChiTietLichHenFromQtyMap(conn, lichHenId, qtyByDv);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void syncChiTietLichHenFromClinical(Connection conn, int lichHenId, List<ChiTietDichVu> clinicalLines)
+            throws SQLException {
+        if (lichHenId < 1) {
+            return;
+        }
+        syncChiTietLichHenFromQtyMap(conn, lichHenId, aggregateClinicalQty(clinicalLines));
+    }
+
+    private static LinkedHashMap<Integer, Integer> aggregateClinicalQty(List<ChiTietDichVu> clinicalLines) {
+        LinkedHashMap<Integer, Integer> qtyByDv = new LinkedHashMap<>();
+        if (clinicalLines == null) {
+            return qtyByDv;
+        }
+        for (ChiTietDichVu c : clinicalLines) {
+            if (c == null || c.getDichVuID() < 1) {
+                continue;
+            }
+            int qty = c.getSoLuong() > 0 ? c.getSoLuong() : 1;
+            qtyByDv.merge(c.getDichVuID(), qty, Integer::sum);
+        }
+        return qtyByDv;
+    }
+
+    private void syncChiTietLichHenFromQtyMap(Connection conn, int lichHenId, LinkedHashMap<Integer, Integer> qtyByDv)
+            throws SQLException {
+        try (PreparedStatement psDel = conn.prepareStatement("DELETE FROM ChiTietLichHen WHERE LichHen_ID = ?")) {
+            psDel.setInt(1, lichHenId);
+            psDel.executeUpdate();
+        }
+        if (qtyByDv.isEmpty()) {
+            return;
+        }
+        String sqlWithQty = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID, SoLuong) VALUES (?, ?, ?)";
+        String sqlLegacy = "INSERT INTO ChiTietLichHen (LichHen_ID, DichVu_ID) VALUES (?, ?)";
+        try {
+            try (PreparedStatement psIns = conn.prepareStatement(sqlWithQty)) {
+                for (Map.Entry<Integer, Integer> e : qtyByDv.entrySet()) {
+                    psIns.setInt(1, lichHenId);
+                    psIns.setInt(2, e.getKey());
+                    psIns.setInt(3, e.getValue());
+                    psIns.addBatch();
+                }
+                psIns.executeBatch();
+            }
+        } catch (SQLException ex) {
+            try (PreparedStatement psIns = conn.prepareStatement(sqlLegacy)) {
+                for (Map.Entry<Integer, Integer> e : qtyByDv.entrySet()) {
+                    psIns.setInt(1, lichHenId);
+                    psIns.setInt(2, e.getKey());
+                    psIns.addBatch();
+                }
+                psIns.executeBatch();
+            }
+        }
+    }
+
+    /** Dịch vụ: ưu tiên phiếu khám (bác sĩ); chưa có phiếu thì lấy từ đặt lịch. */
     private void loadMergedDichVuForDetail(Connection conn, int lichHenId, ReceptionBookingDetail d) throws SQLException {
-        java.util.LinkedHashMap<Integer, Integer> merged = new java.util.LinkedHashMap<>();
+        LinkedHashMap<Integer, Integer> merged = new LinkedHashMap<>();
         String sqlPk = "SELECT ctd.DichVu_ID, ISNULL(ctd.SoLuong, 1) AS SoLuong FROM PhieuKham pk "
                 + "INNER JOIN ChiTietDichVu ctd ON ctd.PhieuKham_ID = pk.PhieuKham_ID "
                 + "WHERE pk.LichHen_ID = ? ORDER BY ctd.ChiTietDichVu_ID";
@@ -1157,21 +1340,21 @@ public class LichHenDAO {
                 }
             }
         }
-        String sqlLh = "SELECT ctlh.DichVu_ID, ISNULL(ctlh.SoLuong, 1) AS SoLuong FROM ChiTietLichHen ctlh "
-                + "WHERE ctlh.LichHen_ID = ? ORDER BY ctlh.ChiTietLichHen_ID";
-        try (PreparedStatement ps = conn.prepareStatement(sqlLh)) {
-            ps.setInt(1, lichHenId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    int dvId = rs.getInt("DichVu_ID");
-                    if (!merged.containsKey(dvId)) {
+        if (merged.isEmpty()) {
+            String sqlLh = "SELECT ctlh.DichVu_ID, ISNULL(ctlh.SoLuong, 1) AS SoLuong FROM ChiTietLichHen ctlh "
+                    + "WHERE ctlh.LichHen_ID = ? ORDER BY ctlh.ChiTietLichHen_ID";
+            try (PreparedStatement ps = conn.prepareStatement(sqlLh)) {
+                ps.setInt(1, lichHenId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int dvId = rs.getInt("DichVu_ID");
                         int qty = rs.getInt("SoLuong");
                         merged.put(dvId, qty > 0 ? qty : 1);
                     }
                 }
             }
         }
-        for (java.util.Map.Entry<Integer, Integer> e : merged.entrySet()) {
+        for (Map.Entry<Integer, Integer> e : merged.entrySet()) {
             d.dichVuIds.add(e.getKey());
             DichVuQty item = new DichVuQty();
             item.id = e.getKey();
@@ -1287,7 +1470,7 @@ public class LichHenDAO {
         String sql = "UPDATE LichHen SET TrangThai = N'Đã khám' "
                 + "WHERE LichHen_ID = ? AND TrangThai IN (N'Đang khám', N'Đã đến')";
         if (bacSiId != null && bacSiId > 0) {
-            sql += " AND BacSi_ID = ?";
+            sql += " AND (BacSi_ID IS NULL OR BacSi_ID = ?)";
         }
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -1295,7 +1478,17 @@ public class LichHenDAO {
             if (bacSiId != null && bacSiId > 0) {
                 ps.setInt(2, bacSiId);
             }
-            return ps.executeUpdate() > 0;
+            int updated = ps.executeUpdate();
+            if (updated > 0) {
+                return true;
+            }
+            System.err.println("[LichHenDAO] capNhatTrangThaiDaHoanThanh: không có dòng nào (lichHen="
+                    + lichHenID + ", bacSiId=" + bacSiId + "). Kiểm tra TrangThai hiện tại và BacSi_ID.");
+        } catch (SQLException e) {
+            if (e.getMessage() != null && e.getMessage().contains("CK_LichHen_TrangThai")) {
+                System.err.println("[LichHenDAO] CHECK constraint thiếu N'Đã khám'. Chạy database/migration_add_da_kham_trangthai.sql");
+            }
+            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1458,7 +1651,7 @@ public class LichHenDAO {
         return result;
     }
 
-    private void loadMergedDichVuQtyMap(Connection conn, int lichHenId, java.util.LinkedHashMap<Integer, Integer> merged)
+    private void loadMergedDichVuQtyMap(Connection conn, int lichHenId, LinkedHashMap<Integer, Integer> merged)
             throws SQLException {
         String sqlPk = "SELECT ctd.DichVu_ID, ISNULL(ctd.SoLuong, 1) AS SoLuong FROM PhieuKham pk "
                 + "INNER JOIN ChiTietDichVu ctd ON ctd.PhieuKham_ID = pk.PhieuKham_ID "
@@ -1473,6 +1666,9 @@ public class LichHenDAO {
                 }
             }
         }
+        if (!merged.isEmpty()) {
+            return;
+        }
         String sqlLh = "SELECT ctlh.DichVu_ID, ISNULL(ctlh.SoLuong, 1) AS SoLuong FROM ChiTietLichHen ctlh "
                 + "WHERE ctlh.LichHen_ID = ? ORDER BY ctlh.ChiTietLichHen_ID";
         try (PreparedStatement ps = conn.prepareStatement(sqlLh)) {
@@ -1480,16 +1676,14 @@ public class LichHenDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     int dvId = rs.getInt("DichVu_ID");
-                    if (!merged.containsKey(dvId)) {
-                        int qty = rs.getInt("SoLuong");
-                        merged.put(dvId, qty > 0 ? qty : 1);
-                    }
+                    int qty = rs.getInt("SoLuong");
+                    merged.put(dvId, qty > 0 ? qty : 1);
                 }
             }
         }
     }
 
-    /** Lịch chờ admin xếp ca (bệnh nhân đặt khi chưa có BS rảnh). */
+    /** Lịch lễ tân đã xác nhận nhưng chưa gán bác sĩ — admin phân ca làm. */
     public String getPendingShiftBookingsJson() {
         String sql = "SELECT lh.LichHen_ID, lh.NgayKham, lh.GioKham, lh.GhiChu, "
                 + "tk.HoTen, tk.SoDienThoai, "
@@ -1499,7 +1693,8 @@ public class LichHenDAO {
                 + "FROM LichHen lh "
                 + "INNER JOIN BenhNhan bn ON lh.BenhNhan_ID = bn.BenhNhan_ID "
                 + "INNER JOIN TaiKhoan tk ON bn.TaiKhoan_ID = tk.TaiKhoan_ID "
-                + "WHERE lh.TrangThai = N'Chờ phân ca' AND lh.BacSi_ID IS NULL "
+                + "WHERE (lh.BacSi_ID IS NULL OR lh.BacSi_ID = 0) "
+                + "AND lh.TrangThai IN (N'Đã xác nhận', N'Đã duyệt') "
                 + "ORDER BY lh.NgayKham ASC, lh.GioKham ASC";
         StringBuilder sb = new StringBuilder("[");
         java.text.SimpleDateFormat iso = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US);
@@ -1535,19 +1730,42 @@ public class LichHenDAO {
         return s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\r", "").replace("\n", " ");
     }
 
-    /**
-     * Sau khi admin thêm ca làm, gán lịch Chờ phân ca phù hợp cho bác sĩ đó và chuyển sang Chờ xác nhận (lễ tân).
-     */
+    private static java.time.LocalTime[] loadCaTimeRange(int caId) {
+        String sql = "SELECT GioBatDau, GioKetThuc FROM CaLam WHERE Ca_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, caId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    java.sql.Time batDau = rs.getTime("GioBatDau");
+                    java.sql.Time ketThuc = rs.getTime("GioKetThuc");
+                    if (batDau != null && ketThuc != null) {
+                        return new java.time.LocalTime[] {
+                            batDau.toLocalTime(),
+                            ketThuc.toLocalTime()
+                        };
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /** Sau khi admin thêm ca làm, gán BS/phòng cho lịch đã xác nhận (chưa có BS) trong khung giờ ca đó. */
     public int assignPendingBookingsForShift(int taiKhoanId, java.sql.Date ngayLam, int caId, int phongId) {
         if (taiKhoanId < 1 || ngayLam == null || caId < 1) return 0;
         BacSiDAO bsDAO = new BacSiDAO();
         int bacSiId = findBacSiIdByTaiKhoan(taiKhoanId);
         if (bacSiId < 1) return 0;
 
+        java.time.LocalTime[] caRange = loadCaTimeRange(caId);
         String ngayStr = ngayLam.toLocalDate().toString();
         List<Integer> pendingIds = new ArrayList<>();
         String sql = "SELECT lh.LichHen_ID, lh.GioKham FROM LichHen lh "
-                + "WHERE lh.TrangThai = N'Chờ phân ca' AND lh.BacSi_ID IS NULL AND lh.NgayKham = ?";
+                + "WHERE (lh.BacSi_ID IS NULL OR lh.BacSi_ID = 0) AND lh.NgayKham = ? "
+                + "AND lh.TrangThai IN (N'Đã xác nhận', N'Đã duyệt')";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setDate(1, ngayLam);
@@ -1570,12 +1788,26 @@ public class LichHenDAO {
                 java.time.LocalTime start = lh.getGioKham().toLocalTime();
                 java.util.Map<Integer, Integer> qty = loadServiceQtyMap(lichHenId);
                 int duration = dichVuDAO.getTotalDurationMinutes(qty);
-                if (!bsDAO.isDoctorFreeForBooking(bacSiId, ngayStr, start, duration)) {
+                if (duration <= 0) duration = 30;
+                java.time.LocalTime end = start.plusMinutes(duration);
+                if (caRange != null) {
+                    if (start.isBefore(caRange[0]) || end.isAfter(caRange[1])) {
+                        continue;
+                    }
+                }
+                if (!bsDAO.isDoctorFreeForBooking(bacSiId, ngayStr, start, duration, lichHenId)) {
                     continue;
                 }
                 int room = phongId > 0 ? phongId : bsDAO.findPhongIdForDoctorOnDate(bacSiId, ngayStr);
-                String update = "UPDATE LichHen SET BacSi_ID = ?, Phong_ID = ?, TrangThai = N'Chờ xác nhận' "
-                        + "WHERE LichHen_ID = ? AND TrangThai = N'Chờ phân ca' AND BacSi_ID IS NULL";
+                if (room > 0 && !isRoomFreeForBooking(room, ngayStr, start, duration, lichHenId)) {
+                    continue;
+                }
+                if (room > 0 && !bsDAO.isDoctorScheduledInRoomOnDate(bacSiId, room, ngayStr)) {
+                    continue;
+                }
+                String update = "UPDATE LichHen SET BacSi_ID = ?, Phong_ID = ? "
+                        + "WHERE LichHen_ID = ? AND (BacSi_ID IS NULL OR BacSi_ID = 0) "
+                        + "AND TrangThai IN (N'Đã xác nhận', N'Đã duyệt')";
                 try (Connection conn = DBConnection.getConnection();
                      PreparedStatement ps = conn.prepareStatement(update)) {
                     ps.setInt(1, bacSiId);
@@ -1670,6 +1902,30 @@ public class LichHenDAO {
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, lichHenId);
             ps.setInt(2, taiKhoanId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /** Gán hoặc bỏ gán BS/phòng sau khi đổi ngày giờ (bệnh nhân / lễ tân). */
+    public boolean updateBookingAssignment(int lichHenId, Integer bacSiId, Integer phongId, String trangThai) {
+        String sql = "UPDATE LichHen SET BacSi_ID = ?, Phong_ID = ?, TrangThai = ? WHERE LichHen_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            if (bacSiId != null && bacSiId > 0) {
+                ps.setInt(1, bacSiId);
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+            if (phongId != null && phongId > 0) {
+                ps.setInt(2, phongId);
+            } else {
+                ps.setNull(2, Types.INTEGER);
+            }
+            ps.setNString(3, trangThai);
+            ps.setInt(4, lichHenId);
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

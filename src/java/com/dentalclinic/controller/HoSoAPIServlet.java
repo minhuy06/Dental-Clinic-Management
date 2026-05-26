@@ -2,6 +2,7 @@ package com.dentalclinic.controller;
 
 import com.dentalclinic.dao.LichHenDAO;
 import com.dentalclinic.dao.TaiKhoanDAO;
+import com.dentalclinic.service.LichHenService;
 import com.dentalclinic.model.TaiKhoan;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -11,8 +12,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.sql.Date;
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -187,7 +192,17 @@ public class HoSoAPIServlet extends HttpServlet {
         Time gioKham = Time.valueOf(timeStr.length() == 5 ? timeStr + ":00" : timeStr);
 
         LichHenDAO lhDAO = new LichHenDAO();
+        LichHenService lhService = new LichHenService();
         if (lhDAO.benhNhanCapNhatLichHen(lichHenId, loggedInUser.getTaiKhoanID(), ngayKham, gioKham, note, dichVuLines)) {
+            Map<Integer, Integer> qtyMap = new LinkedHashMap<>();
+            for (int[] line : dichVuLines) {
+                if (line != null && line.length >= 2 && line[0] > 0) {
+                    qtyMap.put(line[0], qtyMap.getOrDefault(line[0], 0) + Math.max(1, line[1]));
+                }
+            }
+            LocalDate ngay = ngayKham.toLocalDate();
+            LocalTime gio = gioKham.toLocalTime();
+            lhService.refreshAssignmentAfterScheduleChange(lichHenId, qtyMap, ngay, gio);
             jsonResponse.addProperty("success", true);
         } else {
             jsonResponse.addProperty("success", false);

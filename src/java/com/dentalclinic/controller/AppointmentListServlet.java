@@ -96,7 +96,11 @@ public class AppointmentListServlet extends HttpServlet {
             if (isSuccess) {
                 out.print("{\"success\": true}");
             } else {
-                out.print("{\"success\": false, \"message\": \"Không cập nhật được trạng thái\"}");
+                String hint = "complete".equalsIgnoreCase(action)
+                        ? "Không cập nhật được trạng thái. Lịch phải đang ở \"Đang khám\" hoặc \"Đã đến\". "
+                                + "Nếu DB báo lỗi CHECK constraint, chạy file database/migration_add_da_kham_trangthai.sql."
+                        : "Không cập nhật được trạng thái (lịch phải ở trạng thái \"Đã đến\").";
+                out.print("{\"success\": false, \"message\": \"" + hint.replace("\"", "\\\"") + "\"}");
             }
         } catch (Exception e) {
             e.printStackTrace();

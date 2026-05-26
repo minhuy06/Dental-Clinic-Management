@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/style.css">
     <link rel="stylesheet" href="${pageContext.request.contextPath}/assets/css/auth.css">
     <meta name="context-path" content="${pageContext.request.contextPath}">
+    <jsp:include page="../components/notify-resources.jsp" />
 </head>
 <body>
     <jsp:include page="../components/header.jsp" />
@@ -77,8 +78,8 @@
     <div class="system-modal-overlay" id="otpModal">
         <div class="system-modal" style="max-width:380px;">
             <span class="sys-icon">📱</span>
-            <div class="sys-title">Xác thực OTP</div>
-            <div class="sys-msg">Nhập mã 6 số đã gửi đến số điện thoại của bạn</div>
+            <div class="sys-title">Xác thực mã OTP</div>
+            <div class="sys-msg">Nhập mã 6 số để hoàn tất đăng ký (demo: <strong>123456</strong>)</div>
             <div class="otp-inputs" id="otpInputs">
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,0)" onkeydown="otpBack(event,0)">
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,1)" onkeydown="otpBack(event,1)">
@@ -87,12 +88,13 @@
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,4)" onkeydown="otpBack(event,4)">
                 <input type="text" maxlength="1" class="otp-box" oninput="otpNext(this,5)" onkeydown="otpBack(event,5)">
             </div>
-            <div class="otp-timer" id="otpTimer">Gửi lại mã sau <span id="otpCountdown">60</span>s</div>
+            <div class="otp-timer" id="otpTimer">Mã demo có hiệu lực <span id="otpCountdown">60</span>s</div>
             <button class="sys-close" onclick="verifyOtp()" style="margin-top:16px;">Xác nhận</button>
         </div>
     </div>
 
     <jsp:include page="../components/footer.jsp" />
-    <script src="${pageContext.request.contextPath}/assets/js/register.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/register.js?v=20260526b"></script>
 </body>
 </html>

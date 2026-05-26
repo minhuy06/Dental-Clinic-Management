@@ -172,6 +172,6 @@
 <script id="doctorServicesJson" type="application/json"><%= jsonDV %></script>
 <script id="doctorBookedServicesJson" type="application/json"><%= initialBookedJson %></script>
 <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
-<script src="${pageContext.request.contextPath}/assets/js/doctor-hoso.js?v=20260516m"></script>
+<script src="${pageContext.request.contextPath}/assets/js/doctor-hoso.js?v=20260526a"></script>
 </body>
 </html>

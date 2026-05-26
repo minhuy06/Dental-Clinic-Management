@@ -48,31 +48,93 @@ public class BenhNhanDAO {
         return list;
     }
 
-    public int resolveOrCreateDeskPatient(String hoTen, String soDienThoai) {
-        String ten = hoTen == null ? "" : hoTen.trim();
-        String sdt = soDienThoai == null ? "" : soDienThoai.trim();
-        if (ten.isEmpty() || sdt.isEmpty()) return -1;
+    /** Mã lỗi: số điện thoại đã có trong hệ thống (không tạo tài khoản mới). */
+    public static final int DESK_PATIENT_PHONE_DUPLICATE = -2;
 
-        String findSql = "SELECT bn.BenhNhan_ID, tk.TaiKhoan_ID FROM BenhNhan bn " +
-                         "JOIN TaiKhoan tk ON tk.TaiKhoan_ID = bn.TaiKhoan_ID " +
-                         "WHERE tk.SoDienThoai = ?";
+    public int findBenhNhanIdByPhone(String soDienThoai) {
+        String sdt = soDienThoai == null ? "" : soDienThoai.trim();
+        if (sdt.isEmpty()) {
+            return -1;
+        }
+        String findSql = "SELECT bn.BenhNhan_ID FROM BenhNhan bn "
+                + "JOIN TaiKhoan tk ON tk.TaiKhoan_ID = bn.TaiKhoan_ID "
+                + "WHERE tk.SoDienThoai = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(findSql)) {
             ps.setString(1, sdt);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    int taiKhoanId = rs.getInt("TaiKhoan_ID");
-                    int benhNhanId = rs.getInt("BenhNhan_ID");
-                    try (PreparedStatement ups = conn.prepareStatement("UPDATE TaiKhoan SET HoTen = ? WHERE TaiKhoan_ID = ?")) {
-                        ups.setNString(1, ten);
-                        ups.setInt(2, taiKhoanId);
-                        ups.executeUpdate();
-                    }
-                    return benhNhanId;
+                    return rs.getInt("BenhNhan_ID");
                 }
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+        return -1;
+    }
+
+    /**
+     * Đặt lịch lễ tân: BN mới chỉ khi SĐT chưa tồn tại; nếu có {@code knownBenhNhanId} thì dùng BN đó
+     * (trừ khi SĐT nhập thuộc BN khác → {@link #DESK_PATIENT_PHONE_DUPLICATE}).
+     */
+    public int resolveDeskPatientForReceptionBooking(String hoTen, String soDienThoai, Integer knownBenhNhanId) {
+        String ten = hoTen == null ? "" : hoTen.trim();
+        String sdt = soDienThoai == null ? "" : soDienThoai.trim();
+        if (ten.isEmpty() || sdt.isEmpty()) {
+            return -1;
+        }
+        if (knownBenhNhanId != null && knownBenhNhanId > 0) {
+            if (!benhNhanExists(knownBenhNhanId)) {
+                return -1;
+            }
+            int ownerByPhone = findBenhNhanIdByPhone(sdt);
+            if (ownerByPhone > 0 && ownerByPhone != knownBenhNhanId) {
+                return DESK_PATIENT_PHONE_DUPLICATE;
+            }
+            updateHoTenForBenhNhan(knownBenhNhanId, ten);
+            return knownBenhNhanId;
+        }
+        if (phoneExists(sdt)) {
+            return DESK_PATIENT_PHONE_DUPLICATE;
+        }
+        return createDeskPatientOnly(ten, sdt);
+    }
+
+    private boolean benhNhanExists(int benhNhanId) {
+        String sql = "SELECT 1 FROM BenhNhan WHERE BenhNhan_ID = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, benhNhanId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private void updateHoTenForBenhNhan(int benhNhanId, String hoTen) {
+        String sql = "UPDATE TaiKhoan SET HoTen = ? WHERE TaiKhoan_ID = (SELECT TaiKhoan_ID FROM BenhNhan WHERE BenhNhan_ID = ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setNString(1, hoTen);
+            ps.setInt(2, benhNhanId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /** Tạo tài khoản + BN mới (mật khẩu 123456, Bệnh nhân, Hoạt động). SĐT phải chưa tồn tại. */
+    public int createDeskPatientOnly(String hoTen, String soDienThoai) {
+        String ten = hoTen == null ? "" : hoTen.trim();
+        String sdt = soDienThoai == null ? "" : soDienThoai.trim();
+        if (ten.isEmpty() || sdt.isEmpty()) {
+            return -1;
+        }
+        if (phoneExists(sdt)) {
+            return DESK_PATIENT_PHONE_DUPLICATE;
         }
 
         String insertTk = "INSERT INTO TaiKhoan (SoDienThoai, MatKhau, VaiTro, TrangThai, HoTen) VALUES (?, ?, N'Bệnh nhân', N'Hoạt động', ?)";

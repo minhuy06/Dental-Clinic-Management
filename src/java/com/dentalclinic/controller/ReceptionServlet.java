@@ -1,6 +1,7 @@
 package com.dentalclinic.controller;
 
 import com.dentalclinic.dao.BacSiDAO;
+import com.dentalclinic.dao.BenhNhanDAO;
 import com.dentalclinic.dao.DichVuDAO;
 import com.dentalclinic.dao.LeTanDAO;
 import com.dentalclinic.dao.LichHenDAO;
@@ -402,14 +403,20 @@ public class ReceptionServlet extends HttpServlet {
                     String uBs = trimParam(request.getParameter("bacSiId"));
                     String[] dvRaw = request.getParameterValues("dichVu");
                     if (dvRaw == null || dvRaw.length == 0) dvRaw = request.getParameterValues("dichVu[]");
-                    if (uNgay.isBlank() || uGio.isBlank() || uName.isBlank() || uPhone.isBlank() || uPhong.isBlank() || uBs.isBlank()) {
+                    if (uNgay.isBlank() || uGio.isBlank() || uName.isBlank() || uPhone.isBlank()) {
                         throw new IllegalArgumentException("Thiếu thông tin cập nhật.");
                     }
                     List<Integer> dvIds = new ArrayList<>();
                     if (dvRaw != null) {
                         for (String x : dvRaw) dvIds.add(Integer.parseInt(x));
                     }
-                    int benhNhanId = lichHenService.resolveOrCreateDeskPatient(uName, uPhone);
+                    LichHenDAO.ReceptionBookingDetail existingDetail = lhDAO.getReceptionDetailById(lichHenId);
+                    Integer knownBnId = existingDetail != null && existingDetail.benhNhanId > 0
+                            ? existingDetail.benhNhanId : null;
+                    int benhNhanId = lichHenService.resolveDeskPatientForReceptionBooking(uName, uPhone, knownBnId);
+                    if (benhNhanId == BenhNhanDAO.DESK_PATIENT_PHONE_DUPLICATE) {
+                        throw new IllegalStateException(LichHenService.MSG_PHONE_DUPLICATE);
+                    }
                     if (benhNhanId <= 0) throw new IllegalStateException("Không thể lưu thông tin bệnh nhân.");
                     String normalizedTime = uGio.length() == 5 ? (uGio + ":00") : uGio;
                     Map<Integer, Integer> qtyByDv = new LinkedHashMap<>();
@@ -422,13 +429,26 @@ public class ReceptionServlet extends HttpServlet {
                     if (lichHenService.hasPatientTimeConflict(benhNhanId, ngayCapNhat, gioCapNhat, qtyByDv, lichHenId)) {
                         throw new IllegalStateException(LichHenService.MSG_PATIENT_TIME_CONFLICT);
                     }
+                    int bacSiId = uBs.isBlank() ? 0 : Integer.parseInt(uBs);
+                    int phongId = uPhong.isBlank() ? 0 : Integer.parseInt(uPhong);
+                    if (bacSiId > 0 && phongId > 0) {
+                        int durationMin = dichVuDAO.getTotalDurationMinutes(qtyByDv);
+                        if (durationMin <= 0) durationMin = 30;
+                        String slotErr = lichHenService.validateDoctorAndRoomSlot(
+                                bacSiId, phongId, ngayCapNhat, gioCapNhat, durationMin, lichHenId);
+                        if (slotErr != null) {
+                            throw new IllegalStateException(slotErr);
+                        }
+                    } else if (bacSiId > 0 || phongId > 0) {
+                        throw new IllegalArgumentException("Vui lòng chọn cả bác sĩ và phòng khám.");
+                    }
                     LichHen lh = new LichHen();
                     lh.setLichHenID(lichHenId);
                     lh.setBenhNhanID(benhNhanId);
-                    lh.setBacSiID(Integer.parseInt(uBs));
+                    lh.setBacSiID(bacSiId);
                     lh.setNgayKham(Date.valueOf(uNgay));
                     lh.setGioKham(Time.valueOf(normalizedTime));
-                    lh.setPhongID(Integer.parseInt(uPhong));
+                    lh.setPhongID(phongId);
                     lh.setGhiChu(request.getParameter("ghiChu"));
                     boolean ok = lhDAO.updateBookingWithServices(lh, dvIds);
                     if (!ok) throw new IllegalStateException("Không cập nhật được lịch hẹn.");
@@ -523,7 +543,23 @@ public class ReceptionServlet extends HttpServlet {
                 dichVuIds.add(Integer.parseInt(dv));
             }
 
-            int benhNhanId = lichHenService.resolveOrCreateDeskPatient(patientName, patientPhone);
+            Integer knownBenhNhanId = null;
+            String benhNhanIdRaw = trimParam(request.getParameter("benhNhanId"));
+            if (!benhNhanIdRaw.isBlank()) {
+                try {
+                    int parsed = Integer.parseInt(benhNhanIdRaw);
+                    if (parsed > 0) {
+                        knownBenhNhanId = parsed;
+                    }
+                } catch (NumberFormatException ignored) {
+                }
+            }
+
+            int benhNhanId = lichHenService.resolveDeskPatientForReceptionBooking(
+                    patientName, patientPhone, knownBenhNhanId);
+            if (benhNhanId == BenhNhanDAO.DESK_PATIENT_PHONE_DUPLICATE) {
+                throw new IllegalStateException(LichHenService.MSG_PHONE_DUPLICATE);
+            }
             if (benhNhanId <= 0) {
                 throw new IllegalStateException("Không thể lưu thông tin bệnh nhân.");
             }

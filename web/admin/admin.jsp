@@ -27,7 +27,7 @@
         </ul>
         <div class="user-info">
             <div class="admin-bell-wrap" id="adminBellWrap">
-                <button type="button" class="admin-bell-btn" id="adminBellBtn" aria-label="Thông báo lịch chờ phân ca" aria-expanded="false" onclick="toggleAdminBellPanel(event)">
+                <button type="button" class="admin-bell-btn" id="adminBellBtn" aria-label="Thông báo lịch chờ gán bác sĩ" aria-expanded="false" onclick="toggleAdminBellPanel(event)">
                     <span class="admin-bell-icon" aria-hidden="true"><i class="fas fa-bell"></i></span>
                     <span class="admin-bell-badge" id="adminBellBadge" aria-hidden="true">0</span>
                 </button>
@@ -391,11 +391,11 @@
         </div>
     </div>
 
-    <!-- MODAL: THÔNG BÁO LỊCH CHỜ PHÂN CA -->
+    <!-- MODAL: LỊCH ĐÃ XÁC NHẬN, CHỜ ADMIN GÁN BS -->
     <div id="adminBellModal" class="modal" onclick="if(event.target===this)closeAdminBellPanel()">
         <div class="modal-content" style="max-width:520px">
             <div class="modal-header">
-                <h3><i class="fas fa-bell" style="color:#ef4444;margin-right:6px"></i> Lịch chờ phân ca</h3>
+                <h3><i class="fas fa-bell" style="color:#ef4444;margin-right:6px"></i> Lịch chờ gán bác sĩ</h3>
                 <span class="close" onclick="closeAdminBellPanel()">&times;</span>
             </div>
             <div class="modal-body" id="adminBellList" style="max-height:55vh;overflow-y:auto"></div>

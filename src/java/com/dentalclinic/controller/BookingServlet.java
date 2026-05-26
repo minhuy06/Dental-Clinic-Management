@@ -72,18 +72,17 @@ public class BookingServlet extends HttpServlet {
             if (gio.length() == 5) gio = gio + ":00";
             lh.setGioKham(java.sql.Time.valueOf(gio));
             lh.setGhiChu(input.ghiChu);
-            lh.setPhongID(1);
 
             String result = lhService.createBooking(lh, input.qtyByDvId, null, true);
             if (!LichHenService.RESULT_SUCCESS.equals(result)
-                    && !LichHenService.RESULT_SUCCESS_PENDING_SHIFT.equals(result)) {
+                    && !LichHenService.RESULT_SUCCESS_NO_DOCTOR.equals(result)) {
                 fail(request, response, wantsJson, result);
                 return;
             }
 
             if (wantsJson) {
-                String okMsg = LichHenService.RESULT_SUCCESS_PENDING_SHIFT.equals(result)
-                        ? "Đã ghi nhận lịch hẹn! Phòng khám sẽ sắp xếp ca bác sĩ và lễ tân xác nhận sớm nhất."
+                String okMsg = LichHenService.RESULT_SUCCESS_NO_DOCTOR.equals(result)
+                        ? "Đặt lịch thành công! Lễ tân sẽ xác nhận và sắp xếp bác sĩ cho bạn."
                         : "Đặt lịch thành công! Lễ tân sẽ xác nhận trong thời gian sớm nhất.";
                 writeJson(response, true, okMsg, 200);
             } else {

@@ -258,18 +258,50 @@ function applyPhieuKhamLines(lines) {
     renderClinicalTable();
 }
 
+function appendMissingBookedServices(bookingList) {
+    (bookingList || []).forEach(ct => {
+        const dv = ct.dichVu || {};
+        const id = dv.dichVuID || dv.dichVuId || ct.dichVuId || ct.dichVuID;
+        if (!id) return;
+        if (clinicalSelectedServices.findIndex(s => String(s.dichVu_ID) === String(id)) >= 0) {
+            return;
+        }
+        const meta = (typeof danhSachDichVuTuDB !== 'undefined' && danhSachDichVuTuDB)
+            ? (danhSachDichVuTuDB.find(s => String(s.dichVuID) === String(id)) || dv)
+            : dv;
+        const perUnit = !!(dv.tinhTheoRang || meta.tinhTheoRang);
+        clinicalSelectedServices.push({
+            dichVu_ID: parseInt(id, 10),
+            tenDichVu: dv.tenDichVu || meta.tenDichVu,
+            donGia: dv.giaTien != null ? dv.giaTien : meta.giaTien,
+            soLuong: ct.soLuong || 1,
+            isPerUnit: perUnit,
+            viTriRang: perUnit ? '' : 'Toàn hàm'
+        });
+    });
+    renderClinicalTable();
+}
+
+/** Luôn hiển thị dịch vụ đã đặt lịch; phiếu khám (nếu có) ghi đè/bổ sung. */
 function hydrateClinicalFromProfile(lh) {
     if (!lh) return;
-    if (lh.phieuKham && lh.phieuKham.danhSachDichVu && lh.phieuKham.danhSachDichVu.length) {
-        applyPhieuKhamLines(lh.phieuKham.danhSachDichVu);
+    const booked = lh.danhSachDichVuDat || [];
+    const clinical = (lh.phieuKham && lh.phieuKham.danhSachDichVu) ? lh.phieuKham.danhSachDichVu : [];
+
+    if (clinical.length > 0) {
+        applyPhieuKhamLines(clinical);
+        appendMissingBookedServices(booked);
+    } else if (booked.length > 0) {
+        applyBookedServices(booked);
+    }
+
+    if (lh.phieuKham) {
         const diagEl = document.getElementById('diagnosis');
         const symEl = document.getElementById('symptoms');
         const prescEl = document.getElementById('prescription');
         if (diagEl && lh.phieuKham.chanDoan) diagEl.value = lh.phieuKham.chanDoan;
         if (symEl && lh.phieuKham.lyDoKham) symEl.value = lh.phieuKham.lyDoKham;
         if (prescEl && lh.phieuKham.ghiChu) prescEl.value = lh.phieuKham.ghiChu;
-    } else if (lh.danhSachDichVuDat && lh.danhSachDichVuDat.length) {
-        applyBookedServices(lh.danhSachDichVuDat);
     }
 }
 
