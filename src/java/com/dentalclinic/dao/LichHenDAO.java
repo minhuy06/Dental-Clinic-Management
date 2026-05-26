@@ -22,7 +22,7 @@ import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.PhieuKham;
 
 import java.sql.*;
-
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -224,7 +224,61 @@ public class LichHenDAO {
 
     }
 
+    /**
+     * Lịch hẹn đang hiệu lực của bệnh nhân trong ngày (trừ Đã hủy), dùng kiểm tra trùng khung giờ.
+     */
+    public List<BacSiDAO.TimeRange> getPatientBusySlotsOnDate(int benhNhanId, String ngayKham, Integer excludeLichHenId) {
+        List<BacSiDAO.TimeRange> ranges = new ArrayList<>();
+        if (benhNhanId < 1 || ngayKham == null || ngayKham.isBlank()) {
+            return ranges;
+        }
+        String sql = "SELECT lh.LichHen_ID, lh.GioKham AS StartTime, "
+                + "DATEADD(MINUTE, ISNULL(( "
+                + "   SELECT SUM(ISNULL(dv.ThoiLuongDuKien, 30) * ISNULL(ctlh.SoLuong, 1)) "
+                + "   FROM ChiTietLichHen ctlh "
+                + "   JOIN DichVu dv ON dv.DichVu_ID = ctlh.DichVu_ID "
+                + "   WHERE ctlh.LichHen_ID = lh.LichHen_ID "
+                + "), 30) + 15, CAST(lh.GioKham AS DATETIME)) AS EndTime "
+                + "FROM LichHen lh "
+                + "WHERE lh.BenhNhan_ID = ? AND lh.NgayKham = ? AND lh.TrangThai <> N'Đã hủy'";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, benhNhanId);
+            ps.setDate(2, Date.valueOf(ngayKham));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    if (excludeLichHenId != null && excludeLichHenId > 0
+                            && rs.getInt("LichHen_ID") == excludeLichHenId) {
+                        continue;
+                    }
+                    Time start = rs.getTime("StartTime");
+                    Timestamp end = rs.getTimestamp("EndTime");
+                    if (start != null && end != null) {
+                        ranges.add(new BacSiDAO.TimeRange(start.toLocalTime(), end.toLocalDateTime().toLocalTime()));
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return ranges;
+    }
 
+    /** true nếu bệnh nhân đã có lịch khác trùng/ chồng khung giờ trong cùng ngày. */
+    public boolean hasPatientBookingConflict(int benhNhanId, String ngayKham, LocalTime start,
+            int durationMinutes, Integer excludeLichHenId) {
+        if (benhNhanId < 1 || ngayKham == null || ngayKham.isBlank() || start == null) {
+            return false;
+        }
+        int blockMinutes = Math.max(durationMinutes, 15);
+        LocalTime end = start.plusMinutes(blockMinutes);
+        for (BacSiDAO.TimeRange busy : getPatientBusySlotsOnDate(benhNhanId, ngayKham, excludeLichHenId)) {
+            if (start.isBefore(busy.getEnd()) && end.isAfter(busy.getStart())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private static boolean hasColumn(ResultSetMetaData md, String name) throws SQLException {
 

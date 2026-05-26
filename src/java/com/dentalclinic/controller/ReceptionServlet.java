@@ -16,7 +16,10 @@ import java.sql.Date;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
@@ -409,6 +412,16 @@ public class ReceptionServlet extends HttpServlet {
                     int benhNhanId = lichHenService.resolveOrCreateDeskPatient(uName, uPhone);
                     if (benhNhanId <= 0) throw new IllegalStateException("Không thể lưu thông tin bệnh nhân.");
                     String normalizedTime = uGio.length() == 5 ? (uGio + ":00") : uGio;
+                    Map<Integer, Integer> qtyByDv = new LinkedHashMap<>();
+                    for (Integer dvId : dvIds) {
+                        if (dvId == null) continue;
+                        qtyByDv.put(dvId, qtyByDv.getOrDefault(dvId, 0) + 1);
+                    }
+                    LocalDate ngayCapNhat = LocalDate.parse(uNgay);
+                    LocalTime gioCapNhat = LocalTime.parse(normalizedTime);
+                    if (lichHenService.hasPatientTimeConflict(benhNhanId, ngayCapNhat, gioCapNhat, qtyByDv, lichHenId)) {
+                        throw new IllegalStateException(LichHenService.MSG_PATIENT_TIME_CONFLICT);
+                    }
                     LichHen lh = new LichHen();
                     lh.setLichHenID(lichHenId);
                     lh.setBenhNhanID(benhNhanId);

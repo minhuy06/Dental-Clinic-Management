@@ -18,6 +18,7 @@ public class LichHenService {
     public static final String STATUS_CHO_XAC_NHAN = "Chờ xác nhận";
     public static final String RESULT_SUCCESS = "SUCCESS";
     public static final String RESULT_SUCCESS_PENDING_SHIFT = "SUCCESS_PENDING_SHIFT";
+    public static final String MSG_PATIENT_TIME_CONFLICT = "Giờ này bạn đã có lịch khác";
 
     private final LichHenDAO lhDAO = new LichHenDAO();
     private final BacSiDAO bsDAO = new BacSiDAO();
@@ -80,6 +81,10 @@ public class LichHenService {
         int durationMinutes = dichVuDAO.getTotalDurationMinutes(qtyByDvId);
         if (durationMinutes <= 0) durationMinutes = 30;
 
+        if (hasPatientTimeConflict(lh.getBenhNhanID(), ngay, gio, qtyByDvId, null)) {
+            return MSG_PATIENT_TIME_CONFLICT;
+        }
+
         if (requestedDoctorId != null && requestedDoctorId > 0) {
             if (!bsDAO.isDoctorFreeForBooking(requestedDoctorId, ngayStr, gio, durationMinutes)) {
                 return "Bác sĩ đã chọn không rảnh hoặc không có ca làm trong khung giờ này.";
@@ -120,5 +125,15 @@ public class LichHenService {
 
     public int resolveBenhNhanForPatientAccount(int taiKhoanId) {
         return benhNhanDAO.ensureBenhNhanForTaiKhoan(taiKhoanId);
+    }
+
+    public boolean hasPatientTimeConflict(int benhNhanId, LocalDate ngay, LocalTime gio,
+            Map<Integer, Integer> qtyByDvId, Integer excludeLichHenId) {
+        if (benhNhanId < 1 || ngay == null || gio == null) {
+            return false;
+        }
+        int durationMinutes = dichVuDAO.getTotalDurationMinutes(qtyByDvId);
+        if (durationMinutes <= 0) durationMinutes = 30;
+        return lhDAO.hasPatientBookingConflict(benhNhanId, ngay.toString(), gio, durationMinutes, excludeLichHenId);
     }
 }
