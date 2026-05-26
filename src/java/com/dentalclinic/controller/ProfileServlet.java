@@ -3,8 +3,10 @@ package com.dentalclinic.controller;
 import com.dentalclinic.dao.DichVuDAO;
 import com.dentalclinic.dao.LichHenDAO;
 import com.dentalclinic.dao.LichHenDAO.PatientApptService;
+import com.dentalclinic.dao.PhieuKhamDAO;
 import com.dentalclinic.model.DichVu;
 import com.dentalclinic.model.LichHen;
+import com.dentalclinic.model.PhieuKham;
 import com.dentalclinic.model.TaiKhoan;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -70,6 +72,7 @@ public class ProfileServlet extends HttpServlet {
 
         JsonArray appointmentsJsonArray = new JsonArray();
         LichHenDAO lhDAO = new LichHenDAO();
+        PhieuKhamDAO phieuKhamDAO = new PhieuKhamDAO();
         List<LichHen> listLichHen = lhDAO.getLichHenByBenhNhan(loggedInUser.getTaiKhoanID());
 
         if (listLichHen != null) {
@@ -92,6 +95,26 @@ public class ProfileServlet extends HttpServlet {
                 } else if ("Chờ phân ca".equalsIgnoreCase(dbStatus)) {
                     aObj.addProperty("doctorName", "Chờ phân bác sĩ");
                     aObj.addProperty("doctorSpec", "Phòng khám sẽ sắp xếp ca");
+                }
+                aObj.addProperty("doctorAvatar", "");
+                aObj.addProperty("doctorDegree", "");
+
+                if (lh.getTenPhong() != null && !lh.getTenPhong().isBlank()) {
+                    aObj.addProperty("room", lh.getTenPhong());
+                }
+
+                PhieuKham pk = phieuKhamDAO.layPhieuKhamTheoLichHen(lh.getLichHenID());
+                if (pk != null) {
+                    if (pk.getChanDoan() != null && !pk.getChanDoan().isBlank()) {
+                        aObj.addProperty("diagnosis", pk.getChanDoan());
+                    }
+                    if (pk.getGhiChu() != null && !pk.getGhiChu().isBlank()) {
+                        aObj.addProperty("doctorNote", pk.getGhiChu());
+                    }
+                    if (pk.getLyDoKham() != null && !pk.getLyDoKham().isBlank()
+                            && (lh.getGhiChu() == null || lh.getGhiChu().isBlank())) {
+                        aObj.addProperty("customerNote", pk.getLyDoKham());
+                    }
                 }
 
                 JsonArray apptServices = new JsonArray();
@@ -150,7 +173,7 @@ public class ProfileServlet extends HttpServlet {
             return "confirmed";
         }
         if ("Đã khám".equalsIgnoreCase(dbStatus) || "Đã hoàn thành".equalsIgnoreCase(dbStatus)
-                || "Hoàn thành".equalsIgnoreCase(dbStatus)) {
+                || "Hoàn thành".equalsIgnoreCase(dbStatus) || "Đã thanh toán".equalsIgnoreCase(dbStatus)) {
             return "paid";
         }
         if ("Đã hủy".equalsIgnoreCase(dbStatus)) {

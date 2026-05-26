@@ -357,8 +357,8 @@ public class ReceptionServlet extends HttpServlet {
                 }
                 if ("delete".equalsIgnoreCase(action)) {
                     int lichHenId = Integer.parseInt(trimParam(request.getParameter("lichHenId")));
-                    boolean ok = lhDAO.deleteById(lichHenId);
-                    if (!ok) throw new IllegalStateException("Không xóa được lịch hẹn.");
+                    boolean ok = lhDAO.cancelById(lichHenId);
+                    if (!ok) throw new IllegalStateException("Không hủy được lịch hẹn.");
                     response.getWriter().write("{\"success\":true}");
                     return;
                 }

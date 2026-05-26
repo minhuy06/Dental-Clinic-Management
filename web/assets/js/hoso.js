@@ -323,7 +323,13 @@ function showDetail(id) {
 
     // Bac si
     if (d.doctorName) {
-        html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">👨‍⚕️</span> Bác sĩ</div><div class="doctor-card-mini"><div class="doctor-avatar-mini"><img src="' + d.doctorAvatar + '"></div><div class="doctor-details"><h4>' + d.doctorName + '</h4><p>' + d.doctorDegree + '</p><span class="specialty-tag">' + d.doctorSpec + '</span></div></div></div>';
+        var avatarHtml = d.doctorAvatar
+            ? '<img src="' + d.doctorAvatar + '" alt="">'
+            : '<span style="font-size:1.4rem">👨‍⚕️</span>';
+        html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">👨‍⚕️</span> Bác sĩ</div><div class="doctor-card-mini"><div class="doctor-avatar-mini">' + avatarHtml + '</div><div class="doctor-details"><h4>' + d.doctorName + '</h4>';
+        if (d.doctorDegree) html += '<p>' + d.doctorDegree + '</p>';
+        if (d.doctorSpec) html += '<span class="specialty-tag">' + d.doctorSpec + '</span>';
+        html += '</div></div></div>';
     } else {
         html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">👨‍⚕️</span> Bác sĩ</div><div class="medical-empty">⏳ Đang chờ phân bác sĩ...</div></div>';
     }
@@ -333,13 +339,18 @@ function showDetail(id) {
         html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">📝</span> Ghi chú của bạn</div><div class="medical-item"><div class="medical-text">' + d.customerNote + '</div></div></div>';
     }
 
-    // Ket qua kham (chi khi da khAM)
-    if (isPaid && d.diagnosis) {
-        html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">🩺</span> Kết quả khám</div><div class="medical-item"><div class="medical-label">Chẩn đoán</div><div class="medical-text diagnosis">' + d.diagnosis + '</div></div>';
+    // Ket qua kham (khi co phieu kham / da kham)
+    if (d.diagnosis || d.doctorNote) {
+        html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">🩺</span> Kết quả khám</div>';
+        if (d.diagnosis) {
+            html += '<div class="medical-item"><div class="medical-label">Chẩn đoán</div><div class="medical-text diagnosis">' + d.diagnosis + '</div></div>';
+        }
         if (d.doctorNote) {
             html += '<div class="medical-item"><div class="medical-label">Ghi chú bác sĩ</div><div class="medical-text">' + d.doctorNote + '</div></div>';
         }
         html += '</div>';
+    } else if (isPaid) {
+        html += '<div class="receipt-card"><div class="receipt-card-title"><span class="title-icon">🩺</span> Kết quả khám</div><div class="medical-empty">Chưa có thông tin phiếu khám trên hệ thống.</div></div>';
     }
 
     // Dich vu

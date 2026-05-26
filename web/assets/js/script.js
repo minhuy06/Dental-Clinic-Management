@@ -1181,11 +1181,11 @@ function approveAppointment(id) {
 }
 
 async function deleteReceptionAppointment(id) {
-    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn xóa lịch hẹn này?' });
+    const ok = await AppNotify.confirm({ message: 'Bạn có chắc muốn hủy lịch hẹn này?' });
     if (!ok) return;
     const res = await withDataGuard(async function() {
         return postReceptionAction('delete', id);
-    }, 'Đã xóa lịch hẹn');
+    }, 'Đã hủy lịch hẹn');
     if (!res) return;
     window.location.reload();
 }

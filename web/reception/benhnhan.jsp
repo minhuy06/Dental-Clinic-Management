@@ -91,9 +91,6 @@
                 <button class="filter-btn" data-filter="completed">Hoàn thành</button>
                 <button class="filter-btn" data-filter="followup">Tái khám</button>
             </div>
-            <button class="btn-add" id="openAddBtn">
-                <i class="fas fa-plus"></i> Thêm bệnh nhân
-            </button>
         </div>
 
         <!-- ==================== BẢNG BỆNH NHÂN ==================== -->
@@ -124,7 +121,7 @@
     <div id="patientModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Thêm bệnh nhân mới</h3>
+                <h3 id="modalTitle">Sửa thông tin bệnh nhân</h3>
                 <span class="close">&times;</span>
             </div>
             <div class="modal-body">
@@ -212,6 +209,6 @@
     <meta name="context-path" content="${pageContext.request.contextPath}">
     <jsp:include page="../components/notify-resources.jsp" />
     <script src="${pageContext.request.contextPath}/assets/js/bootstrap-helper.js"></script>
-    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260516c"></script>
+    <script src="${pageContext.request.contextPath}/assets/js/benhnhan.js?v=20260526a"></script>
 </body>
 </html>

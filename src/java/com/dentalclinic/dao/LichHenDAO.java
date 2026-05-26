@@ -39,7 +39,7 @@ public class LichHenDAO {
 
         List<LichHen> list = new ArrayList<>();
 
-        String sql = "SELECT lh.*, tkBS.HoTen AS TenBacSi " +
+        String sql = "SELECT lh.*, tkBS.HoTen AS TenBacSi, pk.TenPhong AS TenPhong " +
 
                      "FROM LichHen lh " +
 
@@ -48,6 +48,8 @@ public class LichHenDAO {
                      "LEFT JOIN BacSi bs ON lh.BacSi_ID = bs.BacSi_ID " +
 
                      "LEFT JOIN TaiKhoan tkBS ON bs.TaiKhoan_ID = tkBS.TaiKhoan_ID " +
+
+                     "LEFT JOIN PhongKham pk ON lh.Phong_ID = pk.Phong_ID " +
 
                      "WHERE bn.TaiKhoan_ID = ?";
 
@@ -74,6 +76,13 @@ public class LichHenDAO {
                         BacSi bs = new BacSi();
                         bs.setTaiKhoan(tkBs);
                         lh.setBacSi(bs);
+                    }
+                    try {
+                        String tenPhong = rs.getNString("TenPhong");
+                        if (tenPhong != null && !tenPhong.isBlank()) {
+                            lh.setTenPhong(tenPhong);
+                        }
+                    } catch (SQLException ignored) {
                     }
 
                     ganDanhSachDichVuDatChoLichHen(lh);
@@ -761,16 +770,14 @@ public class LichHenDAO {
         }
     }
 
+    /** Đánh dấu lịch hẹn đã hủy (không xóa khỏi DB). */
+    public boolean cancelById(int lichHenId) {
+        return updateTrangThai(lichHenId, "Đã hủy");
+    }
+
+    /** @deprecated dùng {@link #cancelById(int)} */
     public boolean deleteById(int lichHenId) {
-        String sql = "DELETE FROM LichHen WHERE LichHen_ID = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, lichHenId);
-            return ps.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return cancelById(lichHenId);
     }
 
     public static class ReceptionBookingDetail {

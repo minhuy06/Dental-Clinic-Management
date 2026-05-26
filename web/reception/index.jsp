@@ -270,9 +270,11 @@
                     <button class="btn-action" onclick="viewDetail(${lh.lichHenID})" title="Xem chi tiết">
                         <i class="fas fa-eye"></i>
                     </button>
-                    <button class="btn-action" onclick="deleteReceptionAppointment(${lh.lichHenID})" title="Xóa lịch hẹn">
-                        <i class="fas fa-trash"></i>
+                    <c:if test="${lh.trangThai ne 'Đã hủy'}">
+                    <button class="btn-action" onclick="deleteReceptionAppointment(${lh.lichHenID})" title="Hủy lịch hẹn">
+                        <i class="fas fa-ban"></i>
                     </button>
+                    </c:if>
                 </div>
             </td>
         </tr>

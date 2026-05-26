@@ -41,9 +41,7 @@ function normalizeList(res) {
 
 const patientDataSource = {
     list: async () => normalizeList(await requestApi('patients')),
-    create: async (payload) => requestApi('patients/add', { method: 'POST', body: payload }),
-    update: async (payload) => requestApi('patients/update', { method: 'PUT', body: payload }),
-    remove: async (id) => requestApi('patients/delete?id=' + id, { method: 'DELETE' })
+    update: async (payload) => requestApi('patients/update', { method: 'PUT', body: payload })
 };
 
 async function withDataGuard(action, successMsg) {
@@ -271,7 +269,6 @@ function renderTable() {
                         <i class="fas fa-calendar-plus"></i>
                     </button>
                     <button type="button" class="btn-action btn-edit" data-edit-patient-id="${patient.id}" title="Sửa"><i class="fas fa-edit"></i></button>
-                    <button type="button" class="btn-action btn-delete" data-delete-patient-id="${patient.id}" title="Xóa"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>
         `).join('');
@@ -313,15 +310,6 @@ function goToPage(page) {
     renderTable();
 }
 
-function openAddModal() {
-    editingId = null;
-    document.getElementById('modalTitle').innerText = 'Thêm bệnh nhân mới';
-    document.getElementById('patientForm').reset();
-    document.getElementById('patientId').value = '';
-    document.getElementById('registerDate').value = new Date().toISOString().split('T')[0];
-    document.getElementById('patientModal').style.display = 'flex';
-}
-
 function editPatient(id) {
     let patient = patients.find(p => p.id === id);
     if (patient) {
@@ -342,16 +330,6 @@ function editPatient(id) {
     }
 }
 
-async function deletePatient(id) {
-    const ok = await AppNotify.confirm({ message: 'Bạn có chắc chắn muốn xóa bệnh nhân này?' });
-    if (ok) {
-        const res = await withDataGuard(() => patientDataSource.remove(id), 'Đã xóa bệnh nhân thành công');
-        if (!res) return;
-        if (patients.length === 0) currentPage = 1;
-        await loadPatientsFromServer();
-    }
-}
-
 async function savePatient() {
     let fullName = document.getElementById('fullName').value.trim();
     let gender = document.getElementById('gender').value;
@@ -364,6 +342,10 @@ async function savePatient() {
     let registerDate = document.getElementById('registerDate').value;
     let notes = document.getElementById('notes').value.trim();
 
+    if (!editingId) {
+        showToast('Hồ sơ bệnh nhân mới được tạo tự động khi lễ tân đặt lịch.', 'error');
+        return;
+    }
     if (!fullName || !phone) {
         showToast('Vui lòng điền đầy đủ thông tin bắt buộc!', 'error');
         return;
@@ -372,24 +354,13 @@ async function savePatient() {
     let finalAllergy = allergy === '' ? 'Không' : allergy;
     let finalMedicalHistory = medicalHistory === '' ? 'Không' : medicalHistory;
 
-    if (editingId) {
-        const updatePayload = {
-            id: editingId, fullName, gender, phone, birthDate, address,
-            allergy: finalAllergy, medicalHistory: finalMedicalHistory,
-            status, registerDate, notes
-        };
-        const res = await withDataGuard(() => patientDataSource.update(updatePayload), 'Đã cập nhật thông tin bệnh nhân');
-        if (!res) return;
-    } else {
-        const createPayload = {
-            fullName, gender, phone, birthDate, address,
-            allergy: finalAllergy, medicalHistory: finalMedicalHistory,
-            status, registerDate: registerDate || new Date().toISOString().split('T')[0],
-            notes
-        };
-        const res = await withDataGuard(() => patientDataSource.create(createPayload), 'Đã thêm bệnh nhân mới');
-        if (!res) return;
-    }
+    const updatePayload = {
+        id: editingId, fullName, gender, phone, birthDate, address,
+        allergy: finalAllergy, medicalHistory: finalMedicalHistory,
+        status, registerDate, notes
+    };
+    const res = await withDataGuard(() => patientDataSource.update(updatePayload), 'Đã cập nhật thông tin bệnh nhân');
+    if (!res) return;
 
     closeModal();
     await loadPatientsFromServer();
@@ -415,11 +386,6 @@ function bindPatientTableActions() {
         const editBtn = e.target.closest('[data-edit-patient-id]');
         if (editBtn) {
             editPatient(Number(editBtn.getAttribute('data-edit-patient-id')));
-            return;
-        }
-        const delBtn = e.target.closest('[data-delete-patient-id]');
-        if (delBtn) {
-            deletePatient(Number(delBtn.getAttribute('data-delete-patient-id')));
         }
     });
 }
@@ -429,7 +395,6 @@ document.addEventListener('DOMContentLoaded', () => {
     bindPatientTableActions();
     loadPatientsFromServer();
 
-    document.getElementById('openAddBtn').onclick = openAddModal;
     document.querySelector('.close').onclick = closeModal;
     document.querySelector('.btn-cancel').onclick = closeModal;
     document.querySelector('.btn-save').onclick = savePatient;
