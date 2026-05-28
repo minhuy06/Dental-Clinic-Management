@@ -9,10 +9,12 @@ let currentPage = 1;
 let rowsPerPage = 20;
 let editingId = null;
 
-const PATIENT_API_BASE = (function () {
-    const cp = typeof window.APP_CONTEXT_PATH === 'string' ? window.APP_CONTEXT_PATH : '';
+function getPatientApiBase() {
+    const cp = (typeof window.APP_CONTEXT_PATH === 'string' && window.APP_CONTEXT_PATH)
+        ? window.APP_CONTEXT_PATH
+        : '';
     return cp + '/api';
-})();
+}
 
 async function requestApi(path, options = {}) {
     const method = options.method || 'GET';
@@ -25,7 +27,8 @@ async function requestApi(path, options = {}) {
     };
     if (body !== undefined && body !== null) fetchOptions.body = JSON.stringify(body);
 
-    const res = await fetch(PATIENT_API_BASE + '/' + path, fetchOptions);
+    const apiBase = getPatientApiBase();
+    const res = await fetch(apiBase + '/' + path, fetchOptions);
     let json = null;
     try { json = await res.json(); } catch (e) { json = null; }
     if (!res.ok) throw new Error((json && json.message) || ('Lỗi HTTP: ' + res.status));
@@ -311,14 +314,15 @@ function goToPage(page) {
 }
 
 function editPatient(id) {
-    let patient = patients.find(p => p.id === id);
+    const targetId = Number(id);
+    let patient = patients.find(p => Number(p.id) === targetId);
     if (patient) {
-        editingId = id;
+        editingId = targetId;
         document.getElementById('modalTitle').innerText = 'Sửa thông tin bệnh nhân';
         document.getElementById('patientId').value = patient.id;
-        document.getElementById('fullName').value = patient.fullName;
-        document.getElementById('gender').value = patient.gender;
-        document.getElementById('phone').value = patient.phone;
+        document.getElementById('fullName').value = patient.fullName || patient.hoTen || '';
+        document.getElementById('gender').value = patient.gender || 'Nam';
+        document.getElementById('phone').value = patient.phone || patient.soDienThoai || '';
         document.getElementById('birthDate').value = patient.birthDate || '';
         document.getElementById('address').value = patient.address || '';
         document.getElementById('allergy').value = patient.allergy || '';

@@ -107,6 +107,158 @@
 * Kiến trúc: 3-Tier (Presentation, Business Logic, Data Access)
 * Cơ sở dữ liệu: SQL Server (tương tác qua JDBC)
 
+## Tài liệu nhanh: các controller/helper chính & JSON hiện tại
+
+Phần này mô tả các file/back-end route quan trọng (đúng theo code hiện tại), và các JSON đang được render/return.
+
+### `src/java/com/dentalclinic/controller/InforServlet.java`
+- **Route**: `GET /Infor/*` (ví dụ: `/Infor/Schedule`, `/Infor/service`, `/Infor/Doctor`)
+- **Mục đích**: gom 1 trang công khai `dat-lich.jsp` gồm 3 section: đặt lịch, dịch vụ, bác sĩ; URL quyết định sẽ cuộn tới section nào.
+- **Request attributes**:
+  - `scrollSection`: `datlich | dichvu | bacsi`
+  - `serviceListJson`: JSON danh sách dịch vụ (từ DB)
+  - `doctorListJson`: JSON danh sách bác sĩ (mẫu/hardcode)
+  - `pageTitle`: tiêu đề trang
+
+### `src/java/com/dentalclinic/utils/InforPageHelper.java`
+- **Mục đích**:
+  - `resolveSection(pathInfo)`: map pathInfo sang `datlich|dichvu|bacsi`
+  - `buildServiceListJson()`: lấy `DichVuDAO.getAll()` rồi build JSON
+  - `buildSampleDoctorListJson()`: JSON bác sĩ mẫu (không đọc DB)
+
+**JSON hiện tại (Infor)**:
+- `serviceListJson` (mỗi phần tử):
+  - `id` (number)
+  - `name` (string)
+  - `desc` (string) (hiện đang trùng `name`)
+  - `time` (string, ví dụ `"30 phút"`)
+  - `price` (number)
+  - `cat` (string) (hiện đang `"all"`)
+  - `perUnit` (boolean) + nếu `true` có thêm `unit` = `"răng"`
+
+Ví dụ:
+
+```json
+[
+  {"id":1,"name":"Khám tổng quát","desc":"Khám tổng quát","time":"30 phút","price":100000,"cat":"all","perUnit":false},
+  {"id":2,"name":"Trám răng","desc":"Trám răng","time":"45 phút","price":200000,"cat":"all","perUnit":true,"unit":"răng"}
+]
+```
+
+- `doctorListJson` (mỗi phần tử):
+  - `name`, `specialty`, `degree`, `imgUrl`
+
+### `src/java/com/dentalclinic/utils/RoleNavHelper.java`
+- **Mục đích**: điều hướng URL theo vai trò.
+- **Các URL chính**:
+  - `getWorkspaceUrl(ctx, role)`:
+    - Admin: `ctx + "/admin"`
+    - Bác sĩ: `ctx + "/doctor/dashboard"`
+    - Lễ tân: `ctx + "/reception-dashboard"`
+    - Bệnh nhân/khác: `ctx + "/hoso"`
+  - `getScheduleUrl/getServiceUrl/getDoctorUrl`: trỏ về trang `/Infor/Schedule#...`
+
+### `src/java/com/dentalclinic/service/TaiKhoanService.java`
+- **Mục đích**: đăng nhập (PAP) dùng `TaiKhoanDAO.getTaiKhoanByPhone(phone)` rồi so sánh mật khẩu trực tiếp.
+- **Lưu ý**: hiện là plain-text password (chưa hash).
+
+### `src/java/com/dentalclinic/controller/SaveExaminationServlet.java`
+- **Route**: `POST /api/doctor/save-examination`
+- **Mục đích**: bác sĩ lưu phiếu khám (nháp hoặc hoàn tất).
+- **Request JSON**:
+  - `lichHenID` (number)
+  - `chanDoan` (string)
+  - `lyDoKham` (string)
+  - `ghiChu` (string)
+  - `draft` (boolean)
+  - `danhSachDichVu` (array) mỗi phần tử:
+    - `dichVuID` (number)
+    - `viTriRang` (number, 0 nếu không theo răng)
+    - `donGia` (number)
+    - `soLuong` (number)
+
+Ví dụ request:
+
+```json
+{
+  "lichHenID": 101,
+  "chanDoan": "Sâu răng",
+  "lyDoKham": "Đau răng",
+  "ghiChu": "Theo dõi thêm",
+  "draft": true,
+  "danhSachDichVu": [
+    {"dichVuID": 2, "viTriRang": 46, "donGia": 200000, "soLuong": 1}
+  ]
+}
+```
+
+- **Response JSON**:
+  - `{"success": true|false, "message": "..." }`
+
+### `src/java/com/dentalclinic/controller/ReceptionDeskApiServlet.java`
+- **Routes**:
+  - `GET /api/patients` → trả danh sách bệnh nhân cho lễ tân
+  - `PUT /api/patients/update` → cập nhật bệnh nhân (JSON body)
+  - `GET /api/reports/revenue-summary` → dashboard doanh thu lễ tân
+  - `POST`/`DELETE` hiện bị chặn (trả lỗi)
+
+**JSON hiện tại**:
+- `GET /api/patients` → mảng `ReceptionPatientRow` (xem fields trong `BenhNhanDAO.ReceptionPatientRow`).
+- `PUT /api/patients/update`:
+  - Request body: JSON có `id` + các field của `ReceptionPatientInput` (`fullName`, `phone`, `birthDate`, `gender`, ...).
+  - Response: `{success:true}` hoặc `{success:false,message:"..."}`
+- `GET /api/reports/revenue-summary`:
+  - Response: object do `ReceptionReportDAO.buildDashboardPayload(...)` tạo (tổng quan + danh sách giao dịch).
+
+### `src/java/com/dentalclinic/controller/ReceptionPagesServlet.java`
+- **Route pages (JSP)**:
+  - `GET /reception-patient` → forward `/reception/benhnhan.jsp`, attribute `patientListJson`
+  - `GET /reception-report` → forward `/reception/baocao.jsp`, attribute `reportDataJson`
+
+### `src/java/com/dentalclinic/controller/ReceptionServlet.java`
+- **Route**: `GET/POST /reception-dashboard`
+
+**GET**: render `/reception/index.jsp`
+- **Request attributes (quan trọng)**:
+  - `allLichHen`: list `LichHen` (đã gắn `tenDichVuList` và `paymentStatus`)
+  - `serviceListJson`: JSON dịch vụ cho frontend lễ tân (khác format Infor)
+  - `roomListJson`: JSON phòng khám
+  - `selectedDateNgay`: yyyy-MM-dd
+  - `statTotal/statPending/statConfirmed/statCompleted`: số liệu dashboard
+  - `receptionViewMode` (`day|week|month|year`), `receptionLoc` (`all|pending|confirmed|completed`), `receptionToolbarLabel`, `receptionHistBanner`
+
+**JSON hiện tại (Reception dashboard)**:
+- `serviceListJson` (mỗi phần tử):
+  - `id` (number), `name` (string), `price` (number), `time` (string, `"x phút"`),
+  - `perUnit` (boolean) + nếu `true` có `unit:"răng"`
+- `roomListJson` (mỗi phần tử): `{id:number, name:string}`
+
+Ví dụ:
+
+```json
+[
+  {"id":1,"name":"Khám tổng quát","price":100000,"time":"30 phút","perUnit":false},
+  {"id":2,"name":"Trám răng","price":200000,"time":"45 phút","perUnit":true,"unit":"răng"}
+]
+```
+
+```json
+[
+  {"id":1,"name":"Phòng 1"},
+  {"id":2,"name":"Phòng 2"}
+]
+```
+
+**POST actions** (trả JSON, `Content-Type: application/json`):
+- `action=approve`: `{success:true}` (set `TrangThai = "Đã xác nhận"`)
+- `action=set-status` (pending/approved/arrived/cancelled): `{success:true}`
+- `action=pay`: `{success:true}` hoặc `{success:false,message:"..."}`
+- `action=delete`: `{success:true}`
+- `action=get-detail`: trả chi tiết lịch để edit:
+  - `{success:true,id,patientName,patientPhone,ngayKham,gioKham,bacSiId,phongId,ghiChu,dichVuIds:[...],dichVuItems:[{id,quantity}] }`
+- `action=update-booking`: `{success:true}`
+- `action=get-payment-detail`: `{success:true,id,patientName,patientPhone,ngayKham,gioKham,doctorName,subtotal,items:[{name,quantity,unitPrice,lineTotal}] }`
+
 ## Hướng dẫn Cài đặt & Chạy dự án (Dành cho thành viên nhóm)
 
 **Bước 1: Thiết lập Cơ sở dữ liệu**
