@@ -10,7 +10,7 @@ public class DBConnection {
     private static final String PORT     = "1433";
     private static final String DATABASE = "DbQuanLyNhaKhoa";
     private static final String USERNAME = "sa";
-    private static final String PASSWORD = "12345";
+    private static final String PASSWORD = "123456";
 
     private static final String URL =
         "jdbc:sqlserver://" + HOST + ":" + PORT + ";"

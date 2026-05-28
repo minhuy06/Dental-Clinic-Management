@@ -85,7 +85,7 @@ public class AdminDashboardDAO {
 
     public String getAccountsJson() {
         String sql = "SELECT tk.TaiKhoan_ID, tk.HoTen, tk.SoDienThoai, tk.VaiTro, tk.TrangThai, tk.NgaySinh, tk.GioiTinh, " +
-                     "bs.TrinhDo, ck.TenChuyenKhoa " +
+                     "bs.TrinhDo, ck.TenChuyenKhoa, bs.AnhDaiDien " +
                      "FROM TaiKhoan tk " +
                      "LEFT JOIN BacSi bs ON bs.TaiKhoan_ID = tk.TaiKhoan_ID " +
                      "LEFT JOIN ChuyenKhoa ck ON ck.ChuyenKhoa_ID = bs.ChuyenKhoa_ID " +
@@ -112,6 +112,7 @@ public class AdminDashboardDAO {
                   .append("\"gender\":\"").append(gender).append("\",")
                   .append("\"specialty\":\"").append(esc(rs.getNString("TenChuyenKhoa"))).append("\",")
                   .append("\"degree\":\"").append(esc(rs.getNString("TrinhDo"))).append("\",")
+                  .append("\"avatar\":\"").append(esc(rs.getString("AnhDaiDien"))).append("\",")
                   .append("\"status\":\"").append(statusToUi(rs.getNString("TrangThai"))).append("\"")
                   .append("}");
             }

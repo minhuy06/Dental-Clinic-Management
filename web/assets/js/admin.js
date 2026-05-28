@@ -1305,13 +1305,18 @@ function reloadAdminPage() {
 }
 
 async function postAdminAccount(params, fallbackError) {
+    var isFormData = params instanceof FormData;
+    var headers = {
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+    if (!isFormData) {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded; charset=UTF-8';
+    }
+
     var response = await fetch((window.ADMIN_CONTEXT_PATH || '') + '/admin/accounts', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: params.toString()
+        headers: headers,
+        body: isFormData ? params : params.toString()
     });
     var json = null;
     try { json = await response.json(); } catch (e) { json = null; }
@@ -1342,9 +1347,12 @@ async function saveAccount() {
     };
     var password = document.getElementById('accPassword').value;
     var res = null;
+    var fileInput = document.getElementById('accAvatarFile');
+    var uploadFile = (fileInput && fileInput.files.length > 0) ? fileInput.files[0] : null;
+
     if (editingAccId) {
         res = await withApiGuard(async function() {
-            var params = new URLSearchParams();
+            var params = new FormData();
             params.append('action', 'update');
             params.append('id', String(editingAccId));
             params.append('name', data.name);
@@ -1357,11 +1365,13 @@ async function saveAccount() {
             params.append('specialty', data.specialty || '');
             params.append('degree', data.degree || '');
             params.append('avatar', data.avatar || '');
+            if (uploadFile) params.append('avatarFile', uploadFile);
+            
             return postAdminAccount(params, 'Không cập nhật được tài khoản');
         }, 'Đã cập nhật tài khoản');
     } else {
         res = await withApiGuard(async function() {
-            var params = new URLSearchParams();
+            var params = new FormData();
             params.append('action', 'create');
             params.append('name', data.name);
             params.append('phone', data.phone);
@@ -1372,6 +1382,8 @@ async function saveAccount() {
             params.append('specialty', data.specialty || '');
             params.append('degree', data.degree || '');
             params.append('avatar', data.avatar || '');
+            if (uploadFile) params.append('avatarFile', uploadFile);
+            
             return postAdminAccount(params, 'Không thêm được tài khoản');
         }, 'Đã thêm tài khoản mới');
     }
